@@ -12,3 +12,11 @@ var band = image.select(band_name);
 
 print("NIR = ", band)
 
+var avg_nir = image.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: roi,
+  scale: 1000
+});
+
+print('Average NIR = ', avg_nir.get(band_name));
+
