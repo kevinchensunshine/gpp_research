@@ -17,6 +17,6 @@ var visualization = {
   max: 0.3,
 };
 
-Map.setCenter(-114.2579, 38.9275, 8);
+Map.setCenter(-121.45, 36.75, 8);
 
 Map.addLayer(dataset, visualization, 'True Color (432)');
