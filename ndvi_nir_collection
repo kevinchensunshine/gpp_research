@@ -14,7 +14,7 @@ print("NIR = ", band)
 
 var avg_nir = image.reduceRegion({
   reducer: ee.Reducer.mean(),
-  geometry: roi,
+  geometry: region_of_interest,
   scale: 1000
 });
 
