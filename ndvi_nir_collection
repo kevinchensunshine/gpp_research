@@ -17,4 +17,5 @@ var visualization = {
   max: 0.3,
 };
 
-print(dataset)
+Map.setCenter(-121.45, 36., 8);
+
