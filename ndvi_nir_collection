@@ -54,17 +54,18 @@ dateList.forEach(function(date) {
 
 print("Converted Successfully. Started Download");
 
-var jsonString = JSON.stringify(NIR);
-
-var jsonText = ee.String(jsonString);
-
-Export.string.toDrive({
-  data: jsonText,
-  description: 'NIR_Data',
-  fileNamePrefix: 'data', // Specify the file name prefix
-  fileFormat: 'JSON' // Specify the file format
+var featureList = NIR.map(function(nir) {
+  return ee.Feature(null, { NIR: nir });
 });
 
+var featureCollection = ee.FeatureCollection(featureList);
+
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'nir_values_collection',
+  fileNamePrefix: 'nir_data',
+  fileFormat: 'CSV'
+});
 
 
 
