@@ -32,7 +32,7 @@ var endDateString = '2016-09-30';
 var NIR = []
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateString, endDateString).filterBounds(region_of_interest);
 
-var resolution = 30
+var resolution = 30;
 dateList.forEach(function(date) {
   var spec_data = dataset.filterDate(date, date.advance(1, 'hour'));
   
