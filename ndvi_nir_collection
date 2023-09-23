@@ -30,13 +30,15 @@ var startDateString = '2016-06-10';
 var endDateString = '2016-09-30';
 
 var NIR = []
-var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateString, endDateString).filterBounds(region_of_interest);
+var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateString, endDateString).filterBounds(boundingBox);
 
 var resolution = 30;
 dateList.forEach(function(date) {
   var spec_data = dataset.filterDate(date.advance(-1, 'day'), date.advance(1, 'day'));
   
-  if (spec_data.size().getInfo() > 0) {
+  var has_data = ee.Algorithms.If(spec_data.size().gt(0), spec_data, null);
+  
+  if (hasData != NULL) {
     var band_name = 'SR_B5';
   
     var image = ee.Image(spec_data.first());
