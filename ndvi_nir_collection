@@ -22,8 +22,8 @@ var dateList = dateArray.map(function(entry) {
   var minute = parseInt(timeParts[1]);
   var second = parseInt(timeParts[2]);
   
-  var jsDate = new ee.Date(year, month, day, hour, minute, second);
-  return jsDate;
+  var jsDate = new Date(year, month, day, hour, minute, second);
+  return ee.Date(jsDate);
 });
 
 var NIR = []
