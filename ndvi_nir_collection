@@ -33,12 +33,12 @@ var NIR = []
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateString, endDateString).filterBounds(region_of_interest);
 
 dateList.forEach(function(date) {
-  var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(date, date.advance(1, 'hour')).filterBounds(region_of_interest);
+  var spec_data = dataset.filterDate(date, date.advance(1, 'hour'));
   
-  if (dataset.size().getInfo() > 0) {
+  if (spec_data.size().getInfo() > 0) {
     var band_name = 'SR_B5';
   
-    var image = ee.Image(dataset.first());
+    var image = ee.Image(spec_data.first());
     
     var band = image.select(band_name);
     
