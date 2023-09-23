@@ -38,7 +38,7 @@ dateList.forEach(function(date) {
   
   var has_data = ee.Algorithms.If(spec_data.size().gt(0), spec_data, null);
   
-  if (has_data != NULL) {
+  if (has_data != null) {
     var band_name = 'SR_B5';
   
     var image = ee.Image(spec_data.first());
