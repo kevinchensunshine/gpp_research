@@ -41,7 +41,7 @@ dateList.forEach(function(date) {
   if (has_data !== null) {
     var band_name = 'SR_B5';
   
-    var image = ee.ImageCollection(hasData).first();
+    var image = ee.ImageCollection(has_data).first();
     
     var band = image.select(band_name);
     
