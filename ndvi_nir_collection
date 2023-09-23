@@ -34,7 +34,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateS
 
 var resolution = 30;
 dateList.forEach(function(date) {
-  var spec_data = dataset.filterDate(date, date.advance(1, 'hour'));
+  var spec_data = dataset.filterDate(date.advance(-1, 'day'), date.advance(1, 'day'));
   
 
   var band_name = 'SR_B5';
