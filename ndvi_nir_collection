@@ -36,21 +36,21 @@ var resolution = 30;
 dateList.forEach(function(date) {
   var spec_data = dataset.filterDate(date, date.advance(1, 'hour'));
   
-  if (spec_data.size().getInfo() > 0) {
-    var band_name = 'SR_B5';
+
+  var band_name = 'SR_B5';
+
+  var image = ee.Image(spec_data.first());
   
-    var image = ee.Image(spec_data.first());
-    
-    var band = image.select(band_name);
-    
-    var avg_nir = image.reduceRegion({
-      reducer: ee.Reducer.mean(),
-      geometry: region_of_interest,
-      scale: resolution
-    });
-    
-    NIR.push(avg_nir.get(band_name));
-  }
+  var band = image.select(band_name);
+  
+  var avg_nir = image.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: region_of_interest,
+    scale: resolution
+  });
+  
+  NIR.push(avg_nir.get(band_name));
+  
 });
 
 print("Converted Successfully. Started Download");
