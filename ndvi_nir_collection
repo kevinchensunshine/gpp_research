@@ -27,11 +27,10 @@ var dateList = dateArray.map(function(entry) {
 });
 
 var NIR = []
-var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterBounds(region_of_interest);
 dateList.forEach(function(date) {
-  var data_in_interest = dataset.filterDate(date, date.advance(1, 'hour'));
+  var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(date, date.advance(1, 'hour')).filterBounds(region_of_interest);
   
-  if (data_in_interest.size().getInfo() > 0) {
+  if (dataset.size().getInfo() > 0) {
     var band_name = 'SR_B5';
   
     var image = ee.Image(dataset.first());
