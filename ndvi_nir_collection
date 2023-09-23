@@ -17,7 +17,7 @@ var NIR = []
 
 dateList.forEach(function(date) {
   var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
-      .filterDate('2021-05-01', '2021-06-01')
+      .filterDate(date, date.advance(1, 'day'))
       .filterBounds(region_of_interest);
       
   var band_name = 'SR_B5';
