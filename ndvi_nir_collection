@@ -36,12 +36,10 @@ var resolution = 30;
 dateList.forEach(function(date) {
   var spec_data = dataset.filterDate(date.advance(-1, 'day'), date.advance(1, 'day'));
   
-  var has_data = ee.Algorithms.If(spec_data.size().gt(0), spec_data, null);
-  
-  if (has_data !== null) {
+  if (spec_data.size().getInfo() > 0) {
     var band_name = 'SR_B5';
   
-    var image = ee.ImageCollection(has_data).first();
+    var image = ee.Image(spec_data.first());
     
     var band = image.select(band_name);
     
