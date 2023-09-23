@@ -10,7 +10,20 @@ var dates_of_interest = "[\"2016-06-10 16:30:00\",\"2016-06-10 17:00:00\",\"2016
 var dateArray = JSON.parse(dates_of_interest);
 
 var dateList = dateArray.map(function(entry) {
-  return ee.Date(entry);
+  var parts = entry.split(' ');
+
+  var dateParts = parts[0].split('-');
+  var year = parseInt(dateParts[0]);
+  var month = parseInt(dateParts[1]) - 1; // Months are 0-indexed in JS
+  var day = parseInt(dateParts[2]);
+  
+  var timeParts = parts[1].split(':');
+  var hour = parseInt(timeParts[0]);
+  var minute = parseInt(timeParts[1]);
+  var second = parseInt(timeParts[2]);
+  
+  var jsDate = new Date(year, month, day, hour, minute, second);
+  return jsDate;
 });
 
 var NIR = []
