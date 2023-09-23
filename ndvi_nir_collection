@@ -34,7 +34,6 @@ dateList.forEach(function(date) {
     scale: 1000
   });
   
-  print('Average NIR = ', avg_nir.get(band_name));
   NIR.push(avg_nir.get(band_name));
 });
 
