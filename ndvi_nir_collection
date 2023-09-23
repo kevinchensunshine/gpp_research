@@ -26,7 +26,12 @@ var dateList = dateArray.map(function(entry) {
   return ee.Date(jsDate);
 });
 
+var startDateString = '2016-06-10';
+var endDateString = '2016-09-30';
+
 var NIR = []
+var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDateString, endDateString).filterBounds(region_of_interest);
+
 dateList.forEach(function(date) {
   var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(date, date.advance(1, 'hour')).filterBounds(region_of_interest);
   
