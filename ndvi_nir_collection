@@ -52,6 +52,8 @@ dateList.forEach(function(date) {
   }
 });
 
+print("Converted Successfully. Started Download");
+
 var jsonString = JSON.stringify(NIR);
 
 var jsonText = ee.String(jsonString);
