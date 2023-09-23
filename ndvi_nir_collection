@@ -52,8 +52,18 @@ dateList.forEach(function(date) {
   }
 });
 
-var featureCollection = ee.FeatureCollection(NIR); 
-Export.table.toDrive({ collection: featureCollection, description: 'exportTableExample', fileFormat: 'CSV' });
+var jsonString = JSON.stringify(NIR);
+
+var jsonText = ee.String(jsonString);
+
+Export.string.toDrive({
+  data: jsonText,
+  description: 'NIR_Data',
+  fileNamePrefix: 'data', // Specify the file name prefix
+  fileFormat: 'JSON' // Specify the file format
+});
+
+
 
 
 
