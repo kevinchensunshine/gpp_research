@@ -35,7 +35,9 @@ dateList.forEach(function(date) {
   NIR.push(avg_nir.get(band_name));
 });
 
-print(NIR)
+var featureCollection = ee.FeatureCollection(NIR); 
+Export.table.toDrive({ collection: featureCollection, description: 'exportTableExample', fileFormat: 'CSV' });
+
 
 
 
