@@ -26,8 +26,6 @@ dateList.forEach(function(date) {
   
   var band = image.select(band_name);
   
-  print("NIR = ", band)
-  
   var avg_nir = image.reduceRegion({
     reducer: ee.Reducer.mean(),
     geometry: region_of_interest,
