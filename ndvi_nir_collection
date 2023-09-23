@@ -14,7 +14,7 @@ var dateList = dateArray.map(function(entry) {
 
   var dateParts = parts[0].split('-');
   var year = parseInt(dateParts[0]);
-  var month = parseInt(dateParts[1]) - 1; // Months are 0-indexed in JS
+  var month = parseInt(dateParts[1]) - 1;
   var day = parseInt(dateParts[2]);
   
   var timeParts = parts[1].split(':');
