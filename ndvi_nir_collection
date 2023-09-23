@@ -27,25 +27,25 @@ var dateList = dateArray.map(function(entry) {
 });
 
 var NIR = []
-
+var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterBounds(region_of_interest);
 dateList.forEach(function(date) {
-  var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
-      .filterDate(date, date.advance(1, 'day'))
-      .filterBounds(region_of_interest);
-      
-  var band_name = 'SR_B5';
+  var data_in_interest = data.filterDate(date, date.advance(1, 'hour'));
   
-  var image = ee.Image(dataset.first());
+  if (data_in_interest.size().getInfo() > 0) {
+    var band_name = 'SR_B5';
   
-  var band = image.select(band_name);
-  
-  var avg_nir = image.reduceRegion({
-    reducer: ee.Reducer.mean(),
-    geometry: region_of_interest,
-    scale: 1000
-  });
-  
-  NIR.push(avg_nir.get(band_name));
+    var image = ee.Image(dataset.first());
+    
+    var band = image.select(band_name);
+    
+    var avg_nir = image.reduceRegion({
+      reducer: ee.Reducer.mean(),
+      geometry: region_of_interest,
+      scale: 1000
+    });
+    
+    NIR.push(avg_nir.get(band_name));
+  }
 });
 
 var featureCollection = ee.FeatureCollection(NIR); 
