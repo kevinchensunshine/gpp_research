@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2024-09-30T16:30:00';
+var endDate = '2016-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(125);
 
@@ -179,7 +179,7 @@ var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
 var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), boundingBox,10).values()
 */
-print(ee.Filter.notNull(sg_series))
+print(sg_series.filter(ee.Filter.notNull(['sum']))
 
 print(dataset.select("SR_B5"))
 
