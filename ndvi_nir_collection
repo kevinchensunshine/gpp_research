@@ -113,10 +113,16 @@ function maskClouds(image) {
   return image.updateMask(mask).multiply(0.0000275).add(-0.2).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
+function applyScaleFactors(image) {
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  return image.addBands(opticalBands, null, true);
+}
+
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
   .filterBounds(centerPoint)
+  .map(applyScaleFactors);
   
 var modis_res = dataset.map(function(img) {
 var dstamp = ee.Date(img.get('system:time_start'))
@@ -165,8 +171,6 @@ var sg_series = runLength.map(function(i) {
 })
 
 var graph_series = ee.ImageCollection.fromImages(sg_series)
-
-var validImages = graph_series.filter(ee.Filter.notNull(['sum']));
 
 print(validImages)
 print(dataset.select("SR_B5"))
