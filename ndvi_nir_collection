@@ -98,10 +98,10 @@ var endDate = '2016-09-30';
 
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
-  var cloudBit = 1 << 3; // Bit 3 represents clouds
+  var cloudBit = 1 << 3;
 
   var mask = QA60.bitwiseAnd(cloudBit).eq(0);
-  return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+  return image.updateMask(mask).divide(65455).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
