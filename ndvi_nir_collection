@@ -121,9 +121,9 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
 var interval = 30; // in minutes
 var dateList = [];
 
-var currentDate = startDate;
-
-while (currentDate <= endDate) {
+var currentDate = ee.Date(startDate);
+var end = ee.Date(endDate)
+while (currentDate <= end) {
   dateList.push(currentDate);
   currentDate = currentDate.advance(interval, 'minutes');
 }
