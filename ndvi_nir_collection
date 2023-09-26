@@ -185,7 +185,7 @@ var s1orig = modis_res.slice(1).iterate(stack, modis_res.get(0))
 
 var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
-var y = ee.Image(s1orig).select(['NIR(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
+var y = ee.Image(s1orig).select(['NIR']).reduceRegion(ee.Reducer.mean(), pt,10).values()
 var xlabels = ee.Image(s1orig).select(['t(..)*']).reduceRegion(ee.Reducer.first(), pt,10).values()
 var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
 
@@ -196,7 +196,7 @@ var yValues = ee.Array.cat([y, ee.List.repeat(smoothy.get(0), half_window).cat(s
 var chart = ui.Chart.array.values(yValues, 0, xlabels).setSeriesNames(['Raw', 'Smoothed']).setOptions(
   {
     title: 'Savitsky-Golay smoothing (order = ' + order + ', window_size = ' + window_size + ')', 
-    hAxis: {title: 'Time (years after ' + start_date + ')'}, vAxis: {title: 'NDVI'},
+    hAxis: {title: 'Time (years after ' + startDate + ')'}, vAxis: {title: 'NDVI'},
     legend: null,
     series: { 
       0: { lineWidth: 0},
