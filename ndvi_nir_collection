@@ -194,6 +194,7 @@ var interpolatedCol = ee.ImageCollection(
   join2Result.map(interpolateImages))
   
 print("Interpolation Completed")
+print(interpolatedCol)
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
