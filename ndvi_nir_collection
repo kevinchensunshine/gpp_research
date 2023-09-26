@@ -109,11 +109,11 @@ function maskLandsatClouds(image) {
   var mask = qa60.bitwiseAnd(cloudBitMask).eq(0)
     .and(qa60.bitwiseAnd(cirrusBitMask).eq(0));
 
-  return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+  return image.updateMask(mask).divide(10000);
 }
 
-var startDate = '2016-08-01';
-var endDate = '2017-08-01';
+var startDate = '2021-08-01';
+var endDate = '2022-08-01';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
@@ -130,15 +130,13 @@ Map.onClick(function (coords) {
     lineWidth: 1,
     pointSize: 3,
     title: 'NIR over Time at Clicked Point', // Update the chart title
-    vAxis: { title: 'NIR' }, // Update the y-axis label
-    hAxis: { title: 'Date', format: 'YYYY-MMM', gridlines: { count: 12 } }
+    vAxis: { title: 'NIR' }
   });
   print(chart);
 });
 
 Map.setCenter(-88.2918, 39.9508);
 Map.addLayer(dataset.select("SR_B5"), nirParams, 'NIR Image');
-
 
 
 
