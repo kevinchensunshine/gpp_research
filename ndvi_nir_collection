@@ -116,13 +116,23 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
-  
-  
+
+function calculateMeanNIR(image) {
+  var meanNIR = image.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: boundingBox,
+    scale: 30, // Adjust the scale as needed
+    maxPixels: 1e9
+  });
+  return ee.Image(ee.Number(meanNIR.get('SR_B5')));
+}
+
+var meanNIRCollection = dataset.map(calculateMeanNIR);
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
   var chart = ui.Chart.image.series({
-    imageCollection: dataset.select('SR_B5'), // Select the NIR band
+    imageCollection: meanNIRCollection, // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
