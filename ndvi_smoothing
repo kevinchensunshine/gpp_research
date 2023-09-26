@@ -11,7 +11,7 @@ function maskS2clouds(image) {
   var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
       .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
 
-  return image.updateMask(mask).divide(10000).copyProperties(image, "system:time_end").set('system:time_start', image.get('system:time_start'));
+  return image.updateMask(mask).divide(10000).copyProperties(image, ["system:time_end"]).set('system:time_start', image.get('system:time_start'));
 }
 
 
