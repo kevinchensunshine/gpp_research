@@ -97,7 +97,7 @@ var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 var startDate = '2016-06-10T16:30:00';
 var endDate = '2024-09-30T16:30:00';
 
-var boundingBox = centerPoint.buffer(2000);
+var boundingBox = centerPoint.buffer(500);
 
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
