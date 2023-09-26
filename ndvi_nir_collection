@@ -124,7 +124,7 @@ function calculateMeanNIR(image) {
     scale: 30, // Adjust the scale as needed
     maxPixels: 1e9
   });
-  return ee.Image(ee.Number(meanNIR.get('SR_B5')));
+  return meanNIR;
 }
 
 var meanNIRCollection = dataset.map(calculateMeanNIR);
