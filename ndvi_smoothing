@@ -48,7 +48,7 @@ var chart = ui.Chart.image.series({
 
 var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
-  var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['NDVI', 'EVI']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
