@@ -130,8 +130,7 @@ var modis_res = dataset.map(function(img) {
   img = img.select(['SR_B5']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
 })
 
 print(modis_res)
