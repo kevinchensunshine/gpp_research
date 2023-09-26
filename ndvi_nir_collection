@@ -116,7 +116,7 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
-  .filterBounds(boundingBox)
+  .filterBounds(centerPoint)
   
 var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
 var dstamp = ee.Date(img.get('system:time_start'))
@@ -167,13 +167,13 @@ var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 // Run the SG solver over the series, and return the smoothed image version
 var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
-  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum(), boundingBox, 30).copyProperties(ref)
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref).set('scale', 30)
 })
 
 print(sg_series)
 
 Map.onClick(function (coords) {
-  var clickedPoint = boundingBox; // Create a point geometry directly
+  var clickedPoint = coords; // Create a point geometry directly
   var chart = ui.Chart.image.series({
     imageCollection: sg_series, // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
