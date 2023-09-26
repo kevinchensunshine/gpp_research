@@ -135,15 +135,10 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-// Set polynomial order
-var order = 3
-var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
-var indepSelectors = ['constant', 't', 't2', 't3']
 
-// Change to order = 2 as follows:
-//var order = 2
-//var coeffFlattener = [['constant', 'x', 'x2']]
-//var indepSelectors = ['constant', 't', 't2']
+var order = 2
+var coeffFlattener = [['constant', 'x', 'x2']]
+var indepSelectors = ['constant', 't', 't2']
 
 // Convert the collection to an array.
 var array = modis_res.toArray();
