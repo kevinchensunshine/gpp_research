@@ -118,7 +118,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskClouds)
   .filterBounds(centerPoint)
   
-var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
+var modis_res = dataset.map(function(img) {
 var dstamp = ee.Date(img.get('system:time_start'))
 var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
 img = img.select(['SR_B5']).set('date', dstamp)
