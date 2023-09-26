@@ -96,14 +96,14 @@ var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
-function maskClouds(image) {
+function scale(image) {
 
   return image.multiply(0.0000275).add(-0.2).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
-  .map(maskClouds)
+  .map(scale)
   
   
 
