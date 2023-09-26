@@ -1,0 +1,114 @@
+var batch = require('users/fitoprincipe/geetools:batch')
+
+var ndviParams = {max: 1, min: -1, palette: ["blue", "white", "green"]}
+
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.clipToCollection(cover_crop_fields).normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function reduce_region_ndvi(image) {
+  image = image.select("NDVI");
+  return image.reduceRegions({
+    collection: cover_crop_fields,
+    reducer: ee.Reducer.median(),
+  })
+}
+
+var startDate = '2016-06-10';
+var endDate = '2016-09-31';
+
+var dataset = ee.ImageCollection('COPERNICUS/S2')  
+                  .filterDate(startDate, endDate)
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
+                  .map(maskS2clouds)
+                  .map(dataset_ndvi);
+
+var modis_res = dataset.map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
+  img = img.select(['NDVI', 'B1']).set('date', dstamp).unmask()
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+print(modis_res)
+var window_size = 9
+var half_window = (window_size - 1)/2
+
+var imageAxis = 0;
+var bandAxis = 1;
+
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+var array = modis_res.toArray();
+
+function getLocalFit(i) {
+  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
+  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
+  var response = subarray.arraySlice(bandAxis, 0, 1);
+  var coeff = predictors.matrixSolve(response)
+
+  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
+  return coeff  
+}
+
+modis_res = modis_res.toList(modis_res.size())
+var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
+
+var sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+    .setOptions({
+      title: 'NDVI_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+
+// batch.Download.ImageCollection.toDrive(fieldNDVI, 'GEE',
+//                 {scale: 30, 
+//                 region: cover_crop_fields.getInfo()["coordinates"], 
+//                 type: 'float'})
+
+// var imageList = dataset.select("NDVI").toList(1000);
+// var len = imageList.length().getInfo();
+// var fieldList = cover_crop_fields.toList(1000);
+// var len_fields = fieldList.length().getInfo();
+// for (var i = 0; i < 1; i++) {
+//   var imagei = ee.Image(imageList.get(i));
+//   var IDShort = imagei.id().getInfo();
+//   print(IDShort);
+//   for (var j = 0; j < len_fields; j++) {
+//     var bbox = ee.Feature(fieldList.get(j));
+//     var fieldId = bbox.id().getInfo();
+    
+//     Export.image.toDrive({
+//       image: imagei.clip(bbox),  // <----- flatten()
+//       description: 'Sentinel2_NDVI_' + IDShort + "_" + fieldId,
+//       folder: "GEE",
+//       fileFormat: 'tiff',
+//       scale: 30,
+//       maxPixels: 70000000000
+//     });
+//   }
+// }
