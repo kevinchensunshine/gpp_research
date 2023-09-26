@@ -32,7 +32,20 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(maskS2clouds)
                   .map(dataset_ndvi);
-                  
+
+var chart = ui.Chart.image.series({
+    imageCollection: dataset.select('NDVI'),
+    region: boundingBox
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NDVI over Time at Clicked Point',
+      vAxis: {title: 'NDVI'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+    });
+  print(chart)
+
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
