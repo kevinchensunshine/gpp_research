@@ -1,6 +1,7 @@
 var modis = ee.ImageCollection("MODIS/006/MOD13Q1")
 
 var pt = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
+var boundingBox = centerPoint.buffer(125);
 
 // real NDVI values 
 var NDVI = function(image) {
@@ -33,7 +34,7 @@ print(Mod_col,'Mod_col')
 
 // Add predictors for SG fitting, using date difference
 // We prepare for order 3 fitting, but can be adapted to lower order fitting later on
-var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(aoi).map(function(img) {
+var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBox).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
   img = img.select(['NDVI', 'EVI']).set('date', dstamp)
