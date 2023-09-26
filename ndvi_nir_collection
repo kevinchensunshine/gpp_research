@@ -179,7 +179,7 @@ var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
 var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), boundingBox,10).values()
 */
-print(sg_series.filter(ee.Filter.notNull(['sum']))
+print(sg_series.filter(ee.Filter.notNull(['sum'])))
 
 print(dataset.select("SR_B5"))
 
