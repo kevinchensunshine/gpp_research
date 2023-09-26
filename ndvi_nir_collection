@@ -173,6 +173,7 @@ var sg_series = runLength.map(function(i) {
 var sg_series = ee.ImageCollection.fromImages(sg_series)
 
 print(sg_series)
+print(dataset)
 
 Map.onClick(function (coords) {
   var clickedPoint = coords; // Create a point geometry directly
