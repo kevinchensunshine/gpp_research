@@ -147,7 +147,7 @@ function getLocalFit(i) {
   // Get a slice corresponding to the window_size of the SG smoother
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var response = subarray.arraySlice(bandAxis, 3, 4); // NDVI
   var coeff = predictors.matrixSolve(response)
 
   coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
