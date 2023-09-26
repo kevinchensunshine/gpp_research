@@ -32,7 +32,8 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   // Pre-filter to get less cloudy granules.
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(maskS2clouds)
-                  .map(dataset_ndvi);
+                  .map(dataset_ndvi)
+                  .filter(ee.Filter.notNull(['system:time_start']))
 
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select('NDVI'),
