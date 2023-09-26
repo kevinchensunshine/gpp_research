@@ -169,6 +169,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
 })
 
+print(sg_series)
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
