@@ -129,18 +129,17 @@ function calculateMeanNIR(image) {
 
 var meanNIRCollection = dataset.map(calculateMeanNIR);
 
-Map.onClick(function (coords) {
-  var clickedPoint = boundingBox; // Create a point geometry directly
-  var chart = ui.Chart.image.series({
-    imageCollection: dataset.select('SR_B5'), // Select the NIR band
-    region: clickedPoint // Use the clicked point geometry
-  }).setOptions({
+var chart = ui.Chart.feature.byFeature(dataset, 'system:time_start', ['mean_NIR'])
+  .setOptions({
     interpolateNulls: true,
     lineWidth: 1,
     pointSize: 3,
-    title: 'NIR over Time at Clicked Point', // Update the chart title
-    vAxis: { title: 'NIR' }
+    title: 'Mean NIR over Time at Clicked Point', // Update the chart title
+    vAxis: { title: 'Mean NIR' }
   });
+
+Map.onClick(function (coords) {
+  var clickedPoint = boundingBox; // Create a point geometry directly
   print(chart);
 });
 
