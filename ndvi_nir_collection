@@ -97,7 +97,22 @@ var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
-  .filterDate(startDate, endDate)
+  .filterDate(startDate, endDate);
+
+// Define a function to apply Savitzky-Golay smoothing
+function applySavitzkyGolay(image) {
+  // Adjust the window size and polynomial order as needed
+  var windowSize = 9; // Example window size
+  var polynomialOrder = 3; // Example polynomial order
+
+  var smoothed = image.focal_median({
+    radius: windowSize,
+    kernelType: 'square',
+    iterations: 1
+  });
+  
+  return smoothed;
+}
 
 Map.onClick(function (coords) {
   var clickedPoint = ee.Geometry.Point([coords.lon, coords.lat]); // Create a point geometry directly
@@ -111,6 +126,31 @@ Map.onClick(function (coords) {
     title: 'NIR over Time at Clicked Point', // Update the chart title
     vAxis: { title: 'NIR' }
   });
+
+  // Apply Savitzky-Golay smoothing to the chart data
+  chart.onClick(function (points) {
+    var originalChart = points.target;
+    var originalData = originalChart.getDataTable();
+    var smoothedData = originalData.clone();
+    
+    // Apply Savitzky-Golay smoothing to the NIR values
+    for (var i = 0; i < originalData.getNumberOfRows(); i++) {
+      var smoothedValue = applySavitzkyGolay(originalData.getValue(i, 1)); // Apply smoothing to NIR values
+      smoothedData.setValue(i, 1, smoothedValue);
+    }
+
+    // Create a new chart with smoothed data
+    var smoothedChart = ui.Chart(dataTable, 'LineChart', {
+      title: 'Smoothed NIR over Time at Clicked Point',
+      hAxis: { title: 'Date' },
+      vAxis: { title: 'NIR' },
+      lineWidth: 1,
+      pointSize: 3
+    });
+
+    print(smoothedChart);
+  });
+
   print(chart);
 });
 
