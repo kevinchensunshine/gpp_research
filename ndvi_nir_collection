@@ -132,7 +132,6 @@ var modis_res = dataset.map(function(img) {
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
 print(modis_res)
@@ -142,14 +141,12 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 3
-var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
-var indepSelectors = ['constant', 't', 't2', 't3']
+var order = 2
+var coeffFlattener = [['constant', 'x', 'x2']]
+var indepSelectors = ['constant', 't', 't2']
 
-// Convert the collection to an array.
 var array = modis_res.toArray();
 
-// Solve 
 function getLocalFit(i) {
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
@@ -160,11 +157,9 @@ function getLocalFit(i) {
   return coeff  
 }
 
-// For the remainder, use modis_res as a list of images
 modis_res = modis_res.toList(modis_res.size())
 var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 
-// Run the SG solver over the series, and return the smoothed image version
 var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
