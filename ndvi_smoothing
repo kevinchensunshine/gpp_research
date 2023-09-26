@@ -109,7 +109,6 @@ var sg_series = runLength.map(function(i) {
 
 print(sg_series, 'sg_series')
 
-var sg_series = sg_series.map(maskS2clouds);
 
 print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
