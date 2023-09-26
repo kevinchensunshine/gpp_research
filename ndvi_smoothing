@@ -36,7 +36,7 @@ function drop_nulls(image) {
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
-                  .map(maskS2clouds, true)
+                  .map(maskS2clouds)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(dataset_ndvi);
 
