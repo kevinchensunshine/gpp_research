@@ -39,15 +39,20 @@ dateList.forEach(function(date) {
 
   var image = ee.Image(spec_data.first());
   
-  var band = image.select(band_name);
+  if (image != null) {
   
-  var avg_nir = image.reduceRegion({
-    reducer: ee.Reducer.mean(),
-    geometry: boundingBox,
-    scale: resolution
-  });
-  
-  NIR.push(avg_nir.get(band_name));
+    var band = image.select(band_name);
+    
+    var avg_nir = image.reduceRegion({
+      reducer: ee.Reducer.mean(),
+      geometry: boundingBox,
+      scale: resolution
+    });
+    
+    NIR.push(avg_nir.get(band_name));
+  } else {
+    NIR.push(0);
+  }
 });
 
 print("Converted Successfully. Started Download");
@@ -58,7 +63,6 @@ for (var i = 0; i < dateList.length; i++) {
   chartData.push([dateList[i], NIR[i]]);
 }
 
-// Create an Earth Engine FeatureCollection from the chartData
 var featureCollection = ee.FeatureCollection(chartData.map(function (entry) {
   return ee.Feature(null, {
     'Timestamp': entry[0],
@@ -66,7 +70,6 @@ var featureCollection = ee.FeatureCollection(chartData.map(function (entry) {
   });
 }));
 
-// Create an Earth Engine chart from the FeatureCollection
 var chart = ui.Chart.feature.byFeature(featureCollection)
   .setChartType('LineChart')
   .setOptions({
