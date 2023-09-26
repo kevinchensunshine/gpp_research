@@ -114,8 +114,7 @@ Map.onClick(function (coords) {
   print(chart);
 });
 
-Map.setCenter(-88.2918, 39.9508);
-Map.addLayer(dataset.select("SR_B5"), nirParams, 'NIR Image');
+Map.setCenter(-121.7757874638141, 36.82780041527757);
 
 
 
