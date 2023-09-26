@@ -170,7 +170,7 @@ print(sg_series)
 print(dataset.select("SR_B5"))
 
 Map.onClick(function (coords) {
-  var clickedPoint = coords; // Create a point geometry directly
+  var clickedPoint = boundingBox; // Create a point geometry directly
   var chart = ui.Chart.image.series({
     imageCollection: graph_series.select("sum"), // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
