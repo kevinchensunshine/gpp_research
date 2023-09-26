@@ -1,7 +1,7 @@
 var modis = ee.ImageCollection("MODIS/006/MOD13Q1")
 
 var pt = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
-var boundingBox = centerPoint.buffer(125);
+var boundingBox = pt.buffer(125);
 
 // real NDVI values 
 var NDVI = function(image) {
