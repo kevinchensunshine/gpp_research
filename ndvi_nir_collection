@@ -201,8 +201,10 @@ xlabels = xlabels.map(function(f) { return ee.Number(f).divide(24.0*365.25)}).so
 //smoothy = smoothy.map(function(f) { return ee.Number(f).log10().multiply(10)})
 
 // Chart
-var yValues = ee.Array.cat([y, ee.List.repeat(smoothy.get(0), half_window).cat(smoothy).cat(ee.List.repeat(smoothy.get(-1), half_window))], 1);
 
+print(xlabels)
+var yValues = ee.Array.cat([y, ee.List.repeat(smoothy.get(0), half_window).cat(smoothy).cat(ee.List.repeat(smoothy.get(-1), half_window))], 1);
+print(yValues)
 var chart = ui.Chart.array.values(yValues, 0, xlabels).setSeriesNames(['Raw', 'Smoothed']).setOptions(
   {
     title: 'Savitsky-Golay smoothing (order = ' + order + ', window_size = ' + window_size + ')', 
