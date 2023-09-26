@@ -55,7 +55,8 @@ print(NIR);
 
 var chartData = [];
 for (var i = 0; i < dateList.length; i++) {
-  chartData.push([dateList[i], NIR[i]]);
+  var dateMillis = dateList[i].millis();
+  chartData.push([dateMillis, NIR[i]]);
 }
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
