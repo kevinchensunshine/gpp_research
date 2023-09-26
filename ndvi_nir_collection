@@ -133,7 +133,7 @@ var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
 var imageAxis = 0;
-var bandAxis = 4;
+var bandAxis = 1;
 
 // Set polynomial order
 var order = 3
