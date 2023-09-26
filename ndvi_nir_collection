@@ -97,7 +97,7 @@ var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
 function maskClouds(image) {
-  var QA60 = image.select(['QA60']);
+  var QA60 = image.select(['pixel_qa']);
   var cloudBitMask = 1 << 10; // Bit 10 represents clouds in QA60 band
   var cirrusBitMask = 1 << 11; // Bit 11 represents cirrus clouds
   var mask = QA60.bitwiseAnd(cloudBitMask).eq(0)
