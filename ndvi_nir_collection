@@ -117,7 +117,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
   
-var modis_res = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDate, endDate).filterBounds.map(function(img) {
+var modis_res = dataset.filterDate(startDate, endDate).filterBounds.map(function(img) {
 var dstamp = ee.Date(img.get('system:time_start'))
 var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
 img = img.select(['SR_B5']).divide(32768.0).set('date', dstamp)
