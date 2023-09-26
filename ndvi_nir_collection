@@ -97,36 +97,10 @@ var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
-  .filterDate(startDate, endDate);
+  .filterDate(startDate, endDate)
+  
+  
 
-// Define the temporal interpolation function
-function temporalInterpolation(dataTable) {
-  var interpolatedData = [];
-
-  for (var i = 0; i < dataTable[0].length; i++) {
-    interpolatedData.push([dataTable[0][i], dataTable[1][i]]);
-
-    // Interpolate between existing data points
-    if (i < dataTable[0].length - 1) {
-      var currentDate = new Date(dataTable[0][i]);
-      var nextDate = new Date(dataTable[0][i + 1]);
-      var timeDiff = nextDate - currentDate;
-
-      // Interpolate every 30 minutes
-      var numSteps = Math.ceil(timeDiff / (30 * 60 * 1000)); // 30 minutes in milliseconds
-      var stepValue = (dataTable[1][i + 1] - dataTable[1][i]) / numSteps;
-
-      for (var j = 1; j < numSteps; j++) {
-        var interpolatedDate = new Date(currentDate.getTime() + j * (30 * 60 * 1000));
-        interpolatedData.push([interpolatedDate, dataTable[1][i] + j * stepValue]);
-      }
-    }
-  }
-
-  return interpolatedData;
-}
-
-// Create an onClick event for the Map
 Map.onClick(function (coords) {
   var clickedPoint = ee.Geometry.Point([coords.lon, coords.lat]); // Create a point geometry directly
   var chart = ui.Chart.image.series({
@@ -139,21 +113,10 @@ Map.onClick(function (coords) {
     title: 'NIR over Time at Clicked Point', // Update the chart title
     vAxis: { title: 'NIR' }
   });
-
-
-  var interpolatedData = temporalInterpolation(chart);
-  var interpolatedChart = ui.Chart(interpolatedData, 'LineChart')
-    .setOptions({
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-      title: 'Interpolated NIR over Time at Clicked Point',
-      vAxis: { title: 'NIR' },
-      hAxis: { title: 'Date', format: 'YYYY-MMM', gridlines: { count: 12 } }
-    });
-
-  print(interpolatedChart);
+  print(chart);
 });
 
-// Set the initial map center
 Map.setCenter(-121.7757874638141, 36.82780041527757);
+
+
+
