@@ -116,32 +116,15 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
-
-Map.onClick(function (coords) {
-  var clickedPoint = boundingBox; // Create a point geometry directly
-  var chart = ui.Chart.image.series({
-    imageCollection: dataset.select('SR_B5'), // Select the NIR band
-    region: clickedPoint // Use the clicked point geometry
-  }).setOptions({
-    interpolateNulls: true,
-    lineWidth: 1,
-    pointSize: 3,
-    title: 'NIR over Time at Clicked Point', // Update the chart title
-    vAxis: { title: 'NIR' }
-  });
-  print(chart);
-});
-
-Map.setCenter(-121.7757874638141, 36.82780041527757);
-
-var modis_res = dataset.map(function(img) {
-  var dstamp = ee.Date(img.get('system:time_start'))
-  var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['NDVI', 'EVI']).divide(32768.0).set('date', dstamp)
-  return img.addBands(ee.Image(1).toFloat().rename('constant')).
-    addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+  
+var modis_res = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2').filterDate(startDate, endDate).filterBounds.map(function(img) {
+var dstamp = ee.Date(img.get('system:time_start'))
+var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
+img = img.select(['SR_B5']).divide(32768.0).set('date', dstamp)
+return img.addBands(ee.Image(1).toFloat().rename('constant')).
+  addBands(ee.Image(ddiff).toFloat().rename('t')).
+  addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+  addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 // Step 2: Set up Savitzky-Golay smoothing
 var window_size = 9
@@ -185,4 +168,22 @@ var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
 })
+
+
+Map.onClick(function (coords) {
+  var clickedPoint = boundingBox; // Create a point geometry directly
+  var chart = ui.Chart.image.series({
+    imageCollection: sg_series, // Select the NIR band
+    region: clickedPoint // Use the clicked point geometry
+  }).setOptions({
+    interpolateNulls: true,
+    lineWidth: 1,
+    pointSize: 3,
+    title: 'NIR over Time at Clicked Point', // Update the chart title
+    vAxis: { title: 'NIR' }
+  });
+  print(chart);
+});
+
+Map.setCenter(-121.7757874638141, 36.82780041527757);
 
