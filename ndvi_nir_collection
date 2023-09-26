@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2017-09-30T16:30:00';
+var endDate = '2016-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(125);
 
@@ -177,8 +177,6 @@ var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
-
-
 
 print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
