@@ -140,8 +140,7 @@ Map.onClick(function (coords) {
     vAxis: { title: 'NIR' }
   });
 
-  // Apply temporal interpolation to the chart data
-  var originalChart = chart.evaluate();
+
   var interpolatedData = temporalInterpolation(originalChart);
   var interpolatedChart = ui.Chart(interpolatedData, 'LineChart')
     .setOptions({
