@@ -130,7 +130,8 @@ var modis_res = dataset.map(function(img) {
   img = img.select(['SR_B5', 'SR_B4']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
 print(modis_res)
@@ -140,19 +141,18 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 2
-var coeffFlattener = [['constant', 'x', 'x2']]
-var indepSelectors = ['constant', 't', 't2']
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
 
 // Convert the collection to an array.
 var array = modis_res.toArray();
 
 // Solve 
 function getLocalFit(i) {
-  // Get a slice corresponding to the window_size of the SG smoother
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var response = subarray.arraySlice(bandAxis, 0, 1);
   var coeff = predictors.matrixSolve(response)
 
   coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
