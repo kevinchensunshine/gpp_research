@@ -1,5 +1,6 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.7757874638141, 36.82780041527757]);
+var centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.7757874638141, 36.82780041527757]),
+    centerPoint2 = /* color: #d63000 */ee.Geometry.Point([-121.7757874638141, 36.82780041527757]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 /*var boundingBox = centerPoint.buffer(125); //250m by 250m region centered at farm
 
@@ -96,13 +97,14 @@ var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
+var boundingBox = centerPoint.buffer(125);
+
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
   var dilatedCloudBit = 1 << 1;
   var cirrusBit = 1 << 2;
   var cloudBit = 1 << 3;
   var cloudShadowBit = 1 << 4;
-  
 
   var mask = QA60.bitwiseAnd(cloudBit).eq(0)
   .and(QA60.bitwiseAnd(dilatedCloudBit).eq(0))
@@ -118,7 +120,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   
 
 Map.onClick(function (coords) {
-  var clickedPoint = ee.Geometry.Point([coords.lon, coords.lat]); // Create a point geometry directly
+  var clickedPoint = boundingBox; // Create a point geometry directly
   var chart = ui.Chart.image.series({
     imageCollection: dataset.select('SR_B5'), // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
