@@ -117,17 +117,20 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
 
-function calculateMeanNIR(image) {
-  var meanNIR = image.reduceRegion({
-    reducer: ee.Reducer.mean(),
-    geometry: boundingBox,
-    scale: 30, // Adjust the scale as needed
-    maxPixels: 1e9
-  });
-  return ee.Image(ee.Number(meanNIR.get('SR_B5')));
+var start = ee.Date(startDate);
+var end = ee.Date(endDate);
+
+var interval = 30; // in minutes
+var dateList = [];
+
+var currentDate = start;
+
+while (currentDate.millis() <= end.millis()) {
+  dateList.push(currentDate);
+  currentDate = currentDate.advance(interval, 'minutes');
 }
 
-var meanNIRCollection = dataset.map(calculateMeanNIR);
+print(dateList);
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
@@ -145,21 +148,4 @@ Map.onClick(function (coords) {
 });
 
 Map.setCenter(-121.7757874638141, 36.82780041527757);
-
-var start = ee.Date(startDate);
-var end = ee.Date(endDate);
-
-var interval = 30; // in minutes
-var dateList = [];
-
-var currentDate = start;
-
-while (currentDate.millis() <= end.millis()) {
-  dateList.push(currentDate);
-  currentDate = currentDate.advance(interval, 'minutes');
-}
-
-print(dateList);
-
-
 
