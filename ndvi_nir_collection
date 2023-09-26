@@ -123,7 +123,7 @@ var dateList = [];
 
 var currentDate = startDate;
 
-while (currentDate.millis() <= endDate.millis()) {
+while (currentDate <= endDate) {
   dateList.push(currentDate);
   currentDate = currentDate.advance(interval, 'minutes');
 }
