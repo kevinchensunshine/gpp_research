@@ -55,14 +55,18 @@ print(NIR);
 
 var chartData = [];
 for (var i = 0; i < dateList.length; i++) {
-  var dateMillis = dateList[i].millis();
-  chartData.push([dateMillis, NIR[i]]);
+  chartData.push([dateList[i], NIR[i]]);
 }
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
 
-var chart = ui.Chart(chartData);
-
+var chart = ui.Chart(dataTable, 'LineChart', {
+  title: 'NIR Band Data Over Time',
+  hAxis: { title: 'Timestamp' },
+  vAxis: { title: 'NIR Value' },
+  lineWidth: 1,
+  pointSize: 3
+});
 
 print(chart);
 
