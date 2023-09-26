@@ -165,10 +165,12 @@ modis_res = modis_res.toList(modis_res.size())
 var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 
 // Run the SG solver over the series, and return the smoothed image version
-var sg_series = ee.ImageCollection.fromImages(runLength.map(function(i) {
+var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref).set('scale', 30)
-}));
+})
+
+var sg_series = ee.ImageCollection.fromImages(sg_series)
 
 print(sg_series)
 
