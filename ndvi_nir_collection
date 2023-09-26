@@ -103,22 +103,22 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
 function temporalInterpolation(dataTable) {
   var interpolatedData = [];
 
-  for (var i = 0; i < dataTable.getNumberOfRows(); i++) {
-    interpolatedData.push([dataTable.getValue(i, 0), dataTable.getValue(i, 1)]);
+  for (var i = 0; i < dataTable[0].length; i++) {
+    interpolatedData.push([dataTable[0][i], dataTable[1][i]]);
 
     // Interpolate between existing data points
-    if (i < dataTable.getNumberOfRows() - 1) {
-      var currentDate = new Date(dataTable.getValue(i, 0));
-      var nextDate = new Date(dataTable.getValue(i + 1, 0));
+    if (i < dataTable[0].length - 1) {
+      var currentDate = new Date(dataTable[0][i]);
+      var nextDate = new Date(dataTable[0][i + 1]);
       var timeDiff = nextDate - currentDate;
 
       // Interpolate every 30 minutes
       var numSteps = Math.ceil(timeDiff / (30 * 60 * 1000)); // 30 minutes in milliseconds
-      var stepValue = (dataTable.getValue(i + 1, 1) - dataTable.getValue(i, 1)) / numSteps;
+      var stepValue = (dataTable[1][i + 1] - dataTable[1][i]) / numSteps;
 
       for (var j = 1; j < numSteps; j++) {
         var interpolatedDate = new Date(currentDate.getTime() + j * (30 * 60 * 1000));
-        interpolatedData.push([interpolatedDate, dataTable.getValue(i, 1) + j * stepValue]);
+        interpolatedData.push([interpolatedDate, dataTable[1][i] + j * stepValue]);
       }
     }
   }
@@ -141,10 +141,9 @@ Map.onClick(function (coords) {
   });
 
   // Apply temporal interpolation to the chart data
-  var originalChart = chart;
-  var originalData = originalChart.getDataTable();
-  var interpolatedData = temporalInterpolation(originalData);
-  var interpolatedChart = ui.Chart.array.values(interpolatedData, 0, 1).setChartType('LineChart')
+  var originalChart = chart.evaluate();
+  var interpolatedData = temporalInterpolation(originalChart);
+  var interpolatedChart = ui.Chart(interpolatedData, 'LineChart')
     .setOptions({
       interpolateNulls: true,
       lineWidth: 1,
