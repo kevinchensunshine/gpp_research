@@ -21,12 +21,18 @@ var endDate = '2016-09-30';
 var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
 var boundingBox = centerPoint.buffer(125);
 
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(maskS2clouds)
-
+                  .map(dataset_ndvi);
+                  
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
