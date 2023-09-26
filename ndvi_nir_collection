@@ -99,6 +99,11 @@ var endDate = '2016-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(500);
 
+function applyScaleFactors(image) {
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  return image.addBands(opticalBands, null, true)
+}
+
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
   var dilatedCloudBit = 1 << 1;
@@ -118,6 +123,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(maskClouds)
+  .map(applyScaleFactors)
   
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
