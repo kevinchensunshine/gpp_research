@@ -21,8 +21,8 @@ function returnDate(image) {
 }
 
 
-var start_date = '2016-06-10'
-var end_date = '2017-06-10'  // the Future
+var startDate = '2016-06-10T16:30:00';
+var endDate = '2017-09-30T16:30:00';
 
 var Mod_col = modis.filterDate(start_date, end_date).filterBounds(pt)
 .select(['NDVI', 'EVI'])
