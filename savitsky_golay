@@ -16,7 +16,7 @@ var end_date = '2016-09-30T16:30:00'  // the Future
 var modis_res = modis.filterDate(start_date, end_date).filterBounds(aoi).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['NIR', 'EVI']).divide(32768.0).set('date', dstamp)
+  img = img.select(['NDVI', 'EVI']).divide(32768.0).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
