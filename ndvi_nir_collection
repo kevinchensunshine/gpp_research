@@ -174,7 +174,7 @@ print(dataset.select("SR_B5"))
 Map.onClick(function (coords) {
   var clickedPoint = centerPoint; // Create a point geometry directly
   var chart = ui.Chart.image.series({
-    imageCollection: graph_series.select("sum"), // Select the NIR band
+    imageCollection: graph_series, // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
