@@ -121,7 +121,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
 var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
 var dstamp = ee.Date(img.get('system:time_start'))
 var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-img = img.select(['SR_B5']).divide(32768.0).set('date', dstamp)
+img = img.select(['SR_B5']).divide(65536.0).add(-0.2).set('date', dstamp)
 return img.addBands(ee.Image(1).toFloat().rename('constant')).
   addBands(ee.Image(ddiff).toFloat().rename('t')).
   addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -178,7 +178,7 @@ print(dataset)
 Map.onClick(function (coords) {
   var clickedPoint = coords; // Create a point geometry directly
   var chart = ui.Chart.image.series({
-    imageCollection: sg_series, // Select the NIR band
+    imageCollection: sg_series.select('sum'), // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
