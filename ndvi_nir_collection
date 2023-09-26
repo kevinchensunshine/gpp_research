@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2016-09-30T16:30:00';
+var endDate = '2016-07-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(125);
 
@@ -125,7 +125,7 @@ var filtered = imageCollection.map(function(image) {
   return image.addBands(timeImageMasked)
 })
 
-var days = 30
+var days = 1
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
@@ -187,10 +187,8 @@ var interpolateImages = function(image) {
     't1': timeImage.select('t1'),
     't2': timeImage.select('t2'),
   })
-  // Compute an image with the interpolated image y
   var interpolated = beforeMosaic
     .add((afterMosaic.subtract(beforeMosaic).multiply(timeRatio)))
-  // Replace the masked pixels in the current image with the average value
   var result = image.unmask(interpolated)
   return result.copyProperties(image, ['system:time_start'])
 }
@@ -204,7 +202,6 @@ Map.onClick(function (coords) {
     imageCollection: interpolatedCol, // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
   }).setOptions({
-    interpolateNulls: true,
     lineWidth: 1,
     pointSize: 3,
     title: 'NIR over Time at Clicked Point', // Update the chart title
