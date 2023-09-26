@@ -53,30 +53,23 @@ dateList.forEach(function(date) {
 print("Converted Successfully. Started Download");
 print(NIR);
 
-var data = new google.visualization.DataTable();
-data.addColumn('date', 'Date');
-data.addColumn('float', 'NIR');
+var dataTable = new google.visualization.DataTable();
+dataTable.addColumn('datetime', 'Timestamp');
+dataTable.addColumn('number', 'NIR Value');
 
 for (var i = 0; i < dateList.length; i++) {
-  data.addRows([
-  [dateList[i], NIR[i]]
-]);
+
+  dataTable.addRow([dateList[i], NIR[i]]);
 }
 
-
-var chart = ui.Chart(data, 'LineChart', {
+var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+chart.draw(dataTable, {
   title: 'NIR Band Data Over Time',
   hAxis: { title: 'Timestamp' },
   vAxis: { title: 'NIR Value' },
   lineWidth: 1,
   pointSize: 3
 });
-
-print(chart);
-
-
-
-
 
 
 
