@@ -127,7 +127,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
-    region: clickedPoint // Use the clicked point geometry
+    region: centerPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
     lineWidth: 1,
