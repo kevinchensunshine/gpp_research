@@ -59,21 +59,13 @@ print(Chart.image.series(modis_res.select('NDVI'), pt, ee.Reducer.mean(), 500)//
 var window_size = 9
 var half_window = (window_size - 1)/2
 
-// Define the axes of variation in the collection array.
 var imageAxis = 0;
 var bandAxis = 1;
 
-// Set polynomial order
 var order = 3
 var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
 var indepSelectors = ['constant', 't', 't2', 't3']
 
-// // Change to order = 2 as follows:
-// var order = 2
-// var coeffFlattener = [['constant', 'x', 'x2']]
-// var indepSelectors = ['constant', 't', 't2']
-
-// Convert the collection to an array.
 var array = modis_res.toArray();
 print(array, 'array')
 
