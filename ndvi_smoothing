@@ -32,12 +32,6 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(dataset_ndvi);
 
-function hasMask(image) {
-  return image.mask().reduce(ee.Reducer.anyNonZero()).eq(1);
-}
- 
-dataset = dataset.filter(hasMask)
-
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select('NDVI'),
     region: boundingBox
@@ -113,6 +107,8 @@ var sg_series = runLength.map(function(i) {
 })
 
 print(sg_series, 'sg_series')
+
+var sg_series = sg_series.map(mask2Clouds);
 
 print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
