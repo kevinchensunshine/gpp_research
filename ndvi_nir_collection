@@ -113,20 +113,15 @@ function maskClouds(image) {
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
-function applyScaleFactors(image) {
-  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
-  return image.addBands(opticalBands, null, true);
-}
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
-  .map(applyScaleFactors);
   
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['SR_B5', 'SR_B4']).set('date', dstamp)
+  img = img.select(['SR_B5']).set('date', dstamp).unmask()
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
