@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2024-09-30T16:30:00';
+var endDate = '2016-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(125);
 
@@ -124,6 +124,18 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterBounds(boundingBox)
   .map(maskClouds)
   .map(applyScaleFactors)
+  
+var chart = ui.Chart.image.series({
+    imageCollection: dataset.select("SR_B5"), // Select the NIR band
+    region: clickedPoint // Use the clicked point geometry
+  }).setOptions({
+    interpolateNulls: true,
+    lineWidth: 1,
+    pointSize: 3,
+    title: 'NIR over Time', // Update the chart title
+    vAxis: { title: 'NIR' }
+  });
+  print(chart);
   
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
