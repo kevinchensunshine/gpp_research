@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2016-07-30T16:30:00';
+var endDate = '2016-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(125);
 
@@ -125,7 +125,7 @@ var filtered = imageCollection.map(function(image) {
   return image.addBands(timeImageMasked)
 })
 
-var days = 1
+var days = 16
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
@@ -171,13 +171,10 @@ var join2Result = join2.apply({
 
 var interpolateImages = function(image) {
   var image = ee.Image(image)
-  // We get the list of before and after images from the image property
-  // Mosaic the images so we a before and after image with the closest unmasked pixel
   var beforeImages = ee.List(image.get('before'))
   var beforeMosaic = ee.ImageCollection.fromImages(beforeImages).mosaic()
   var afterImages = ee.List(image.get('after'))
   var afterMosaic = ee.ImageCollection.fromImages(afterImages).mosaic()
-  // Get image with before and after times
   var t1 = beforeMosaic.select('timestamp').rename('t1')
   var t2 = afterMosaic.select('timestamp').rename('t2')
   var t = image.metadata('system:time_start').rename('t')
@@ -195,6 +192,8 @@ var interpolateImages = function(image) {
 
 var interpolatedCol = ee.ImageCollection(
   join2Result.map(interpolateImages))
+  
+print("Interpolation Completed")
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
