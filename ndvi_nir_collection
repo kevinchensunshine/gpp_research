@@ -93,32 +93,11 @@ var batch = require('users/fitoprincipe/geetools:batch');
 
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
-/**
- * Function to mask clouds using the LANDSAT QA band
- * @param {ee.Image} image LANDSAT image
- * @return {ee.Image} cloud masked LANDSAT image
- */
-function maskLandsatClouds(image) {
-  var qa60 = image.select('QA60');
-
-  // Bits 4 and 5 are cloud and cirrus, respectively.
-  var cloudBitMask = 1 << 4;
-  var cirrusBitMask = 1 << 5;
-
-  // Both flags should be set to zero, indicating clear conditions.
-  var mask = qa60.bitwiseAnd(cloudBitMask).eq(0)
-    .and(qa60.bitwiseAnd(cirrusBitMask).eq(0));
-
-  return image.updateMask(mask).divide(10000);
-}
-
-var startDate = '2021-08-01';
-var endDate = '2022-08-01';
+var startDate = '2016-06-10';
+var endDate = '2016-09-30';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
-  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 80))
-  .map(maskLandsatClouds);
 
 Map.onClick(function (coords) {
   var clickedPoint = ee.Geometry.Point([coords.lon, coords.lat]); // Create a point geometry directly
