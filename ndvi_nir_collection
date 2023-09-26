@@ -147,7 +147,7 @@ function getLocalFit(i) {
   // Get a slice corresponding to the window_size of the SG smoother
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 0, 2); // NDVI
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
   var coeff = predictors.matrixSolve(response)
 
   coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
@@ -171,7 +171,7 @@ print(sg_series)
 Map.onClick(function (coords) {
   var clickedPoint = coords; // Create a point geometry directly
   var chart = ui.Chart.image.series({
-    imageCollection: sg_series.select('sum'), // Select the NIR band
+    imageCollection: sg_series.select("sum"), // Select the NIR band
     region: clickedPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
