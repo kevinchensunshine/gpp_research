@@ -117,13 +117,11 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .map(maskClouds)
 
-var start = ee.Date(startDate);
-var end = ee.Date(endDate);
 
 var interval = 30; // in minutes
 var dateList = [];
 
-var currentDate = start;
+var currentDate = startDate;
 
 while (currentDate.millis() <= end.millis()) {
   dateList.push(currentDate);
