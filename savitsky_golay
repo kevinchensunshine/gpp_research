@@ -8,15 +8,15 @@ var countries = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017");
 
 var aoi =  ee.Feature(countries.filterMetadata('country_na', 'equals', 'Kenya').first()).buffer(1000).geometry()
 
-var start_date = '2010-01-01'
-var end_date = '2100-01-01'  // the Future
+var start_date = '2016-06-10T16:30:00'
+var end_date = '2016-09-30T16:30:00'  // the Future
 
 // Add predictors for SG fitting, using date difference
 // We prepare for order 3 fitting, but can be adapted to lower order fitting later on
 var modis_res = modis.filterDate(start_date, end_date).filterBounds(aoi).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['NDVI', 'EVI']).divide(32768.0).set('date', dstamp)
+  img = img.select(['NIR', 'EVI']).divide(32768.0).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
