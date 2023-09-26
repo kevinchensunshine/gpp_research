@@ -59,8 +59,8 @@ print("Converted Successfully. Started Download");
 print(NIR);
 
 var chartData = [];
-for (var i = 0; i < dateArray.length; i++) {
-  chartData.push([dateArray[i], NIR[i]]);
+for (var i = 0; i < dateList.length; i++) {
+  chartData.push([dateList[i], NIR[i]]);
 }
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
