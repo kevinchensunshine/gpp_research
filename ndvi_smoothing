@@ -26,8 +26,6 @@ function dataset_ndvi(image) {
   return image.addBands(ndvi);
 }
 
-print('filtered', filtered.toList(MAX_LIST_SIZE))
-
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
