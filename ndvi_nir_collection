@@ -54,6 +54,14 @@ dateList.forEach(function(date) {
   }
 });
 
+for (var i = 0; i < NIR.length; i++) {
+  assert(typeof NIR[i] === 'number', 'NIR value at index ' + i + ' is not a float.');
+}
+
+for (var i = 0; i < dateList.length; i++) {
+  assert(dateList[i] instanceof ee.Date, 'Date at index ' + i + ' is not an ee.Date object.');
+}
+
 print("Converted Successfully. Started Download");
 print(NIR);
 
