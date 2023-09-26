@@ -46,7 +46,7 @@ var chart = ui.Chart.image.series({
     });
   print(chart)
 
-var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(aoi).map(function(img) {
+var modis_res = dataset.filterDate(start_date, end_date).filterBounds(aoi).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
   img = img.select(['NDVI', 'EVI']).set('date', dstamp)
