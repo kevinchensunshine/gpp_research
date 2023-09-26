@@ -150,8 +150,6 @@ Map.onClick(function (coords) {
 
     print(smoothedChart);
   });
-
-  print(chart);
 });
 
 Map.setCenter(-121.7757874638141, 36.82780041527757);
