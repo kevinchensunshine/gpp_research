@@ -97,14 +97,13 @@ var startDate = '2016-06-10';
 var endDate = '2016-09-30';
 
 function maskClouds(image) {
-  var QA60 = image.select(['pixel_qa']);
-  var cloudBitMask = 1 << 10; // Bit 10 represents clouds in QA60 band
-  var cirrusBitMask = 1 << 11; // Bit 11 represents cirrus clouds
-  var mask = QA60.bitwiseAnd(cloudBitMask).eq(0)
-    .and(QA60.bitwiseAnd(cirrusBitMask).eq(0));
-  return image.updateMask(mask);
+  var QA60 = image.select(['QA_PIXEL']);
+  var cloudBit = 1 << 3; // Bit 3 represents clouds
+  var cloudShadowConfidenceBits = QA60.bitwiseRightShift(10).and(3); // Bits 10-11 represent cloud shadow confidence
+  var cloudMask = QA60.bitwiseAnd(cloudBit).neq(0).and(cloudShadowConfidenceBits.eq(3));
+  var cleanImage = image.updateMask(cloudMask.not());
+  return cleanImage.select(['SR_B5']);
 }
-
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
