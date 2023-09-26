@@ -98,7 +98,7 @@ var endDate = '2016-09-30';
 
 function maskClouds(image) {
 
-  return image.updateMask(mask).multiply(0.0000275).add(-0.2).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+  return image.multiply(0.0000275).add(-0.2).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
