@@ -135,7 +135,6 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-
 var order = 2
 var coeffFlattener = [['constant', 'x', 'x2']]
 var indepSelectors = ['constant', 't', 't2']
