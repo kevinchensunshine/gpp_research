@@ -1,10 +1,11 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var modis = ee.ImageCollection("MODIS/006/MOD13Q1");
+var modis = ee.ImageCollection("MODIS/006/MOD13Q1"),
+    countries = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //print(modis.limit(2))
 
 // Part 1: Set up a regularly sampled MODIS time series 
-var countries = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017");
+
 
 var aoi =  ee.Feature(countries.filterMetadata('country_na', 'equals', 'Kenya').first()).buffer(1000).geometry()
 
