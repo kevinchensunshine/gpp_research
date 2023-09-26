@@ -61,13 +61,8 @@ for (var i = 0; i < dateList.length; i++) {
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
 
-var chart = ui.Chart(chartData, 'LineChart', {
-  title: 'NIR Band Data Over Time',
-  hAxis: { title: 'Timestamp' },
-  vAxis: { title: 'NIR Value' },
-  lineWidth: 1,
-  pointSize: 3
-});
+var chart = ui.Chart(chartData);
+
 
 print(chart);
 
