@@ -18,7 +18,7 @@ function maskS2clouds(image) {
 var startDate = '2016-06-10';
 var endDate = '2016-09-31';
 
-var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757]),
+var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
 var boundingBox = centerPoint.buffer(125);
 
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
