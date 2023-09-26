@@ -53,9 +53,14 @@ dateList.forEach(function(date) {
 print("Converted Successfully. Started Download");
 print(NIR);
 
-var chartData = [];
+var data = new google.visualization.DataTable();
+data.addColumn('date', 'Date');
+data.addColumn('float', 'NIR');
+
 for (var i = 0; i < dateList.length; i++) {
-  chartData.push([dateList[i], NIR[i]]);
+  data.addRows([
+  [dateList[i], NIR[i]]
+]);
 }
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
