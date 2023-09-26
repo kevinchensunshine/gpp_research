@@ -50,24 +50,32 @@ dateList.forEach(function(date) {
     });
     
     NIR.push(avg_nir.get(band_name));
+  } else {
+    NIR.push(0);
   }
 });
 
 print("Converted Successfully. Started Download");
 print(NIR);
 
-var featureList = NIR.map(function(nir) {
-  return ee.Feature(null, { NIR: nir });
+var chartData = [];
+for (var i = 0; i < dateArray.length; i++) {
+  chartData.push([datesArray[i], NIR[i]]);
+}
+
+var dataTable = ui.Chart.array.values(chartData, 0, 1);
+
+var chart = ui.Chart(dataTable, 'LineChart', {
+  title: 'NIR Band Data Over Time',
+  hAxis: { title: 'Timestamp' },
+  vAxis: { title: 'NIR Value' },
+  lineWidth: 1,
+  pointSize: 3
 });
 
-var featureCollection = ee.FeatureCollection(featureList);
+print(chart);
 
-Export.table.toDrive({
-  collection: featureCollection,
-  description: 'nir_values_collection',
-  fileNamePrefix: 'nir_data',
-  fileFormat: 'CSV'
-});
+
 
 
 
