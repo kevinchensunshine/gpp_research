@@ -11,7 +11,16 @@ function maskS2clouds(image) {
   var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
       .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
 
-  return image.updateMask(mask).divide(10000).copyProperties(image, ["system:time_end"]).set('system:time_start', image.get('system:time_start'));
+  var hasClouds = mask.reduceRegion({
+    reducer: ee.Reducer.anyNonZero(),
+    geometry: image.geometry(),
+    scale: 10, 
+  });
+
+  return ee.Algorithms.If(hasClouds.get('constant'), null, image.updateMask(mask)
+    .divide(10000)
+    .copyProperties(image, ["system:time_end"])
+    .set('system:time_start', image.get('system:time_start')));
 }
 
 
@@ -33,8 +42,7 @@ function drop_nulls(image) {
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
-                  .map(maskS2clouds)
-                  .map(drop_nulls)
+                  .map(maskS2clouds, true)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(dataset_ndvi);
 
