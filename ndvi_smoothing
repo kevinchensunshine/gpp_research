@@ -29,7 +29,6 @@ function dataset_ndvi(image) {
 var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
-                  // Pre-filter to get less cloudy granules.
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(maskS2clouds)
                   .map(dataset_ndvi)
