@@ -148,7 +148,7 @@ var modis_res = dataset.map(function(img) {
 })
 
 print(modis_res)
-var window_size = 13
+var window_size = 7
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
