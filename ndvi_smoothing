@@ -27,7 +27,7 @@ function dataset_ndvi(image) {
 }
 
 function drop_nulls(image) {
-  return ee.Algorithms.If(image, null)
+  return image === null;
 }
 
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
