@@ -26,10 +26,15 @@ function dataset_ndvi(image) {
   return image.addBands(ndvi);
 }
 
+function drop_nulls(image) {
+  return ee.Algorithms.If(image, null)
+}
+
 var dataset = ee.ImageCollection('COPERNICUS/S2')  
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
-                  .map(maskS2clouds, true)
+                  .map(maskS2clouds)
+                  .map(drop_nulls)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(dataset_ndvi);
 
