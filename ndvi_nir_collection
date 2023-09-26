@@ -60,7 +60,7 @@ print(NIR);
 
 var chartData = [];
 for (var i = 0; i < dateArray.length; i++) {
-  chartData.push([datesArray[i], NIR[i]]);
+  chartData.push([dateArray[i], NIR[i]]);
 }
 
 var dataTable = ui.Chart.array.values(chartData, 0, 1);
