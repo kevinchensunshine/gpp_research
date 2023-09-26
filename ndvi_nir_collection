@@ -110,7 +110,7 @@ function maskClouds(image) {
   .and(QA60.bitwiseAnd(dilatedCloudBit).eq(0))
   .and(QA60.bitwiseAnd(cirrusBit).eq(0))
   .and(QA60.bitwiseAnd(cloudShadowBit).eq(0));
-  return image.updateMask(mask).multiply(0.0000275).add(-0.2).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 function applyScaleFactors(image) {
@@ -125,13 +125,13 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(applyScaleFactors);
   
 var modis_res = dataset.map(function(img) {
-var dstamp = ee.Date(img.get('system:time_start'))
-var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-img = img.select(['SR_B5']).set('date', dstamp)
-return img.addBands(ee.Image(1).toFloat().rename('constant')).
-  addBands(ee.Image(ddiff).toFloat().rename('t')).
-  addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-  addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
+  img = img.select(['SR_B5']).set('date', dstamp)
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 // Step 2: Set up Savitzky-Golay smoothing
 var window_size = 9
