@@ -67,6 +67,7 @@ var sg_series = runLength.map(function(i) {
 })
 
 print(sg_series)
+print(sg_series.filter(ee.Filter.neq('sum', null)))
 
 //print(sg_series)
 // Part 3: Generate some output
