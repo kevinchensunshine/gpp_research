@@ -14,7 +14,7 @@ function maskS2clouds(image) {
   var hasClouds = mask.reduceRegion({
     reducer: ee.Reducer.anyNonZero(),
     geometry: image.geometry(),
-    scale: 30, 
+    scale: 250, 
   });
 
   return ee.Algorithms.If(hasClouds.get('constant'), null, image.updateMask(mask)
