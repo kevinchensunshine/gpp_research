@@ -111,7 +111,7 @@ var sg_series = runLength.map(function(i) {
 print(sg_series, 'sg_series')
 
 
-print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
       title: 'NDVI_SG_timeseries_3rd Order',
       interpolateNulls: true,
