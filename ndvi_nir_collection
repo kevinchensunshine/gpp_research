@@ -117,6 +117,7 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
+  .map(maskClouds)
   
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
