@@ -65,6 +65,8 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
 })
 
+print(sg_series)
+
 //print(sg_series)
 // Part 3: Generate some output
 
