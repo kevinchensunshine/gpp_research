@@ -10,7 +10,7 @@ var modis = ee.ImageCollection("MODIS/006/MOD13Q1"),
 var aoi =  ee.Feature(countries.filterMetadata('country_na', 'equals', 'Kenya').first()).buffer(1000).geometry()
 
 var start_date = '2016-06-10T16:30:00'
-var end_date = '2016-09-30T16:30:00'  // the Future
+var end_date = '2024-09-30T16:30:00'  // the Future
 
 // Add predictors for SG fitting, using date difference
 // We prepare for order 3 fitting, but can be adapted to lower order fitting later on
