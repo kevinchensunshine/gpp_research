@@ -177,7 +177,7 @@ function stack(i1, i2)
 
 var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
-var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
+var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), boundingBox,10).values()
 
 print(smoothy)
 
