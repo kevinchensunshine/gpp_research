@@ -170,7 +170,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
 })
 
-var NDVI = (ee.Image(modis_res.get(41)).select('NIR'))
+var NDVI = (ee.Image(modis_res.get(41)).select('SR_B5'))
 var NDVIsg = (ee.Image(sg_series.get(41-half_window)))  // half-window difference in index
 
 var pt = ee.Geometry.Point(39.89, -1.8516).buffer(500)
@@ -185,7 +185,7 @@ var s1orig = modis_res.slice(1).iterate(stack, modis_res.get(0))
 
 var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
-var y = ee.Image(s1orig).select(['NIR']).reduceRegion(ee.Reducer.mean(), pt,10).values()
+var y = ee.Image(s1orig).select(['SR_B5']).reduceRegion(ee.Reducer.mean(), pt,10).values()
 var xlabels = ee.Image(s1orig).select(['t(..)*']).reduceRegion(ee.Reducer.first(), pt,10).values()
 var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
 
