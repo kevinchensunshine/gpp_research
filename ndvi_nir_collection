@@ -118,14 +118,16 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskClouds)
 
 function calculateMeanNIR(image) {
-  image = image.select("SR_B5")
   var meanNIR = image.reduceRegion({
     reducer: ee.Reducer.mean(),
     geometry: boundingBox,
     scale: 30, // Adjust the scale as needed
     maxPixels: 1e9
   });
-  return meanNIR;
+  return ee.Feature(null, {
+    'system:time_start': image.get('system:time_start'),
+    'mean_NIR': meanNIR.get('SR_B5')
+  });
 }
 
 var meanNIRCollection = dataset.map(calculateMeanNIR);
