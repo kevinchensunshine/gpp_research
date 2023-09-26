@@ -173,7 +173,7 @@ var sg_series = runLength.map(function(i) {
 var NDVI = (ee.Image(modis_res.get(41)).select('SR_B5'))
 var NDVIsg = (ee.Image(sg_series.get(41-half_window)))  // half-window difference in index
 
-var pt = ee.Geometry.Point(39.89, -1.8516).buffer(500)
+var pt = boundingBox
 
 // Build a stack for all images in the collection
 function stack(i1, i2)
