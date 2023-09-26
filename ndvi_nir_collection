@@ -194,7 +194,16 @@ var interpolatedCol = ee.ImageCollection(
   join2Result.map(interpolateImages))
   
 print("Interpolation Completed")
-print(interpolatedCol)
+
+var exportParams = {
+  collection: interpolatedCol, // Replace with the collection you want to export
+  description: 'exported_images', // Set a description for the exported files
+  scale: 30, // Set the scale (resolution) for the exported images
+  maxPixels: 1e13, // Set the maximum number of pixels to export
+};
+
+// Start the export
+Export.image.toDrive(exportParams);
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
