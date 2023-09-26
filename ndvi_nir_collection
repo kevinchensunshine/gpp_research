@@ -124,29 +124,27 @@ function calculateMeanNIR(image) {
     scale: 30, // Adjust the scale as needed
     maxPixels: 1e9
   });
-  return ee.Feature(null, {
-    'system:time_start': image.get('system:time_start'),
-    'mean_NIR': meanNIR.get('SR_B5')
-  });
+  return ee.Image(ee.Number(meanNIR.get('SR_B5')));
 }
 
-var meanNIRCollection = ee.FeatureCollection(dataset.map(calculateMeanNIR));
-
-// Create a chart based on the FeatureCollection
-var chart = ui.Chart.feature.byFeature(meanNIRCollection, 'system:time_start', ['mean_NIR'])
-  .setOptions({
-    interpolateNulls: true,
-    lineWidth: 1,
-    pointSize: 3,
-    title: 'Mean NIR over Time at Clicked Point', // Update the chart title
-    vAxis: { title: 'Mean NIR' }
-  });
+var meanNIRCollection = dataset.map(calculateMeanNIR);
 
 Map.onClick(function (coords) {
   var clickedPoint = boundingBox; // Create a point geometry directly
+  var chart = ui.Chart.image.series({
+    imageCollection: dataset.select('SR_B5'), // Select the NIR band
+    region: clickedPoint // Use the clicked point geometry
+  }).setOptions({
+    interpolateNulls: true,
+    lineWidth: 1,
+    pointSize: 3,
+    title: 'NIR over Time at Clicked Point', // Update the chart title
+    vAxis: { title: 'NIR' }
+  });
   print(chart);
 });
 
 Map.setCenter(-121.7757874638141, 36.82780041527757);
+
 
 
