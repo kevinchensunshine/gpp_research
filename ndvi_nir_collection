@@ -178,7 +178,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 500)
+print(Chart.image.series(sg_series, boundingBox, ee.Reducer.mean(), 500)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
       lineWidth: 1,
