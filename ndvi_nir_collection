@@ -100,7 +100,7 @@ var endDate = '2017-09-30T16:30:00';
 var boundingBox = centerPoint.buffer(125);
 
 function applyScaleFactors(image) {
-  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  var opticalBands = image.select('SR_B.');
   return image.addBands(opticalBands, null, true)
 }
 
