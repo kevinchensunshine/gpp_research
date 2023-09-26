@@ -141,7 +141,7 @@ Map.onClick(function (coords) {
   });
 
 
-  var interpolatedData = temporalInterpolation(originalChart);
+  var interpolatedData = temporalInterpolation(chart);
   var interpolatedChart = ui.Chart(interpolatedData, 'LineChart')
     .setOptions({
       interpolateNulls: true,
