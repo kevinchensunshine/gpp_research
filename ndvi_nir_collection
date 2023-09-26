@@ -95,7 +95,7 @@ var batch = require('users/fitoprincipe/geetools:batch');
 var nirParams = { max: 1, min: -1, palette: ["blue", "white", "green"] };
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2016-09-30T16:30:00';
+var endDate = '2024-09-30T16:30:00';
 
 var boundingBox = centerPoint.buffer(2000);
 
@@ -134,11 +134,9 @@ var modis_res = dataset.map(function(img) {
 })
 
 print(modis_res)
-// Step 2: Set up Savitzky-Golay smoothing
 var window_size = 9
 var half_window = (window_size - 1)/2
 
-// Define the axes of variation in the collection array.
 var imageAxis = 0;
 var bandAxis = 1;
 
@@ -182,8 +180,48 @@ var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean
 */
 print(sg_series.filter(ee.Filter.neq('sum', null)))
 
-print(dataset.select("SR_B5"))
+var NDVI = (ee.Image(modis_res.get(41)).select('SR_B5'))
+var NDVIsg = (ee.Image(sg_series.get(41-half_window)))
 
+var pt = boundingBox
+// Build a stack for all images in the collection
+function stack(i1, i2)
+{
+  return ee.Image(i1).addBands(ee.Image(i2))
+}
+
+var s1orig = modis_res.slice(1).iterate(stack, modis_res.get(0))
+
+var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
+
+// Get samples from both series
+var y = ee.Image(s1orig).select(['SR_B5']).reduceRegion(ee.Reducer.mean(), pt,10).values()
+var xlabels = ee.Image(s1orig).select(['t(..)*']).reduceRegion(ee.Reducer.first(), pt,10).values()
+var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
+
+// NB: convert to dB (this actually exaggarates differences between raw points and the smooth series somewhat)
+// NB2 the first and last half_window values of the smoothy are simply repeated from the start and end values
+//y = y.map(function(f) { return ee.Number(f).log10().multiply(10)})
+xlabels = xlabels.map(function(f) { return ee.Number(f).divide(24.0*365.25)}).sort()
+
+//smoothy = smoothy.map(function(f) { return ee.Number(f).log10().multiply(10)})
+
+// Chart
+var yValues = ee.Array.cat([y, ee.List.repeat(smoothy.get(0), half_window).cat(smoothy).cat(ee.List.repeat(smoothy.get(-1), half_window))], 1);
+
+var chart = ui.Chart.array.values(yValues, 0, xlabels).setSeriesNames(['Raw', 'Smoothed']).setOptions(
+  {
+    title: 'Savitsky-Golay smoothing (order = ' + order + ', window_size = ' + window_size + ')', 
+    hAxis: {title: 'Time (years after ' + startDate + ')'}, vAxis: {title: 'NDVI'},
+    legend: null,
+    series: { 
+      0: { lineWidth: 0},
+      1: { lineWidth: 2, pointSize: 0, color: 'red' }}
+  })
+print(chart)
+
+print(dataset.select("SR_B5"))
+/*
 Map.onClick(function (coords) {
   var clickedPoint = centerPoint; // Create a point geometry directly
   var chart = ui.Chart.image.series({
@@ -200,4 +238,5 @@ Map.onClick(function (coords) {
 });
 
 Map.setCenter(-121.7757874638141, 36.82780041527757);
+*/
 
