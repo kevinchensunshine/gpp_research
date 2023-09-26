@@ -58,15 +58,6 @@ var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
 
 print(modis_res, 'modis_res')
 
-
-print(Chart.image.series(modis_res.select('NDVI'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
-    //.setSeriesNames(['fitted'])
-    .setOptions({
-      title: 'NDVI_timeseries',
-      lineWidth: 1,
-      pointSize: 3,
-}));
-
 // Step 2: Set up Savitzky-Golay smoothing
 var window_size = 9
 var half_window = (window_size - 1)/2
