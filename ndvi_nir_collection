@@ -34,9 +34,7 @@ var resolution = 30;
 dateList.forEach(function(date) {
   var spec_data = dataset.filterDate(date.advance(-1, 'day'), date.advance(1, 'day'));
   
-  if (spec_data.size().gt(0)) {
-    NIR.push(0.0);
-  } else {
+  if (spec_data.size().getInfo() > 0) {
   
     var band_name = 'SR_B5';
   
@@ -51,6 +49,8 @@ dateList.forEach(function(date) {
     });
     
     NIR.push(avg_nir.get(band_name));
+  } else {
+    NIR.push(0.0);
   }
 });
 
