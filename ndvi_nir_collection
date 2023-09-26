@@ -48,8 +48,6 @@ dateList.forEach(function(date) {
   });
   
   NIR.push(avg_nir.get(band_name));
-
-  }
 });
 
 print("Converted Successfully. Started Download");
