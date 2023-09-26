@@ -112,8 +112,8 @@ function maskLandsatClouds(image) {
   return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
-var startDate = '2021-08-01';
-var endDate = '2022-08-01';
+var startDate = '2016-08-01';
+var endDate = '2017-08-01';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
