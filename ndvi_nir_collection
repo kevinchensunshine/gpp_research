@@ -112,43 +112,19 @@ function maskLandsatClouds(image) {
   return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
-function dataset_nir(image) {
-  var nir = image.clipToCollection(cover_crop_fields).select('SR_B5').rename('NIR');
-  return image.addBands(nir);
-}
-
-function reduce_region_nir(image) {
-  image = image.select("NIR");
-  return image.reduceRegions({
-    collection: cover_crop_fields,
-    reducer: ee.Reducer.median(),
-    // scale: 30
-  });
-}
-
 var startDate = '2021-08-01';
 var endDate = '2022-08-01';
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 80))
-  .map(maskLandsatClouds)
-  .map(dataset_nir); // Use the NIR band
+  .map(maskLandsatClouds);
 
 Map.onClick(function (coords) {
-  var clickedPoint = ee.Feature({
-    "type": "Feature",
-    "geometry": {
-      "type": "Point",
-      "coordinates": [coords.lon, coords.lat]
-    },
-    "properties": {
-      "name": "Mouse Click"
-    }
-  });
+  var clickedPoint = ee.Geometry.Point([coords.lon, coords.lat]); // Create a point geometry directly
   var chart = ui.Chart.image.series({
-    imageCollection: dataset.select('NIR'), // Select the NIR band
-    region: clickedPoint.geometry()
+    imageCollection: dataset.select('SR_B5'), // Select the NIR band
+    region: clickedPoint // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
     lineWidth: 1,
@@ -161,8 +137,7 @@ Map.onClick(function (coords) {
 });
 
 Map.setCenter(-88.2918, 39.9508);
-Map.addLayer(dataset.select("NIR"), nirParams, 'NIR Image');
-Map.addLayer(cover_crop_fields, { color: 'FF0000' }, 'Cover Crop Fields');
+Map.addLayer(dataset.select("SR_B5"), nirParams, 'NIR Image');
 
 
 
