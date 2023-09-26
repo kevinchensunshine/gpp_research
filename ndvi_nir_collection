@@ -153,7 +153,7 @@ function getLocalFit(i) {
   // Get a slice corresponding to the window_size of the SG smoother
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 4, 5); // NDVI
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
   var coeff = predictors.matrixSolve(response)
 
   coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
@@ -170,40 +170,33 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
 })
 
-var NDVI = (ee.Image(modis_res.get(41)).select('SR_B5'))
-var NDVIsg = (ee.Image(sg_series.get(41-half_window)))  // half-window difference in index
-
-var pt = boundingBox
-
-// Build a stack for all images in the collection
 function stack(i1, i2)
 {
   return ee.Image(i1).addBands(ee.Image(i2))
 }
 
-var s1orig = modis_res.slice(1).iterate(stack, modis_res.get(0))
-
 var s1sged = sg_series.slice(1).iterate(stack, sg_series.get(0))
 
-var y = ee.Image(s1orig).select(['SR_B5']).reduceRegion(ee.Reducer.mean(), pt,10).values()
-var xlabels = ee.Image(s1orig).select(['t(..)*']).reduceRegion(ee.Reducer.first(), pt,10).values()
 var smoothy = ee.Image(s1sged).select(['sum(..)*']).reduceRegion(ee.Reducer.mean(), pt,10).values()
 
-xlabels = xlabels.map(function(f) { return ee.Number(f).divide(24.0*365.25)}).sort()
+print(smoothy)
 
-var yValues = ee.Array.cat([y, ee.List.repeat(smoothy.get(0), half_window).cat(smoothy).cat(ee.List.repeat(smoothy.get(-1), half_window))], 1);
+print(dataset.select("SR_B5"))
 
-var chart = ui.Chart.array.values(yValues, 0, xlabels).setSeriesNames(['Raw', 'Smoothed']).setOptions(
-  {
-    title: 'Savitsky-Golay smoothing (order = ' + order + ', window_size = ' + window_size + ')', 
-    hAxis: {title: 'Time (years after ' + startDate + ')'}, vAxis: {title: 'NDVI'},
-    legend: null,
-    series: { 
-      0: { lineWidth: 0},
-      1: { lineWidth: 2, pointSize: 0, color: 'red' }}
-  })
-print(chart)
-
+Map.onClick(function (coords) {
+  var clickedPoint = centerPoint; // Create a point geometry directly
+  var chart = ui.Chart.image.series({
+    imageCollection: dataset.select("SR_B5"), // Select the NIR band
+    region: clickedPoint // Use the clicked point geometry
+  }).setOptions({
+    interpolateNulls: true,
+    lineWidth: 1,
+    pointSize: 3,
+    title: 'NIR over Time at Clicked Point', // Update the chart title
+    vAxis: { title: 'NIR' }
+  });
+  print(chart);
+});
 
 Map.setCenter(-121.7757874638141, 36.82780041527757);
 
