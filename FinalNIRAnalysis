@@ -105,7 +105,7 @@ var originalCollection = originalCollection.map(function(image) {
 // Convert days to milliseconds
 
 // Specify the time-window to look for unmasked pixel
-var days = 16;
+var days = 45;
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
