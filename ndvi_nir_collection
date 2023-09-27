@@ -117,6 +117,7 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
+  .map(maskClouds)
   .map(applyScaleFactors)
 /*
 var featureCollection = dataset.map(function(image) {
@@ -209,12 +210,13 @@ print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
 
 var oeel=require('users/OEEL/lib:loadAll');
 var order = 2;
-var library_sg=oeel.ImageCollection.SavatskyGolayFilter(dataset,
-        ee.Filter.maxDifference(1000*3600*24*15, 'system:time_start', null, 'system:time_start'),
+var library_sg = oeel.ImageCollection.SavatskyGolayFilter(
+        dataset,
+        ee.Filter.maxDifference(1000*3600*24*30, 'system:time_start', null, 'system:time_start'),
         function(infromedImage,estimationImage){
           return ee.Image.constant(ee.Number(infromedImage.get('system:time_start'))
             .subtract(ee.Number(estimationImage.get('system:time_start'))));},
-        5,
+        9,
         ['SR_B5']);
 
 print(Chart.image.series(library_sg.select('SR_B5'), boundingBox, ee.Reducer.median(), 30)
