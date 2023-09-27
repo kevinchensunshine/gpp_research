@@ -46,12 +46,13 @@ var chart = ui.Chart.image.series({
     });
   print(chart)
   
+
+  
 var bandNames = ee.Image(originalCollection.first()).bandNames();
 var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-// Select the interval. We will have 1 image every n days
 var n = 5;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
@@ -104,7 +105,7 @@ var originalCollection = originalCollection.map(function(image) {
 // Convert days to milliseconds
 
 // Specify the time-window to look for unmasked pixel
-var days = 45;
+var days = 16;
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
@@ -247,7 +248,7 @@ var chart = ui.Chart.image.series({
     })
 print(chart);
 
-var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
+var modis_res = regularCol.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['SR_B5', 'SR_B2']).set('date', dstamp)
@@ -257,10 +258,8 @@ var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-print(modis_res, 'modis_res')
-
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 7
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
@@ -273,8 +272,6 @@ var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
 var indepSelectors = ['constant', 't', 't2', 't3']
 
 var array = modis_res.toArray();
-print(array, 'array')
-
 // Solve 
 function getLocalFit(i) {
   // Get a slice corresponding to the window_size of the SG smoother
@@ -288,15 +285,10 @@ function getLocalFit(i) {
 }
 
 
-// For the remainder, use modis_res as a list of images
 modis_res = modis_res.toList(modis_res.size())
-print(modis_res,'modis_res size')
-
 
 var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
-print(runLength, 'runLength')
 
-// Run the SG filter over the series, and get the smoothed image 
 var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
