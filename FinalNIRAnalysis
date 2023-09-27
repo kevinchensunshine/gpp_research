@@ -53,7 +53,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 5;
+var n = 1;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
