@@ -137,7 +137,7 @@ var chart = ui.Chart.image.series({
   print(chart);
   
 var modis_res = dataset.map(function(img) {
-  var dstamp = ee.Date(img.get('DATE_PRODUCT_GENERATED'))
+  var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['SR_B5', 'SR_B4']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
@@ -174,7 +174,7 @@ var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 
 var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
-  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref)
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref).set('system:time_start', modis_res.get(ee.Number(i)).get('system:time_start'))
 })
 
 print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
