@@ -123,6 +123,13 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskClouds)
   .map(applyScaleFactors)
   
+Export.table.toCloudStorage({
+            collection: dataset.select("SR_B5"),
+            bucket: bucket_name,
+            fileNamePrefix: file_name_prefix,
+            fileFormat: 'CSV'
+        })
+  
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
     region: centerPoint // Use the clicked point geometry
@@ -183,6 +190,7 @@ print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
       lineWidth: 1,
       pointSize: 3,
 }));
+
 /*
 Map.onClick(function (coords) {
   var clickedPoint = centerPoint; // Create a point geometry directly
