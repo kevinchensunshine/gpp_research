@@ -124,7 +124,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(applyScaleFactors)
   
 var featureCollection = dataset.map(function(image) {
-    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd');
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var bandValues = image.select(['SR_B5']);
     return ee.Feature(null, {
       'Date': date,
