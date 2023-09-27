@@ -31,7 +31,7 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filterBounds(boundingBox)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .map(maskS2clouds)
-                  .filter(ee.Filter.notNull.not())
+                  .filter(ee.Filter.notNull().not())
                   .map(dataset_ndvi)
 
 var chart = ui.Chart.image.series({
