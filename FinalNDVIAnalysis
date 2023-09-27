@@ -325,14 +325,22 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
 
 var oeel=require('users/OEEL/lib:loadAll');
 var order = 3;
+
+var distanceFunction = function(infromedImage, estimationImage) {
+  return ee.Image.constant(
+      ee.Number(infromedImage.get('system:time_start'))
+      .subtract(
+        ee.Number(estimationImage.get('system:time_start')))
+        );
+  }
+
 var library_sg = oeel.ImageCollection.SavatskyGolayFilter(
-        regularCol,
-        ee.Filter.maxDifference(1000*3600*24*16, 'system:time_start', null, 'system:time_start'),
-        function(infromedImage,estimationImage){
-          return ee.Image.constant(ee.Number(infromedImage.get('system:time_start'))
-            .subtract(ee.Number(estimationImage.get('system:time_start'))));},
-        9,
-        ['NDVI']);
+        regularCol, 
+        maxDiffFilter,
+        distanceFunction,
+        order
+        )
+
         
 print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.median(), 30)
     .setOptions({
