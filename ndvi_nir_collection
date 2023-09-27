@@ -138,7 +138,7 @@ var cloudShadowBit = 1 << 4;
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
-  .filter(ee.Filter(is_cloudy))
+  .filter(ee.Filter.evaluate(is_cloudy))
   .map(applyScaleFactors)
   
 var chart = ui.Chart.image.series({
