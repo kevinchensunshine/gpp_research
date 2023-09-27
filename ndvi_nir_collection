@@ -121,6 +121,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .filter(ee.Filter.lt('CLOUD_COVER', 20))
+  .filter(ee.Filter.lt('CLOUD_COVER_LAND', 20))
   .map(applyScaleFactors)
   
 var chart = ui.Chart.image.series({
