@@ -124,9 +124,12 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(applyScaleFactors)
   
 Export.table.toCloudStorage({
-        collection: dataset.select("SR_B5"),
-        fileFormat: 'CSV'
-    })
+    collection: dataset.select("SR_B5"),
+    description: 'exported_data', // Specify a description for your exported file
+    bucket: 'your_bucket_name', // Specify your Cloud Storage bucket name
+    fileNamePrefix: 'output_folder/exported_data', // Specify the file path in your bucket
+    fileFormat: 'CSV'
+  });
   
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
