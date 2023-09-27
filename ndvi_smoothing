@@ -14,7 +14,6 @@ function maskS2clouds(image) {
   return image.updateMask(mask).divide(10000).copyProperties(image, ["system:time_end"]).set('system:time_start', image.get('system:time_start'));
 }
 
-
 var startDate = '2016-06-10T16:30:00';
 var endDate = '2017-09-30T16:30:00';
 
@@ -29,10 +28,11 @@ function dataset_ndvi(image) {
 var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
-                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',50))
                   .map(maskS2clouds)
-                  .filter(ee.Filter.notNull().not())
                   .map(dataset_ndvi)
+
+print(dataset)
 
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select('NDVI'),
