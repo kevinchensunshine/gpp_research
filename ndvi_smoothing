@@ -30,7 +30,6 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filterDate(startDate, endDate)
                   .filterBounds(boundingBox)
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
-                  .map(maskS2clouds)
                   .map(dataset_ndvi)
 
 var chart = ui.Chart.image.series({
@@ -49,7 +48,7 @@ var chart = ui.Chart.image.series({
 var modis_res = dataset.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NDVI', 'B1']).set('date', dstamp).unmask()
+  img = img.select(['NDVI', 'B2']).set('date', dstamp).unmask()
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
