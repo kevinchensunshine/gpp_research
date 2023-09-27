@@ -224,14 +224,11 @@ var interpolateImages = function(image) {
   return result.copyProperties(image, ['system:time_start'])
 }
 
-// map() the function to interpolate all images in the collection
 var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
-
 
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
 
-// Display a time-series chart
 var chart = ui.Chart.image.series({
   imageCollection: regularCol.select('SR_B5'),
   region: boundingBox,
