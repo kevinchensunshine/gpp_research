@@ -122,8 +122,6 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(geometry)
   .filter(ee.Filter.lt('CLOUD_COVER', 30))
-  .filter(ee.Filter.lt('CLOUD_COVER_LAND', 30))
-  .map(maskClouds)
   .map(applyScaleFactors)
 /*
 var featureCollection = dataset.map(function(image) {
@@ -152,7 +150,7 @@ Export.table.toDrive({
   
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
-    region: centerPoint // Use the clicked point geometry
+    region: geometry // Use the clicked point geometry
   }).setOptions({
     interpolateNulls: true,
     lineWidth: 1,
