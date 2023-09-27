@@ -123,11 +123,10 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskClouds)
   .map(applyScaleFactors)
   
-Export.table.toCloudStorage({
+Export.table.toDrive({
     collection: dataset.select("SR_B5"),
     description: 'exported_data', // Specify a description for your exported file
-    bucket: 'your_bucket_name', // Specify your Cloud Storage bucket name
-    fileNamePrefix: 'output_folder/exported_data', // Specify the file path in your bucket
+    fileNamePrefix: 'exported_data', // Specify the file name prefix
     fileFormat: 'CSV'
   });
   
