@@ -123,12 +123,22 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskClouds)
   .map(applyScaleFactors)
   
-Export.table.toDrive({
-    collection: dataset.select("SR_B5"),
-    description: 'exported_data', // Specify a description for your exported file
-    fileNamePrefix: 'exported_data', // Specify the file name prefix
-    fileFormat: 'CSV'
+var featureCollection = dataset.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd');
+    var bandValues = image.select(['SR_B5']);
+    return ee.Feature(null, {
+      'Date': date,
+      'SR_B5': bandValues.get('SR_B5')
+    });
   });
+
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'exported_data', // Specify a description for your exported file
+  folder: 'your_drive_folder', // Specify the Google Drive folder where you want to save the file
+  fileNamePrefix: 'exported_data', // Specify the file name prefix
+  fileFormat: 'CSV'
+});
   
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
