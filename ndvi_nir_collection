@@ -119,6 +119,12 @@ function maskClouds(image) {
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
+  .filter(ee.Filter.or(
+    ee.Filter.bitwiseAnd('QA_PIXEL', dilatedCloudBit).eq(0),
+    ee.Filter.bitwiseAnd('QA_PIXEL', cirrusBit).eq(0),
+    ee.Filter.bitwiseAnd('QA_PIXEL', cloudBit).eq(0),
+    ee.Filter.bitwiseAnd('QA_PIXEL', cloudShadowBit).eq(0)
+   ))
   .map(applyScaleFactors)
   
 var chart = ui.Chart.image.series({
