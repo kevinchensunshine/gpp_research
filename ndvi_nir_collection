@@ -94,7 +94,8 @@ print(chart);
 var startDate = '2016-06-10T16:30:00';
 var endDate = '2017-09-30T16:30:00';
 
-var boundingBox = centerPoint.buffer(125);
+
+var geometry = ee.Geometry.Rectangle([-122, 36.5, -121.4, 37]);
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
@@ -119,26 +120,35 @@ function maskClouds(image) {
 
 var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
-  .filterBounds(boundingBox)
+  .filterBounds(geometry)
+  .filter(ee.Filter.lt('CLOUD_COVER', 30))
+  .filter(ee.Filter.lt('CLOUD_COVER_LAND', 30))
   .map(maskClouds)
   .map(applyScaleFactors)
-  
+/*
 var featureCollection = dataset.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var bandValues = image.select(['SR_B5']);
+    var medianSR_B5 = image.select('SR_B5').reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: 30
+    }).get('SR_B5');
     return ee.Feature(null, {
       'Date': date,
-      'SR_B5': bandValues.get('SR_B5')
+      'SR_B5_Median': medianSR_B5
     });
   });
+  
+print(featureCollection)
 
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'exported_data', // Specify a description for your exported file
-  folder: 'your_drive_folder', // Specify the Google Drive folder where you want to save the file
-  fileNamePrefix: 'exported_data', // Specify the file name prefix
+  description: 'exported_data',
+  folder: 'your_drive_folder',
+  fileNamePrefix: 'exported_data',
   fileFormat: 'CSV'
 });
+*/
   
 var chart = ui.Chart.image.series({
     imageCollection: dataset.select("SR_B5"), // Select the NIR band
@@ -194,7 +204,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref, ['system:time_start'])
 })
 
-print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+print(Chart.image.series(sg_series, geometry, ee.Reducer.median(), 30)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
       lineWidth: 1,
