@@ -73,7 +73,6 @@ var initImages = daysToInterpolate.map(function(day) {
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
-print('Empty Collection', initCol)
 
 // Merge original and empty collections
 var originalCollection = originalCollection.merge(initCol)
@@ -151,7 +150,6 @@ var join1Result = join1.apply({
 })
 // Each image now as a property called 'after' containing
 // all images that come after it within the time-window
-print(join1Result.first())
 
 // Do the second join now to match all images within the time-window
 // that come before each image
@@ -171,8 +169,6 @@ var join2Result = join2.apply({
 
 // Each image now as a property called 'before' containing
 // all images that come after it within the time-window
-print(join2Result.first())
-
 var joinedCol = join2Result;
 
 // Do the interpolation
@@ -233,12 +229,12 @@ var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 var chart = ui.Chart.image.series({
   imageCollection: regularCol.select('SR_B5'),
   region: boundingBox,
-  reducer: ee.Reducer.mean(),
+  reducer: ee.Reducer.median(),
   scale: 20
 }).setOptions({
       title: 'Regular NIR Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NIR', viewWindow: {min: 0, max: 0.6}},
+      vAxis: {title: 'NIR', viewWindow: {min: 0.2, max: 0.6}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -248,56 +244,18 @@ var chart = ui.Chart.image.series({
     })
 print(chart);
 
-var modis_res = regularCol.map(function(img) {
-  var dstamp = ee.Date(img.get('system:time_start'))
-  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['SR_B5', 'SR_B2']).set('date', dstamp)
-  return img.addBands(ee.Image(1).toFloat().rename('constant')).
-    addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
-})
-
-// Step 2: Set up Savitzky-Golay smoothing
-var window_size = 9
-var half_window = (window_size - 1)/2
-
-// Define the axes of variation in the collection array.
-var imageAxis = 0;
-var bandAxis = 1;
-
-// Set polynomial order
-var order = 3
-var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
-var indepSelectors = ['constant', 't', 't2', 't3']
-
-var array = modis_res.toArray();
-// Solve 
-function getLocalFit(i) {
-  // Get a slice corresponding to the window_size of the SG smoother
-  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
-  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 0, 1); // NIR
-  var coeff = predictors.matrixSolve(response)
-
-  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
-  return coeff  
-}
-
-
-modis_res = modis_res.toList(modis_res.size())
-
-var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
-
-var sg_series = runLength.map(function(i) {
-  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
-  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
-})
-
-print(sg_series, 'sg_series')
-
-
-print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+var oeel=require('users/OEEL/lib:loadAll');
+var order = 3;
+var library_sg = oeel.ImageCollection.SavatskyGolayFilter(
+        regularCol,
+        ee.Filter.maxDifference(1000*3600*24*16, 'system:time_start', null, 'system:time_start'),
+        function(infromedImage,estimationImage){
+          return ee.Image.constant(ee.Number(infromedImage.get('system:time_start'))
+            .subtract(ee.Number(estimationImage.get('system:time_start'))));},
+        3,
+        ['SR_B5']);
+        
+print(ui.Chart.image.series(library_sg.select('SR_B5'), boundingBox, ee.Reducer.median(), 30)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
       interpolateNulls: true,
