@@ -251,5 +251,78 @@ var chart = ui.Chart.image.series({
     })
 print(chart);
 
+var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
+  img = img.select(['NDVI', 'B2']).set('date', dstamp).unmask()
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+print(modis_res, 'modis_res')
+
+// Step 2: Set up Savitzky-Golay smoothing
+var window_size = 9
+var half_window = (window_size - 1)/2
+
+// Define the axes of variation in the collection array.
+var imageAxis = 0;
+var bandAxis = 1;
+
+// Set polynomial order
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+// // Change to order = 2 as follows:
+// var order = 2
+// var coeffFlattener = [['constant', 'x', 'x2']]
+// var indepSelectors = ['constant', 't', 't2']
+
+// Convert the collection to an array.
+var array = modis_res.toArray();
+print(array, 'array')
+
+// Solve 
+function getLocalFit(i) {
+  // Get a slice corresponding to the window_size of the SG smoother
+  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
+  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var coeff = predictors.matrixSolve(response)
+
+  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
+  return coeff  
+}
+
+
+// For the remainder, use modis_res as a list of images
+modis_res = modis_res.toList(modis_res.size())
+print(modis_res,'modis_res size')
+
+
+var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
+print(runLength, 'runLength')
+
+// Run the SG filter over the series, and get the smoothed image 
+var sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+print(sg_series, 'sg_series')
+
+
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+    .setOptions({
+      title: 'NDVI_SG_timeseries_3rd Order',
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+
 
 
