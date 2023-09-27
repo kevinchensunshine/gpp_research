@@ -124,10 +124,10 @@ function is_cloudy(image) {
   var cloudBit = 1 << 3;
   var cloudShadowBit = 1 << 4;
   
-  return QA60.bitwiseAnd(cloudBit).eq(0)
+  return ee.Filter(QA60.bitwiseAnd(cloudBit).eq(0)
     .or(QA60.bitwiseAnd(dilatedCloudBit).eq(0))
     .or(QA60.bitwiseAnd(cirrusBit).eq(0))
-    .or(QA60.bitwiseAnd(cloudShadowBit).eq(0));
+    .or(QA60.bitwiseAnd(cloudShadowBit).eq(0)));
 }
 
 var dilatedCloudBit = 1 << 1;
