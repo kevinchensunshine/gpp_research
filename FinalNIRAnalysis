@@ -276,10 +276,18 @@ var order = 3
 var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
 var indepSelectors = ['constant', 't', 't2', 't3']
 
+// // Change to order = 2 as follows:
+// var order = 2
+// var coeffFlattener = [['constant', 'x', 'x2']]
+// var indepSelectors = ['constant', 't', 't2']
+
+// Convert the collection to an array.
 var array = modis_res.toArray();
 print(array, 'array')
 
+// Solve 
 function getLocalFit(i) {
+  // Get a slice corresponding to the window_size of the SG smoother
   var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
   var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
   var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
@@ -290,6 +298,7 @@ function getLocalFit(i) {
 }
 
 
+// For the remainder, use modis_res as a list of images
 modis_res = modis_res.toList(modis_res.size())
 print(modis_res,'modis_res size')
 
@@ -297,6 +306,7 @@ print(modis_res,'modis_res size')
 var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 print(runLength, 'runLength')
 
+// Run the SG filter over the series, and get the smoothed image 
 var sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
