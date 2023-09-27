@@ -95,7 +95,7 @@ var startDate = '2016-06-10T16:30:00';
 var endDate = '2017-09-30T16:30:00';
 
 
-var geometry = ee.Geometry.Rectangle([-122, 36.5, -121.4, 37]);
+var geometry = ee.Geometry.Rectangle([-121.9, 36.84, -121.7, 36.85]);
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
@@ -122,6 +122,7 @@ var dataset = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(geometry)
   .filter(ee.Filter.lt('CLOUD_COVER', 30))
+  .map(maskClouds)
   .map(applyScaleFactors)
 /*
 var featureCollection = dataset.map(function(image) {
@@ -163,7 +164,7 @@ var chart = ui.Chart.image.series({
 var modis_res = dataset.map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['SR_B5', 'SR_B4']).set('date', dstamp).unmask()
+  img = img.select(['SR_B5', 'SR_B4']).set('date', dstamp).unmask(0)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
