@@ -175,7 +175,7 @@ var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 var sg_series = runLength.map(function(i) {
   var curr_img_time = ee.Image(modis_res.get(ee.Number(i))).get('DATE_PRODUCT_GENERATED')
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
-  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref, ['system:time_start']).set('system:time_start', curr_img_time)
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref).set('system:time_start', curr_img_time)
 })
 
 print(Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
