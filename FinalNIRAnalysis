@@ -1,47 +1,47 @@
-var batch = require('users/fitoprincipe/geetools:batch')
-
-var ndviParams = {max: 1, min: -1, palette: ["blue", "white", "green"]}
-
-function maskS2clouds(image) {
-  var qa = image.select('QA60');
-
-  var cloudBitMask = 1 << 10;
-  var cirrusBitMask = 1 << 11;
-
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
-      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
-
-  return image.updateMask(mask).divide(10000).copyProperties(image, ["system:time_end"]).set('system:time_start', image.get('system:time_start'));
-}
-
 var startDate = '2016-06-10T16:30:00';
 var endDate = '2016-09-30T16:30:00';
 
-var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
+var centerPoint = ee.Geometry.Point(-121.77653287661818, 36.839911160080)
 var boundingBox = centerPoint.buffer(125);
 
-function dataset_ndvi(image) {
-  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
-  return image.addBands(ndvi);
+function applyScaleFactors(image) {
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
+  return image.addBands(opticalBands, null, true)
 }
 
-var originalCollection = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
-                  .filterDate(startDate, endDate)
-                  .filterBounds(boundingBox)
-                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
-                  .map(dataset_ndvi)
+function maskClouds(image) {
+  var QA60 = image.select(['QA_PIXEL']);
+  
+  var dilatedCloudBit = 1 << 1;
+  var cirrusBit = 1 << 2;
+  var cloudBit = 1 << 3;
+  var cloudShadowBit = 1 << 4;
+
+  var mask = QA60.bitwiseAnd(cloudBit).eq(0)
+  .and(QA60.bitwiseAnd(dilatedCloudBit).eq(0))
+  .and(QA60.bitwiseAnd(cirrusBit).eq(0))
+  .and(QA60.bitwiseAnd(cloudShadowBit).eq(0));
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+
+var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
+  .filterDate(startDate, endDate)
+  .filterBounds(boundingBox)
+  .map(maskClouds)
+  .map(applyScaleFactors)
 
 print(originalCollection)
 
 var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('NDVI'),
+    imageCollection: originalCollection.select('SR_B5'),
     region: boundingBox
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
       pointSize: 3,
-      title: 'NDVI over Time at Clicked Point',
-      vAxis: {title: 'NDVI'},
+      title: 'NIR over Time at Clicked Point',
+      vAxis: {title: 'NIR'},
       hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
     });
   print(chart)
@@ -227,21 +227,20 @@ var interpolateImages = function(image) {
 // map() the function to interpolate all images in the collection
 var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
-// Once the interpolation are done, remove original images
-// We keep only the generated interpolated images
+
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
 
 // Display a time-series chart
 var chart = ui.Chart.image.series({
-  imageCollection: regularCol.select('NDVI'),
+  imageCollection: regularCol.select('SR_B5'),
   region: boundingBox,
   reducer: ee.Reducer.mean(),
   scale: 20
 }).setOptions({
-      title: 'Regular NDVI Time Series',
+      title: 'Regular NIR Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.2}},
+      vAxis: {title: 'NIR', viewWindow: {min: 0, max: 0.6}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -254,7 +253,7 @@ print(chart);
 var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NDVI', 'B2']).set('date', dstamp)
+  img = img.select(['SR_B5', 'SR_B2']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -276,12 +275,6 @@ var order = 3
 var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
 var indepSelectors = ['constant', 't', 't2', 't3']
 
-// // Change to order = 2 as follows:
-// var order = 2
-// var coeffFlattener = [['constant', 'x', 'x2']]
-// var indepSelectors = ['constant', 't', 't2']
-
-// Convert the collection to an array.
 var array = modis_res.toArray();
 print(array, 'array')
 
