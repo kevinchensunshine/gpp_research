@@ -14,12 +14,10 @@ function maskS2clouds(image) {
   return image.updateMask(mask).divide(10000).select("B.*")
       .copyProperties(image, ["system:time_start"])
 }
-
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
-
-var centerPoint = ee.Geometry.Point([-121.77000951941847, 36.86100278892686])
-var boundingBox = centerPoint.buffer(125);
+var centerPoint = ee.Geometry.Point([-121.789167, 36.846645])
+var boundingBox = centerPoint.buffer({'distance' : 125})
 
 function dataset_ndvi(image) {
   var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
@@ -38,7 +36,7 @@ var rgbVis = {
   max: 3000
 };
 
-Map.setCenter(-121.77000951941847, 36.86100278892686, 24)
+Map.setCenter(-121.789167, 36.846645, 20)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
 
 var chart = ui.Chart.image.series({
