@@ -288,6 +288,29 @@ var sg_series = runLength.map(function(i) {
 
 print(sg_series, 'sg_series')
 
+sg_series = ee.ImageCollection(sg_series)
+
+var featureCollection = sg_series.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var medianSR_B5 = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: 30
+    }).get('sum');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIR_Median': medianSR_B5
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NIR_TimeSeries',
+  fileFormat: 'CSV'
+});
+
 
 print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
