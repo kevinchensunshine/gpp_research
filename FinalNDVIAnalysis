@@ -16,7 +16,7 @@ function maskS2clouds(image) {
 }
 
 var startDate = '2016-06-10T16:30:00';
-var endDate = '2016-09-30T16:30:00';
+var endDate = '2016-10-5T16:30:00';
 
 var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
 var boundingBox = centerPoint.buffer(125);
@@ -320,13 +320,13 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
       pointSize: 3,
 }));
 
-var exportable = sg_series.map(function(image) {
+var exportable = ee.ImageCollection(sg_series).map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var medianSR_B5 = image.select('NDVI').reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
       scale: 30
-    }).get('NDVI');
+    });
     return ee.Feature(null, {
       'Date': date,
       'NDVI_Median': medianSR_B5
