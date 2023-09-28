@@ -269,7 +269,7 @@ var exportable = library_sg.map(function(image) {
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
       scale: 30
-    }).get('SR_B5');
+    });
     return ee.Feature(null, {
       'Date': date,
       'SR_B5_Median': medianSR_B5
