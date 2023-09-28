@@ -15,10 +15,10 @@ function maskS2clouds(image) {
       .copyProperties(image, ["system:time_start"])
 }
 
-var startDate = '2016-06-10T16:30:00';
+var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
+var centerPoint = ee.Geometry.Point([-121.77000951941847, 36.86100278892686])
 var boundingBox = centerPoint.buffer(125);
 
 function dataset_ndvi(image) {
@@ -32,6 +32,14 @@ var originalCollection = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
                   .map(dataset_ndvi)
 
+var rgbVis = {
+  bands: ['B11', 'B8', 'B3'],
+  min: 0,
+  max: 3000
+};
+
+Map.setCenter(-121.77000951941847, 36.86100278892686, 24)
+Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
 
 var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NDVI'),
@@ -238,7 +246,7 @@ var chart = ui.Chart.image.series({
 }).setOptions({
       title: 'Regular NDVI Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.2}},
+      vAxis: {title: 'NDVI'},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
