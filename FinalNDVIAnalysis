@@ -326,10 +326,10 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
       pointSize: 3,
 }));
 
-/*
+
 var exportable = ee.ImageCollection(sg_series).map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var medianSR_B5 = image.select('NDVI').reduceRegion({
+    var medianSR_B5 = image.select('sum').reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
       scale: 30
@@ -343,11 +343,11 @@ var exportable = ee.ImageCollection(sg_series).map(function(image) {
 Export.table.toDrive({
   collection: exportable,
   description: 'exported_data',
-  folder: 'your_drive_folder',
+  folder: 'linear_interp',
   fileNamePrefix: 'exported_data',
   fileFormat: 'CSV'
 });
-
+/*
 var oeel=require('users/OEEL/lib:loadAll');
 var order = 3;
 
