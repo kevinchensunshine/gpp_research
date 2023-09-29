@@ -28,6 +28,7 @@ function maskClouds(image) {
 var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
+  .map(maskClouds)
   .map(applyScaleFactors)
 
 print(originalCollection)
