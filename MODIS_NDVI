@@ -1,6 +1,6 @@
 var modis = ee.ImageCollection('MODIS/MOD09GA_006_NDVI')
 
-var pt = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
+var pt = ee.Geometry.Point([-121.789167, 36.846645])
 var boundingBox = pt.buffer(125);
 
 // real NDVI values 
@@ -14,8 +14,8 @@ var rescale = function(image) {
 }
 
 var updatedFeatures = function(feature) {
-  var ndviValue = feature.getNumber('NDVI');
-  return feature.set('sentinel', ndviValue);
+  var ndviValue = feature.get('NDVI');
+  return feature.set('sentinel', ndviValue).copyProperties(feature);
 };
 
 // get the date and convert to DOY
