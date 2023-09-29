@@ -25,7 +25,7 @@ function maskClouds(image) {
 }
 
 
-var originalCollection = ee.ImageCollection('MODIS/061/MCD43A1')
+var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(applyScaleFactors)
@@ -33,7 +33,7 @@ var originalCollection = ee.ImageCollection('MODIS/061/MCD43A1')
 print(originalCollection)
 
 var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('Albedo_BSA_nir'),
+    imageCollection: originalCollection.select('SR_B5'),
     region: boundingBox
     }).setOptions({
       interpolateNulls: true,
