@@ -15,8 +15,12 @@ var rescale = function(image) {
 
 var updatedFeatures = function(feature) {
   var ndviValue = feature.get('NDVI');
-  return feature.set('sentinel', ndviValue).copyProperties(feature);
+  return feature.addBands(ndviValue).copyProperties(feature);
 };
+
+function dataset_ndvi(image) {
+  return image.addBands(ee.Image(1).toFloat().rename('sentinel'))
+}
 
 // get the date and convert to DOY
 
@@ -31,8 +35,7 @@ var end_date = '2016-09-30T16:30:00';
 
 var Mod_col = modis.filterDate(start_date, end_date).filterBounds(pt)
 .select(['NDVI'])
-.map(updatedFeatures)
-.map(rescale)
+.map(dataset_ndvi)
 print(Mod_col,'Mod_col')
 
 
