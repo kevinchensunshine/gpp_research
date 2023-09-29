@@ -1,4 +1,4 @@
-var modis = ee.ImageCollection("MODIS/006/MOD13Q1")
+var modis = ee.ImageCollection('MODIS/MOD09GA_006_NDVI')
 
 var pt = ee.Geometry.Point([-121.7757874638141, 36.82780041527757])
 var boundingBox = pt.buffer(125);
@@ -13,6 +13,11 @@ var rescale = function(image) {
   return image.divide(10000).copyProperties(image, ["system:time_start", "system:time_end"])
 }
 
+var updatedFeatures = function(feature) {
+  var ndviValue = feature.getNumber('NDVI');
+  return feature.set('sentinel', ndviValue);
+};
+
 // get the date and convert to DOY
 
 function returnDate(image) { 
@@ -22,11 +27,11 @@ function returnDate(image) {
 
 
 var start_date = '2016-06-10T16:30:00';
-var end_date = '2017-09-30T16:30:00';
+var end_date = '2016-09-30T16:30:00';
 
 var Mod_col = modis.filterDate(start_date, end_date).filterBounds(pt)
-.select(['NDVI', 'EVI'])
-// .map(returnDate)
+.select(['NDVI'])
+.map(updatedFeatures)
 .map(rescale)
 print(Mod_col,'Mod_col')
 
@@ -37,7 +42,7 @@ print(Mod_col,'Mod_col')
 var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBox).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['NDVI', 'EVI']).set('date', dstamp)
+  img = img.select(['NDVI', 'sentinel']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
