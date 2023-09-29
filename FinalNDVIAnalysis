@@ -326,25 +326,26 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
       pointSize: 3,
 }));
 
+sg_series = ee.ImageCollection(sg_series)
 
-var exportable = ee.ImageCollection(sg_series).map(function(image) {
+var featureCollection = sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var medianSR_B5 = image.select('sum').reduceRegion({
+    var medianSR_B5 = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
       scale: 30
-    });
+    }).get('sum');
     return ee.Feature(null, {
       'Date': date,
       'NDVI_Median': medianSR_B5
     });
   });
-  
+
+print(featureCollection)
+// Export the feature collection to a CSV file
 Export.table.toDrive({
-  collection: exportable,
-  description: 'exported_data',
-  folder: 'linear_interp',
-  fileNamePrefix: 'exported_data',
+  collection: featureCollection,
+  description: 'NDVI_Median',
   fileFormat: 'CSV'
 });
 /*
