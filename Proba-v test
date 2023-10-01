@@ -19,20 +19,20 @@ var bitwiseExtract = function(input, fromBit, toBit) {
 }
 var mask_vnpa2_img = function(image) {
   var qa = image.select('SM');
-  var cloud = bitwiseExtract(qa, 0, 2)
-  var mask = qa
-    .and(cloud.eq(0))// Clear sky conditions
+  var cloud = 1 << 5
+  var mask = qa.bitwiseAnd(cloud).eq(1)// Clear sky conditions
       return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 };
 
 var originalCollection = ee.ImageCollection('VITO/PROBAV/C1/S1_TOC_100M')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
+  .map(mask_vnpa2_img)
   .map(applyScaleFactors)
 
 
 var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('NDVI'),
+    imageCollection: originalCollection.select('NIR'),
     region: boundingBox
     }).setOptions({
       interpolateNulls: true,
