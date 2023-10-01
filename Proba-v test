@@ -50,7 +50,7 @@ var chart = ui.Chart.image.series({
     lineWidth: 1,
     pointSize: 3,
     title: 'NDVI over Time at Clicked Point',
-    vAxis: {title: 'NIR'},
+    vAxis: {title: 'NDVI'},
     hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
   });
 print(chart)
@@ -239,9 +239,9 @@ var chart = ui.Chart.image.series({
   reducer: ee.Reducer.median(),
   scale: 20
 }).setOptions({
-      title: 'Regular NIR Time Series',
+      title: 'Regular NDVI Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NIR'},
+      vAxis: {title: 'NDVI'},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -251,7 +251,7 @@ var chart = ui.Chart.image.series({
     })
 print(chart);
 
-var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
+var probav_res = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['NDVI', 'NIR']).set('date', dstamp).unmask()
@@ -280,7 +280,7 @@ var indepSelectors = ['constant', 't', 't2', 't3']
 // var indepSelectors = ['constant', 't', 't2']
 
 // Convert the collection to an array.
-var array = modis_res.toArray();
+var array = probav_res.toArray();
 
 // Solve 
 function getLocalFit(i) {
@@ -296,14 +296,14 @@ function getLocalFit(i) {
 
 
 // For the remainder, use modis_res as a list of images
-modis_res = modis_res.toList(modis_res.size())
+probav_res = probav_res.toList(probav_res.size())
 
 
-var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
+var runLength = ee.List.sequence(0, probav_res.size().subtract(window_size))
 
 // Run the SG filter over the series, and get the smoothed image 
 var sg_series = runLength.map(function(i) {
-  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+  var ref = ee.Image(probav_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
