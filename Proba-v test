@@ -28,7 +28,6 @@ var mask_vnpa2_img = function(image) {
 var originalCollection = ee.ImageCollection('VITO/PROBAV/C1/S1_TOC_100M')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
-  .map(mask_vnpa2_img)
   .map(applyScaleFactors)
 
 
