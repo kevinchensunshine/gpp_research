@@ -67,7 +67,7 @@ print(Chart.image.series(original.select('NDVI'), pt, ee.Reducer.mean(), 500)//.
       pointSize: 3,
 }));
 
-var Mod_col = original.select(['sur_refl_b02'])
+var Mod_col = original
 
 print(Mod_col,'Mod_col')
 
