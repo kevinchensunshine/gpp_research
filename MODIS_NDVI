@@ -30,8 +30,8 @@ function returnDate(image) {
 }
 
 
-var start_date = '2016-06-10T16:30:00';
-var end_date = '2016-09-30T16:30:00';
+var start_date = '2016-05-10T16:30:00';
+var end_date = '2016-10-31T16:30:00';
 
 var Mod_col = modis.filterDate(start_date, end_date).filterBounds(pt)
 .select(['NDVI'])
@@ -113,4 +113,28 @@ print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 500)//.select('NDVI')
       lineWidth: 1,
       pointSize: 3,
 }));
+
+sg_series = ee.ImageCollection(sg_series)
+
+var featureCollection = sg_series.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var medianNDVI = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: 30
+    }).get('sum');
+    return ee.Feature(null, {
+      'Date': date,
+      'NDVI_Median': medianNDVI
+    });
+  });
+  
+print(featureCollection)
+  
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NDVI_PROBAV333',
+  fileFormat: 'CSV'
+});
+
 
