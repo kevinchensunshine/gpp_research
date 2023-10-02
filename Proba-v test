@@ -254,7 +254,7 @@ print(chart);
 var probav_res = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NDVI', 'NIR']).set('date', dstamp).unmask()
+  img = img.select(['NIR', 'NDVI']).set('date', dstamp).unmask()
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -328,7 +328,7 @@ var featureCollection = sg_series.map(function(image) {
     }).get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NDVI_Median': medianNDVI
+      'NIR_Median': medianNDVI
     });
   });
   
@@ -336,7 +336,7 @@ print(featureCollection)
   
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NDVI_PROBAV333',
+  description: 'NIR_PROBAV333',
   fileFormat: 'CSV'
 });
 
