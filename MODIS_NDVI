@@ -30,12 +30,26 @@ function returnDate(image) {
   return image.addBands(ee.Image.constant(date).select([0],['DOY']).int16());
 }
 
+var bitwiseExtract = function(input, fromBit, toBit) {
+  if (toBit === undefined) toBit = fromBit
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
+  return input.rightShift(fromBit).bitwiseAnd(mask)
+}
+
+var mask_clouds = function(image) {
+  var qa = image.select('State');
+  var cloud = bitwiseExtract(qa, 0, 1)
+  var mask = qa.bitwiseAnd(cloud).eq(0)// Clear sky conditions
+      return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+};
+
 
 var start_date = '2016-05-10T16:30:00';
 var end_date = '2016-10-31T16:30:00';
 
 
-var original = modis.filterDate(start_date, end_date).filterBounds(pt).map(dataset_ndvi)
+var original = modis.filterDate(start_date, end_date).filterBounds(pt).map(dataset_ndvi).map(mask_clouds)
 
 print(Chart.image.series(original.select('sur_refl_b02'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
     //.setSeriesNames(['fitted'])
