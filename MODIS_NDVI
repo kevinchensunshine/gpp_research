@@ -78,7 +78,7 @@ print(Mod_col,'Mod_col')
 var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBox).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['sur_refl_b02', 'NDVI']).set('date', dstamp)
+  img = img.select(['NDVI', 'sur_refl_b02']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
