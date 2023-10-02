@@ -1,4 +1,4 @@
-var modis = ee.ImageCollection('MODIS/MOD09GA_006_NDVI')
+var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
 var pt = ee.Geometry.Point([-121.789167, 36.846645])
 var boundingBox = pt.buffer(125);
@@ -14,12 +14,13 @@ var rescale = function(image) {
 }
 
 var updatedFeatures = function(feature) {
-  var ndviValue = feature.get('NDVI');
+  var ndviValue = feature.get('sur_refl_b02');
   return feature.addBands(ndviValue).copyProperties(feature);
 };
 
 function dataset_ndvi(image) {
-  return image.addBands(ee.Image(1).toFloat().rename('sentinel'))
+  var ndvi = image.normalizedDifference(['sur_refl_b02', 'sur_refl_b01']).rename('NDVI');
+  return image.addBands(ndvi);
 }
 
 // get the date and convert to DOY
@@ -33,9 +34,27 @@ function returnDate(image) {
 var start_date = '2016-05-10T16:30:00';
 var end_date = '2016-10-31T16:30:00';
 
-var Mod_col = modis.filterDate(start_date, end_date).filterBounds(pt)
-.select(['NDVI'])
-.map(dataset_ndvi)
+
+var original = modis.filterDate(start_date, end_date).filterBounds(pt).map(dataset_ndvi)
+
+print(Chart.image.series(original.select('sur_refl_b02'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIR_timeseries',
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+print(Chart.image.series(original.select('NDVI'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NDVI_timeseries',
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+var Mod_col = original.select(['sur_refl_b02'])
+
 print(Mod_col,'Mod_col')
 
 
@@ -45,7 +64,7 @@ print(Mod_col,'Mod_col')
 var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBox).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
-  img = img.select(['NDVI', 'sentinel']).set('date', dstamp)
+  img = img.select(['sur_refl_b02', 'NDVI']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -54,14 +73,6 @@ var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBo
 
 print(modis_res, 'modis_res')
 
-
-print(Chart.image.series(modis_res.select('NDVI'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
-    //.setSeriesNames(['fitted'])
-    .setOptions({
-      title: 'NDVI_timeseries',
-      lineWidth: 1,
-      pointSize: 3,
-}));
 
 // Step 2: Set up Savitzky-Golay smoothing
 var window_size = 9
