@@ -1,6 +1,6 @@
 var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
-var pt = ee.Geometry.Point([-121.794167, 36.846645])
+var pt = ee.Geometry.Point([-121.789167, 36.846645])
 Map.setCenter(-121.789167, 36.846645, 15)
 // real NDVI values 
 var NDVI = function(image) {
@@ -35,8 +35,11 @@ var bitwiseExtract = function(input, fromBit, toBit) {
 var mask_clouds = function(image) {
   var qa = image.select('State');
   var cloud = bitwiseExtract(qa, 0, 1)
-  var mask = qa.bitwiseAnd(cloud).eq(0)// Clear sky conditions
-      return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+  var cirrus = bitwiseExtract(qa, 8, 9)
+  var shadow = 1 << 2
+  var modis_cloud = 1 << 10
+  var mask = qa.bitwiseAnd(modis_cloud).eq(0)
+      return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start')).set('system:time_end', image.get('system:time_end'));
 };
 
 
@@ -51,7 +54,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
-print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.median(), 500)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.median(), 100)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_timeseries',
@@ -59,7 +62,7 @@ print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reduc
       pointSize: 3,
 }));
 
-print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.median(), 500)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.median(), 100)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_timeseries',
@@ -264,7 +267,7 @@ print(modis_res, 'modis_res')
 
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 5
+var window_size = 7
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
@@ -349,7 +352,7 @@ print(modis_res_nir, 'modis_res')
 
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 5
+var window_size = 7
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
