@@ -1,7 +1,7 @@
 var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
-var pt = ee.Geometry.Point([-121.794167, 36.846645])
-Map.setCenter(-121.798167, 36.846645, 15)
+var pt = ee.Geometry.Point([-121.789167, 36.846645])
+Map.setCenter(-121.789167, 36.846645, 15)
 // real NDVI values 
 var NDVI = function(image) {
   return image.expression('float(b("NDVI")/10000)')
@@ -88,7 +88,7 @@ print(modis_res, 'modis_res')
 
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 7
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
