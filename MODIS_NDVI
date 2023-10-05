@@ -1,8 +1,7 @@
 var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
-var pt = ee.Geometry.Point([-121.789167, 36.846645])
-var boundingBox = pt.buffer(125);
-
+var pt = ee.Geometry.Point([-121.794167, 36.846645])
+Map.setCenter(-121.798167, 36.846645, 15)
 // real NDVI values 
 var NDVI = function(image) {
   return image.expression('float(b("NDVI")/10000)')
@@ -26,7 +25,7 @@ function dataset_ndvi(image) {
 // get the date and convert to DOY
 
 function returnDate(image) { 
-  var date = ee.Date(image.get('system:time_start')).getRelative('day','year').add(1).toFloat();
+  var date = ee.Date(image.get('google:max_source_file_timestamp')).getRelative('day','year').add(1).toFloat();
   return image.addBands(ee.Image.constant(date).select([0],['DOY']).int16());
 }
 
@@ -49,7 +48,7 @@ var start_date = '2016-05-10T16:30:00';
 var end_date = '2016-10-31T16:30:00';
 
 
-var original = modis.filterDate(start_date, end_date).filterBounds(pt).map(dataset_ndvi).map(mask_clouds)
+var original = modis.filterDate(start_date, end_date).filterBounds(pt).map(mask_clouds).map(dataset_ndvi)
 
 print(Chart.image.series(original.select('sur_refl_b02'), pt, ee.Reducer.mean(), 500)//.select('NDVI')
     //.setSeriesNames(['fitted'])
@@ -75,7 +74,7 @@ print(Mod_col,'Mod_col')
 
 // Add predictors for SG fitting, using date difference
 // We prepare for order 3 fitting, but can be adapted to lower order fitting later on
-var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(boundingBox).map(function(img) {
+var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
   img = img.select(['NDVI', 'sur_refl_b02']).set('date', dstamp)
@@ -145,7 +144,88 @@ var featureCollection = sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var medianNDVI = image.reduceRegion({
       reducer: ee.Reducer.median(),
-      geometry: boundingBox,
+      geometry: pt,
+      scale: 30
+    }).get('sum');
+    return ee.Feature(null, {
+      'Date': date,
+      'NDVI_Median': medianNDVI
+    });
+  });
+  
+// Add predictors for SG fitting, using date difference
+// We prepare for order 3 fitting, but can be adapted to lower order fitting later on
+var modis_res_nir = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
+  img = img.select(['sur_refl_b02', 'NDVI']).set('date', dstamp)
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+print(modis_res_nir, 'modis_res')
+
+
+// Step 2: Set up Savitzky-Golay smoothing
+var window_size = 9
+var half_window = (window_size - 1)/2
+
+var imageAxis = 0;
+var bandAxis = 1;
+
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+var array = modis_res_nir.toArray();
+print(array, 'array')
+
+// Solve 
+function getLocalFit(i) {
+  // Get a slice corresponding to the window_size of the SG smoother
+  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
+  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var coeff = predictors.matrixSolve(response)
+
+  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
+  return coeff  
+}
+
+
+// For the remainder, use modis_res as a list of images
+modis_res = modis_res_nir.toList(modis_res_nir.size())
+print(modis_res,'modis_res size')
+
+
+var runLength = ee.List.sequence(0, modis_res_nir.size().subtract(window_size))
+print(runLength, 'runLength')
+
+// Run the SG filter over the series, and get the smoothed image 
+var sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+print(sg_series, 'sg_series')
+
+print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 500)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIR_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+sg_series = ee.ImageCollection(sg_series)
+
+var featureCollection = sg_series.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var medianNDVI = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: pt,
       scale: 30
     }).get('sum');
     return ee.Feature(null, {
