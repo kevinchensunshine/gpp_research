@@ -22,7 +22,7 @@ function applyScaleFactors(image) {
   return image.addBands(opticalBands, null, true)
 }
 
-var originalCollection = ee.ImageCollection('VITO/PROBAV/C1/S1_TOC_333M')
+var originalCollection = ee.ImageCollection('VITO/PROBAV/C1/S1_TOC_100M')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(mask_vnpa2_img)
@@ -60,7 +60,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 1;
+var n = 5;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -262,7 +262,7 @@ var probav_res = regularCol.filterDate(startDate, endDate).map(function(img) {
 })
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 5
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
