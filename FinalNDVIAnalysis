@@ -383,8 +383,8 @@ print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.m
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
-var boundingBox = centerPoint.buffer(125);
+var centerPoint = ee.Geometry.Point(-121.791167, 36.846645)
+var boundingBox = centerPoint;
 
 
 function applyScaleFactors(image) {
@@ -692,7 +692,7 @@ var featureCollection = sg_series.map(function(image) {
     var medianSR_B5 = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
-      scale: 30
+      scale: 5
     }).get('sum');
     return ee.Feature(null, {
       'Date': date,
@@ -709,7 +709,7 @@ Export.table.toDrive({
 });
 
 
-print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 5)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
@@ -719,13 +719,11 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
 
 var chart = ui.Chart.image.series({
   imageCollection: regularCol.select('NDVI'),
-  region: boundingBox,
-  reducer: ee.Reducer.median(),
-  scale: 20
+  region: boundingBox
 }).setOptions({
       title: 'Regular NIR Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NIR', viewWindow: {min: 0.2, max: 0.6}},
+      vAxis: {title: 'NIR'},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
