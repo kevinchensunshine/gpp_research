@@ -383,7 +383,7 @@ print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.m
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point(-121.791167, 36.846645)
+var centerPoint = ee.Geometry.Point(-121.787167, 36.846645)
 var boundingBox = centerPoint;
 
 
@@ -719,7 +719,8 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 5)
 
 var chart = ui.Chart.image.series({
   imageCollection: regularCol.select('NDVI'),
-  region: boundingBox
+  region: boundingBox,
+  scale: 5
 }).setOptions({
       title: 'Regular NIR Time Series',
       interpolateNulls: false,
