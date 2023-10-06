@@ -1,7 +1,7 @@
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
+var centerPoint = ee.Geometry.Point(-121.790167, 36.846645)
 var boundingBox = centerPoint
 
 var bitwiseExtract = function(input, fromBit, toBit) {
@@ -13,7 +13,9 @@ var bitwiseExtract = function(input, fromBit, toBit) {
 var mask_vnpa2_img = function(image) {
   var qa = image.select('SM');
   var cloud = bitwiseExtract(qa, 0, 2)
-  var mask = qa.bitwiseAnd(cloud).eq(0)// Clear sky conditions
+  var nir_qual = 1 << 5
+  var ndvi_qual = 1 << 6
+  var mask = qa.bitwiseAnd(nir_qual).eq(1).and(qa.bitwiseAnd(ndvi_qual).eq(1))// Clear sky conditions
       return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 };
 
