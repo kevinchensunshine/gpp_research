@@ -4,7 +4,7 @@ var endDate = '2016-10-31T16:30:00';
 var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
 
 function applyScaleFactors(image) {
-  var opticalBands = image.select('B.').multiply(0.0000275).add(-0.2);
+  var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
   return image.addBands(opticalBands, null, true)
 }
 
@@ -29,7 +29,7 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C01/T1_SR')
   .map(dataset_ndvi)
   
 
-originalCollection = originalCollection.map(updateMask(mask));
+originalCollection = originalCollection;
 
 print(originalCollection)
 
