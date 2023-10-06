@@ -34,11 +34,7 @@ var bitwiseExtract = function(input, fromBit, toBit) {
 
 var mask_clouds = function(image) {
   var qa = image.select('State');
-  var cloud = bitwiseExtract(qa, 0, 1)
-  var cirrus = bitwiseExtract(qa, 8, 9)
-  var shadow = 1 << 2
   var modis_cloud = 1 << 10
-  var snow = 1 << 15
   var mask = qa.bitwiseAnd(modis_cloud).eq(0)
       return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))/*.advance(-8, 'days')*/.millis());
 };
@@ -260,8 +256,7 @@ var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(fu
   img = img.select(['NDVI', 'sur_refl_b02']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
 })
 
 print(modis_res, 'modis_res')
@@ -274,9 +269,9 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 3
-var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
-var indepSelectors = ['constant', 't', 't2', 't3']
+var order = 2
+var coeffFlattener = [['constant', 'x', 'x2']]
+var indepSelectors = ['constant', 't', 't2']
 
 var array = modis_res.toArray();
 print(array, 'array')
@@ -344,8 +339,7 @@ var modis_res_nir = Mod_col.filterDate(start_date, end_date).filterBounds(pt).ma
   img = img.select(['sur_refl_b02', 'NDVI']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
-    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
 })
 
 print(modis_res_nir, 'modis_res')
@@ -358,25 +352,11 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 3
-var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
-var indepSelectors = ['constant', 't', 't2', 't3']
+var order = 2
+var coeffFlattener = [['constant', 'x', 'x2']]
+var indepSelectors = ['constant', 't', 't2']
 
 var array = modis_res_nir.toArray();
-print(array, 'array')
-
-// Solve 
-function getLocalFit(i) {
-  // Get a slice corresponding to the window_size of the SG smoother
-  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
-  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
-  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
-  var coeff = predictors.matrixSolve(response)
-
-  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
-  return coeff  
-}
-
 
 // For the remainder, use modis_res as a list of images
 modis_res = modis_res_nir.toList(modis_res_nir.size())
