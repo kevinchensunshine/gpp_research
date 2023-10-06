@@ -2,6 +2,11 @@ var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
 var pt = ee.Geometry.Point([-121.789167, 36.846645])
 Map.setCenter(-121.789167, 36.846645, 15)
+
+Map.addLayer(pt,
+             {'color': 'green'},
+             'Geometry [black]: geometry');
+
 // real NDVI values 
 var NDVI = function(image) {
   return image.expression('float(b("NDVI")/10000)')
@@ -36,7 +41,7 @@ var mask_clouds = function(image) {
   var qa = image.select('State');
   var modis_cloud = 1 << 10
   var mask = qa.bitwiseAnd(modis_cloud).eq(0)
-      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))/*.advance(-8, 'days')*/.millis());
+      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start')).advance(-16, 'days').millis()).set('system:time_end', ee.Date(image.get('system:time_end')).advance(-16, 'days').millis());
 };
 
 
@@ -51,7 +56,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
-print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.max(), 250)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.max(), 1)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_timeseries',
@@ -59,7 +64,7 @@ print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reduc
       pointSize: 3,
 }));
 
-print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.max(), 250)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.max(), 1)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_timeseries',
@@ -256,7 +261,8 @@ var modis_res = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(fu
   img = img.select(['NDVI', 'sur_refl_b02']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
 print(modis_res, 'modis_res')
@@ -269,9 +275,9 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 2
-var coeffFlattener = [['constant', 'x', 'x2']]
-var indepSelectors = ['constant', 't', 't2']
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 't3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
 
 var array = modis_res.toArray();
 print(array, 'array')
@@ -303,7 +309,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 250)//.select('NDVI')
+print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 1)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_SG_timeseries_3rd Order',
@@ -315,14 +321,10 @@ sg_series = ee.ImageCollection(sg_series)
 
 var featureCollection = sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var medianNDVI = image.reduceRegion({
-      reducer: ee.Reducer.max(),
-      geometry: pt,
-      scale: 250
-    }).get('sum');
+    var medianNDVI = image.get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NDVI_Median': medianNDVI
+      'NDVI': medianNDVI
     });
   });
   
@@ -340,7 +342,8 @@ var modis_res_nir = Mod_col.filterDate(start_date, end_date).filterBounds(pt).ma
   img = img.select(['sur_refl_b02', 'NDVI']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
-    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2'))
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
 print(modis_res_nir, 'modis_res')
@@ -353,9 +356,9 @@ var half_window = (window_size - 1)/2
 var imageAxis = 0;
 var bandAxis = 1;
 
-var order = 2
-var coeffFlattener = [['constant', 'x', 'x2']]
-var indepSelectors = ['constant', 't', 't2']
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
 
 var array = modis_res_nir.toArray();
 
@@ -375,7 +378,7 @@ var sg_series = runLength.map(function(i) {
 
 print(sg_series, 'sg_series')
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 30)//.select('NDVI')
+print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 1)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
@@ -387,14 +390,10 @@ sg_series = ee.ImageCollection(sg_series)
 
 var featureCollection = sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var medianNIR = image.reduceRegion({
-      reducer: ee.Reducer.max(),
-      geometry: pt,
-      scale: 250
-    }).get('sum');
+    var medianNIR = image.get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NIR_Median': medianNIR
+      'NIR': medianNIR
     });
   });
   
