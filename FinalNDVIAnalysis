@@ -383,7 +383,7 @@ print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.m
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point(-121.791167, 36.846645)
+var centerPoint = ee.Geometry.Point(-121.790167, 36.846645)
 var boundingBox = centerPoint.buffer(25);
 
 
@@ -395,15 +395,11 @@ function applyScaleFactors(image) {
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
   
-  var dilatedCloudBit = 1 << 1;
   var cirrusBit = 1 << 2;
   var cloudBit = 1 << 3;
-  var cloudShadowBit = 1 << 4;
 
   var mask = QA60.bitwiseAnd(cloudBit).eq(0)
-  .and(QA60.bitwiseAnd(dilatedCloudBit).eq(0))
   .and(QA60.bitwiseAnd(cirrusBit).eq(0))
-  .and(QA60.bitwiseAnd(cloudShadowBit).eq(0));
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
@@ -424,9 +420,6 @@ var rgbVis = {
   min: 0.0,
   max: 0.3
 };
-
-var geometry = ee.Geometry.Rectangle([-121.790167, 36.845645, -121.788167, 36.847645])
-
 
 Map.setCenter(-121.789167, 36.846645, 20)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
@@ -705,7 +698,7 @@ Export.table.toDrive({
 });
 
 
-print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 5)
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.max(), 5)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
