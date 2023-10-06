@@ -1,6 +1,6 @@
 var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
-var pt = ee.Geometry.Point([-121.789167, 36.846645])
+var pt = ee.Geometry.Point([-121.790167, 36.846645])
 Map.setCenter(-121.789167, 36.846645, 15)
 // real NDVI values 
 var NDVI = function(image) {
@@ -33,9 +33,17 @@ var bitwiseExtract = function(input, fromBit, toBit) {
 }
 
 var mask_clouds = function(image) {
-  var qa = image.select('State');
+  
+  var state = image.select('State');
   var modis_cloud = 1 << 10
-  var mask = qa.bitwiseAnd(modis_cloud).eq(0)
+  
+  var qa = image.select('QA');
+  var band_one_qual = bitwiseExtract(qa, 4, 7)
+  var band_two_qual = bitwiseExtract(qa, 8, 11)
+  
+  var mask = state.bitwiseAnd(modis_cloud).eq(0)
+                  .and(qa.bitwiseAnd(band_one_qual).eq(0))
+                  .and(qa.bitwiseAnd(band_two_qual).eq(0))
       return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))/*.advance(-8, 'days')*/.millis());
 };
 
@@ -50,6 +58,15 @@ var originalCollection = modis
 .map(rescale)
 .map(mask_clouds)
 .map(dataset_ndvi)
+
+var rgbVis = {
+  bands: ['sur_refl_b01', 'sur_refl_b02', 'NDVI'],
+  min: 0.0,
+  max: 0.3
+};
+
+Map.setCenter(-121.789167, 36.846645, 15)
+Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
 
 print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.median())//.select('NDVI')
     //.setSeriesNames(['fitted'])
