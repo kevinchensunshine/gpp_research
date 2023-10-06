@@ -383,13 +383,28 @@ print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.m
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var centerPoint = ee.Geometry.Point(-121.790167, 36.846645)
-var boundingBox = centerPoint.buffer(25);
+var centerPoint = ee.Geometry.Point(-121.791167, 36.846645)
+var boundingBox = centerPoint.buffer(125);
 
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('SR_B.').multiply(0.0000275).add(-0.2);
   return image.addBands(opticalBands, null, true)
+}
+
+var bitwiseExtract = function(input, fromBit, toBit) {
+  if (toBit === undefined) toBit = fromBit
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
+  return input.rightShift(fromBit).bitwiseAnd(mask)
+}
+
+function maskAerosols(image) {
+  var qa_aerosol = image.select(['SR_QA_AEROSOL']);
+  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7)
+
+  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0)
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 function maskClouds(image) {
@@ -412,6 +427,7 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(maskClouds)
+  .map(maskAerosols)
   .map(dataset_ndvi)
   .map(applyScaleFactors)
   
@@ -438,6 +454,19 @@ var chart = ui.Chart.image.series({
       pointSize: 3,
       title: 'NDVI over Time at Clicked Point',
       vAxis: {title: 'NDVI'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+    });
+  print(chart)
+  
+var chart = ui.Chart.image.series({
+    imageCollection: originalCollection.select('SR_B5'),
+    region: boundingBox 
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NIR over Time at Clicked Point',
+      vAxis: {title: 'NIR'},
       hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
     });
   print(chart)
@@ -698,7 +727,7 @@ Export.table.toDrive({
 });
 
 
-print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.max(), 5)
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 30)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
@@ -709,7 +738,7 @@ print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.max(), 5)
 var chart = ui.Chart.image.series({
   imageCollection: regularCol.select('NDVI'),
   region: boundingBox,
-  scale: 5
+  scale: 30
 }).setOptions({
       title: 'Regular NIR Time Series',
       interpolateNulls: false,
