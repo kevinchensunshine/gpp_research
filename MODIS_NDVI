@@ -1,6 +1,6 @@
 var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
 
-var pt = ee.Geometry.Point([-121.789167, 36.846645])
+var pt = ee.Geometry.Point([-121.790167, 36.847645])
 Map.setCenter(-121.789167, 36.846645, 15)
 
 Map.addLayer(pt,
