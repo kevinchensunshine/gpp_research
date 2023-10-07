@@ -451,7 +451,9 @@ Map.addLayer(polygon,
 
 var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NDVI'),
-    region: boundingBox
+    region: boundingBox,
+    reducer: ee.Reducer.mean(),
+    scale:30
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -464,7 +466,9 @@ var chart = ui.Chart.image.series({
   
 var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('SR_B5'),
-    region: boundingBox 
+    region: boundingBox,
+    reducer: ee.Reducer.mean(),
+    scale:30
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
