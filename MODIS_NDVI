@@ -64,7 +64,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
-print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 50)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_timeseries',
@@ -72,7 +72,7 @@ print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reduc
       pointSize: 3,
 }));
 
-print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(), 50)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_timeseries',
@@ -317,7 +317,7 @@ var ndvi_sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(Chart.image.series(ndvi_sg_series, pt, ee.Reducer.median(), 50)//.select('NDVI')
+print(Chart.image.series(ndvi_sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_SG_timeseries_3rd Order',
@@ -386,7 +386,7 @@ var nir_sg_series = runLength.map(function(i) {
 
 print(nir_sg_series, 'sg_series')
 
-print(Chart.image.series(nir_sg_series, pt, ee.Reducer.median(), 50)//.select('NDVI')
+print(Chart.image.series(nir_sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
@@ -423,7 +423,7 @@ function mul_img(ndvi_image) {
 
 var nirv_sg_smoothed = ndvi_sg_series.map(mul_img)
 
-print(Chart.image.series(nirv_sg_smoothed.select("sum"), pt, ee.Reducer.median(), 50)//.select('NDVI')
+print(Chart.image.series(nirv_sg_smoothed.select("sum"), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIRV_SG_timeseries_3rd Order',
