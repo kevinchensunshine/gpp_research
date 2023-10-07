@@ -6,7 +6,7 @@ var pt = ee.Geometry.Polygon(
         [[[-121.789167, 36.846645],
           [-121.789167, 36.849645],
           [-121.793267, 36.846945],
-          [-121.792567, 36.843645]]])
+          [-121.792567, 36.844345]]])
 
 
 Map.setCenter(-121.789167, 36.846645, 15)
@@ -64,7 +64,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
-print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 50)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_timeseries',
@@ -72,7 +72,7 @@ print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reduc
       pointSize: 3,
 }));
 
-print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(), 50)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_timeseries',
@@ -312,12 +312,12 @@ var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
 print(runLength, 'runLength')
 
 // Run the SG filter over the series, and get the smoothed image 
-var sg_series = runLength.map(function(i) {
+var ndvi_sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
+print(Chart.image.series(ndvi_sg_series, pt, ee.Reducer.median(), 50)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_SG_timeseries_3rd Order',
@@ -325,9 +325,9 @@ print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
       pointSize: 3,
 }));
 
-sg_series = ee.ImageCollection(sg_series)
+ndvi_sg_series = ee.ImageCollection(ndvi_sg_series)
 
-var featureCollection = sg_series.map(function(image) {
+var featureCollection = ndvi_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var medianNDVI = image.get('sum');
     return ee.Feature(null, {
@@ -379,14 +379,14 @@ var runLength = ee.List.sequence(0, modis_res_nir.size().subtract(window_size))
 print(runLength, 'runLength')
 
 // Run the SG filter over the series, and get the smoothed image 
-var sg_series = runLength.map(function(i) {
+var nir_sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(sg_series, 'sg_series')
+print(nir_sg_series, 'sg_series')
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
+print(Chart.image.series(nir_sg_series, pt, ee.Reducer.median(), 50)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
@@ -394,9 +394,9 @@ print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
       pointSize: 3,
 }));
 
-sg_series = ee.ImageCollection(sg_series)
+nir_sg_series = ee.ImageCollection(nir_sg_series)
 
-var featureCollection = sg_series.map(function(image) {
+var featureCollection = nir_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var medianNIR = image.get('sum');
     return ee.Feature(null, {
@@ -412,5 +412,23 @@ Export.table.toDrive({
   description: 'NIR_MODIS250',
   fileFormat: 'CSV'
 });
+
+var index = 0
+var nir_sg_list = nir_sg_series.toList(nir_sg_series.size())
+function mul_img(ndvi_image) {
+  var nir_img = nir_sg_list.get(index)
+  index++
+  return ndvi_image.multiply(nir_img).copyProperties(ndvi_image).set('system:time_start', ndvi_image.get('system:time_start'))
+}
+
+var nirv_sg_smoothed = ndvi_sg_series.map(mul_img)
+
+print(Chart.image.series(nirv_sg_smoothed.select("sum"), pt, ee.Reducer.median(), 50)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIRV_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
 
 
