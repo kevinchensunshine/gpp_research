@@ -1,6 +1,14 @@
-var modis = ee.ImageCollection("MODIS/061/MOD09Q1")
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var modis = ee.ImageCollection("MODIS/061/MOD09Q1");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var pt = ee.Geometry.Point([-121.790167, 36.847645])
+var pt = ee.Geometry.Polygon(
+        [[[-121.789167, 36.846645],
+          [-121.789167, 36.849645],
+          [-121.793267, 36.846945],
+          [-121.792567, 36.843645]]])
+
+
 Map.setCenter(-121.789167, 36.846645, 15)
 
 Map.addLayer(pt,
@@ -41,12 +49,12 @@ var mask_clouds = function(image) {
   var qa = image.select('State');
   var modis_cloud = 1 << 10
   var mask = qa.bitwiseAnd(modis_cloud).eq(0)
-      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start')).advance(-16, 'days').millis()).set('system:time_end', ee.Date(image.get('system:time_end')).advance(-16, 'days').millis());
+      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-16, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-16, 'days').*/millis());
 };
 
 
-var start_date = '2016-05-10T16:30:00';
-var end_date = '2016-10-31T16:30:00';
+var start_date = '2016-05-10';
+var end_date = '2016-10-31';
 
 
 var originalCollection = modis
@@ -56,7 +64,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
-print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.max(), 1)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_timeseries',
@@ -64,7 +72,7 @@ print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reduc
       pointSize: 3,
 }));
 
-print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.max(), 1)//.select('NDVI')
+print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_timeseries',
@@ -309,7 +317,7 @@ var sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 1)//.select('NDVI')
+print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NDVI_SG_timeseries_3rd Order',
@@ -378,7 +386,7 @@ var sg_series = runLength.map(function(i) {
 
 print(sg_series, 'sg_series')
 
-print(Chart.image.series(sg_series, pt, ee.Reducer.max(), 1)//.select('NDVI')
+print(Chart.image.series(sg_series, pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Order',
