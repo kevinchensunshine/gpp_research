@@ -1,12 +1,13 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var modis = ee.ImageCollection("MODIS/061/MOD09Q1");
-/***** End of imports. If edited, may not auto-convert in the playground. *****/
-
-var pt = ee.Geometry.Polygon(
+var modis = ee.ImageCollection("MODIS/061/MOD09Q1"),
+    pt = /* color: #98ff00 */ee.Geometry.Polygon(
         [[[-121.789167, 36.846645],
           [-121.789167, 36.849645],
           [-121.793267, 36.846945],
-          [-121.792567, 36.844345]]])
+          [-121.792567, 36.844345]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+
+
 
 
 Map.setCenter(-121.789167, 36.846645, 15)
@@ -49,10 +50,10 @@ var mask_clouds = function(image) {
   var qa = image.select('State');
   var modis_cloud = 1 << 10
   var mask = qa.bitwiseAnd(modis_cloud).eq(0)
-      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-16, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-16, 'days').*/millis());
+      return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-8, 'days').*/millis());
 };
 
-
+//Buffered space to ensure all dates in the GPP set are captured
 var start_date = '2016-05-10';
 var end_date = '2016-10-31';
 
@@ -64,6 +65,7 @@ var originalCollection = modis
 .map(mask_clouds)
 .map(dataset_ndvi)
 
+//Currently using mean. Not sure if this is the best metric for this or median, but results are similar
 print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.mean(), 250)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
@@ -80,6 +82,8 @@ print(Chart.image.series(originalCollection.select('NDVI'), pt, ee.Reducer.mean(
       pointSize: 3,
 }));
 
+
+//Linear Interpolation
 var bandNames = ee.Image(originalCollection.first()).bandNames();
 var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
@@ -325,6 +329,7 @@ print(Chart.image.series(ndvi_sg_series, pt, ee.Reducer.mean(), 250)//.select('N
       pointSize: 3,
 }));
 
+/*
 ndvi_sg_series = ee.ImageCollection(ndvi_sg_series)
 
 var featureCollection = ndvi_sg_series.map(function(image) {
@@ -341,7 +346,8 @@ Export.table.toDrive({
   description: 'NDVI_MODIS250',
   fileFormat: 'CSV'
 });
-  
+*/
+
 // Add predictors for SG fitting, using date difference
 // We prepare for order 3 fitting, but can be adapted to lower order fitting later on
 var modis_res_nir = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(function(img) {
@@ -394,6 +400,7 @@ print(Chart.image.series(nir_sg_series, pt, ee.Reducer.mean(), 250)//.select('ND
       pointSize: 3,
 }));
 
+/*
 nir_sg_series = ee.ImageCollection(nir_sg_series)
 
 var featureCollection = nir_sg_series.map(function(image) {
@@ -412,6 +419,10 @@ Export.table.toDrive({
   description: 'NIR_MODIS250',
   fileFormat: 'CSV'
 });
+*/
+/*
+Code to piecewise multiple NIRV and NDVI
+*/
 
 var index = 0
 var nir_sg_list = nir_sg_series.toList(nir_sg_series.size())
