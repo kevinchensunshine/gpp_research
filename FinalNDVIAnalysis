@@ -421,7 +421,7 @@ function maskClouds(image) {
 
   var mask = QA60.bitwiseAnd(cloudBit).eq(0)
   .and(QA60.bitwiseAnd(cirrusBit).eq(0))
-  .and(QA60.bitwiseAnd(dilatedCloud).eq(0))
+  .and(QA60.bitwiseAnd(cloudShadow).eq(0))
 
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
@@ -662,7 +662,7 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
-var modis_res = regularCol.filterDate(startDate, endDate).map(function(img) {
+var modis_res_ndvi = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['NDVI', 'SR_B5']).set('date', dstamp)
@@ -691,7 +691,7 @@ var indepSelectors = ['constant', 't', 't2', 't3']
 // var indepSelectors = ['constant', 't', 't2']
 
 // Convert the collection to an array.
-var array = modis_res.toArray();
+var array = modis_res_ndvi.toArray();
 
 // Solve 
 function getLocalFit(i) {
@@ -707,20 +707,21 @@ function getLocalFit(i) {
 
 
 // For the remainder, use modis_res as a list of images
-modis_res = modis_res.toList(modis_res.size())
+modis_res_ndvi = modis_res_ndvi.toList(modis_res_ndvi.size())
 
 
-var runLength = ee.List.sequence(0, modis_res.size().subtract(window_size))
+var runLength = ee.List.sequence(0, modis_res_ndvi.size().subtract(window_size))
 
 // Run the SG filter over the series, and get the smoothed image 
-var sg_series = runLength.map(function(i) {
-  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+var ndvi_sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res_ndvi.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
 
-sg_series = ee.ImageCollection(sg_series)
+ndvi_sg_series = ee.ImageCollection(ndvi_sg_series)
 
+/*
 var featureCollection = sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var medianSR_B5 = image.get('sum');
@@ -752,7 +753,7 @@ var chart = ui.Chart.image.series({
   region: boundingBox,
   scale: 2000
 }).setOptions({
-      title: 'Regular NIR Time Series',
+      title: 'Regular NDVI Time Series',
       interpolateNulls: false,
       vAxis: {title: 'NIR'},
       hAxis: {title: '', format: 'YYYY-MM'},
@@ -763,6 +764,129 @@ var chart = ui.Chart.image.series({
       },
     })
 print(chart);
+
+*/
+
+
+
+//------------------------------------------------------------------
+
+
+var modis_res_nir = regularCol.filterDate(startDate, endDate).map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
+  img = img.select(['NDVI', 'SR_B5']).set('date', dstamp)
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+// Step 2: Set up Savitzky-Golay smoothing
+var window_size = 9
+var half_window = (window_size - 1)/2
+
+// Define the axes of variation in the collection array.
+var imageAxis = 0;
+var bandAxis = 1;
+
+// Set polynomial order
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+// // Change to order = 2 as follows:
+// var order = 2
+// var coeffFlattener = [['constant', 'x', 'x2']]
+// var indepSelectors = ['constant', 't', 't2']
+
+// Convert the collection to an array.
+var array = modis_res_nir.toArray();
+
+// Solve 
+function getLocalFit(i) {
+  // Get a slice corresponding to the window_size of the SG smoother
+  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
+  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var coeff = predictors.matrixSolve(response)
+
+  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
+  return coeff  
+}
+
+
+// For the remainder, use modis_res as a list of images
+modis_res_nir = modis_res_nir.toList(modis_res_nir.size())
+
+
+var runLength = ee.List.sequence(0, modis_res_nir.size().subtract(window_size))
+
+// Run the SG filter over the series, and get the smoothed image 
+var nir_sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res_nir.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+
+nir_sg_series = ee.ImageCollection(nir_sg_series)
+
+/*
+var featureCollection = nir_sg_series.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var medianSR_B5 = image.get('sum');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIR_Median': medianSR_B5
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NIR_TimeSeries',
+  fileFormat: 'CSV'
+});
+
+
+print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 2000)
+    .setOptions({
+      title: 'NIR_SG_timeseries_3rd Custom Order',
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+var chart = ui.Chart.image.series({
+  imageCollection: regularCol.select('NDVI'),
+  region: boundingBox,
+  scale: 2000
+}).setOptions({
+      title: 'Regular NDVI Time Series',
+      interpolateNulls: false,
+      vAxis: {title: 'NIR'},
+      hAxis: {title: '', format: 'YYYY-MM'},
+      lineWidth: 1,
+      pointSize: 4,
+      series: {
+        0: {color: '#238b45'},
+      },
+    })
+print(chart);
+*/
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 var oeel=require('users/OEEL/lib:loadAll');
 var order = 3;
@@ -806,6 +930,24 @@ Export.table.toDrive({
   fileFormat: 'CSV'
 });
 */
+
+var index = 0
+var nir_sg_list = nir_sg_series.toList(nir_sg_series.size())
+function mul_img(ndvi_image) {
+  var nir_img = nir_sg_list.get(index)
+  index++
+  return ndvi_image.multiply(nir_img).copyProperties(ndvi_image).set('system:time_start', ndvi_image.get('system:time_start'))
+}
+
+var nirv_sg_smoothed = ndvi_sg_series.map(mul_img)
+
+print(Chart.image.series(nirv_sg_smoothed.select("sum"), boundingBox, ee.Reducer.median(), 2000)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIRV_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
 
 
 
