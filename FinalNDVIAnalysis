@@ -380,8 +380,8 @@ print(ui.Chart.image.series(library_sg.select('NDVI'), boundingBox, ee.Reducer.m
 }));
 */
 
-var startDate = '2016-05-10T16:30:00';
-var endDate = '2016-10-31T16:30:00';
+var startDate = '2016-05-10';
+var endDate = '2016-11-30';
 
 var polygon = ee.Geometry.Polygon([
   [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.793867, 36.846645], [-121.793167, 36.843645]]
@@ -417,11 +417,9 @@ function maskClouds(image) {
   var dilatedCloud = 1 << 1;
   var cirrusBit = 1 << 2;
   var cloudBit = 1 << 3;
-  var cloudShadow = 1 << 4
 
   var mask = QA60.bitwiseAnd(cloudBit).eq(0)
   .and(QA60.bitwiseAnd(cirrusBit).eq(0))
-  .and(QA60.bitwiseAnd(cloudShadow).eq(0))
 
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
@@ -438,6 +436,29 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskAerosols)
   .map(dataset_ndvi)
   .map(applyScaleFactors)
+  
+var temporalCollection = function(collection, start, count, interval, units) {
+  // Create a sequence of numbers, one for each time interval.
+  var sequence = ee.List.sequence(0, ee.Number(count).subtract(1));
+
+  var originalStartDate = ee.Date(start);
+
+  return ee.ImageCollection(sequence.map(function(i) {
+    // Get the start date of the current sequence.
+    var startDate = originalStartDate.advance(ee.Number(interval).multiply(i), units);
+
+    // Get the end date of the current sequence.
+    var endDate = originalStartDate.advance(
+      ee.Number(interval).multiply(ee.Number(i).add(1)), units);
+
+    return collection.filterDate(startDate, endDate).mean()
+        .set('system:time_start', startDate.millis())
+        .set('system:time_end', endDate.millis());
+  }));
+};
+
+var originalCollection = temporalCollection(originalCollection, '2016-05-10', 25, 8, 'day');
+print(originalCollection)
   
 var rgbVis = {
   bands: ['SR_B4', 'SR_B3', 'SR_B2'],
@@ -457,7 +478,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NDVI'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:2000
+    scale:300
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -472,7 +493,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('SR_B5'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:2000
+    scale:300
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -721,56 +742,8 @@ var ndvi_sg_series = runLength.map(function(i) {
 
 ndvi_sg_series = ee.ImageCollection(ndvi_sg_series)
 
-/*
-var featureCollection = sg_series.map(function(image) {
-    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var medianSR_B5 = image.get('sum');
-    return ee.Feature(null, {
-      'Date': date,
-      'NIR_Median': medianSR_B5
-    });
-  });
-
-print(featureCollection)
-// Export the feature collection to a CSV file
-Export.table.toDrive({
-  collection: featureCollection,
-  description: 'NIR_TimeSeries',
-  fileFormat: 'CSV'
-});
-
-
-print(ui.Chart.image.series(sg_series, boundingBox, ee.Reducer.median(), 2000)
-    .setOptions({
-      title: 'NIR_SG_timeseries_3rd Custom Order',
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-}));
-
-var chart = ui.Chart.image.series({
-  imageCollection: regularCol.select('NDVI'),
-  region: boundingBox,
-  scale: 2000
-}).setOptions({
-      title: 'Regular NDVI Time Series',
-      interpolateNulls: false,
-      vAxis: {title: 'NIR'},
-      hAxis: {title: '', format: 'YYYY-MM'},
-      lineWidth: 1,
-      pointSize: 4,
-      series: {
-        0: {color: '#238b45'},
-      },
-    })
-print(chart);
-
-*/
-
-
 
 //------------------------------------------------------------------
-
 
 var modis_res_nir = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
@@ -941,7 +914,7 @@ function mul_img(ndvi_image) {
 
 var nirv_sg_smoothed = ndvi_sg_series.map(mul_img)
 
-print(Chart.image.series(nirv_sg_smoothed.select("sum"), boundingBox, ee.Reducer.median(), 2000)//.select('NDVI')
+print(Chart.image.series(nirv_sg_smoothed.select("sum"), boundingBox, ee.Reducer.median(), 300)//.select('NDVI')
     //.setSeriesNames(['fitted'])
     .setOptions({
       title: 'NIRV_SG_timeseries_3rd Order',
