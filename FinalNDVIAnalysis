@@ -429,6 +429,11 @@ function dataset_ndvi(image) {
   return image.addBands(ndvi);
 }
 
+function dataset_nirv(image) {
+  var nirv = image.multiply(['NDVI', 'SR_B5']).rename('NIRV');
+  return image.addBands(nirv);
+}
+
 var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
@@ -436,6 +441,8 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(maskAerosols)
   .map(dataset_ndvi)
   .map(applyScaleFactors)
+  
+originalCollection = originalCollection.map(dataset_nirv)
   
 var temporalCollection = function(collection, start, count, interval, units) {
   // Create a sequence of numbers, one for each time interval.
@@ -504,6 +511,20 @@ var chart = ui.Chart.image.series({
     });
   print(chart)
   
+var chart = ui.Chart.image.series({
+    imageCollection: originalCollection.select('NIRV'),
+    region: boundingBox,
+    reducer: ee.Reducer.median(),
+    scale:300
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NIRV over Time at Clicked Point',
+      vAxis: {title: 'NIRV'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+    });
+  print(chart)
 
   
 var bandNames = ee.Image(originalCollection.first()).bandNames();
