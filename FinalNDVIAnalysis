@@ -78,7 +78,6 @@ var temporalCollection = function(collection, start, count, interval, units) {
   }));
 };
 
-originalCollection = temporalCollection(originalCollection, '2016-05-10', 25, 8, 'day')
 
 originalCollection = originalCollection.map(dataset_nirv)
 
@@ -381,7 +380,7 @@ nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
 print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), 90)
     .setOptions({
-      title: 'NIR_SG_timeseries_3rd Custom Order',
+      title: 'NIRV_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
       lineWidth: 1,
       pointSize: 3,
