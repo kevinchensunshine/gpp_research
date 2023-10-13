@@ -1,14 +1,11 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var modis = ee.ImageCollection("MODIS/061/MOD09Q1"),
-    pt = /* color: #d63000 */ee.Geometry.Polygon(
-        [[[-121.789167, 36.846645],
-          [-121.789167, 36.849645],
-          [-121.793867, 36.847045],
-          [-121.792167, 36.844645]]]);
+var modis = ee.ImageCollection("MODIS/061/MOD09Q1");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
 
-
+var pt = ee.Geometry.Polygon([
+  [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.792867, 36.847045], [-121.791167, 36.844645]]
+]);
 
 Map.setCenter(-121.789167, 36.846645, 15)
 
