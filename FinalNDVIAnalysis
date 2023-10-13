@@ -5,6 +5,8 @@ var polygon = ee.Geometry.Polygon([
   [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.793867, 36.847045], [-121.792167, 36.844645]]
 ]);
 
+var cur_scale = 30
+
 var centerPoint = polygon
 var boundingBox = centerPoint;
 
@@ -101,7 +103,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NDVI'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:90
+    scale:cur_scale
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -116,7 +118,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('SR_B5'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:90
+    scale:cur_scale
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -131,7 +133,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NIRV'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:90
+    scale:cur_scale
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -378,7 +380,7 @@ var nirv_sg_series = runLength.map(function(i) {
 
 nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
-print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), 90)
+print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), cur_scale)
     .setOptions({
       title: 'NIRV_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
@@ -391,7 +393,7 @@ var featureCollection = nirv_sg_series.map(function(image) {
     var NIRV_Median = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
-      scale: 90
+      scale: cur_scale
       }).get('sum');
     return ee.Feature(null, {
       'Date': date,
