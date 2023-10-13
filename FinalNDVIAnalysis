@@ -32,7 +32,6 @@ function maskAerosols(image) {
 function maskClouds(image) {
   var QA60 = image.select(['QA_PIXEL']);
   
-  var dilatedCloud = 1 << 1;
   var cirrusBit = 1 << 2;
   var cloudBit = 1 << 3;
 
@@ -59,8 +58,6 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .map(dataset_ndvi)
   .map(applyScaleFactors)
   
-originalCollection = originalCollection.map(dataset_nirv)
-  
 var temporalCollection = function(collection, start, count, interval, units) {
   // Create a sequence of numbers, one for each time interval.
   var sequence = ee.List.sequence(0, ee.Number(count).subtract(1));
@@ -80,6 +77,10 @@ var temporalCollection = function(collection, start, count, interval, units) {
         .set('system:time_end', endDate.millis());
   }));
 };
+
+originalCollection = temporalCollection(originalCollection, '2016-05-10', 25, 8, 'day')
+
+originalCollection = originalCollection.map(dataset_nirv)
 
 print(originalCollection)
   
@@ -101,7 +102,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NDVI'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:30
+    scale:90
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -116,7 +117,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('SR_B5'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:30
+    scale:90
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -131,7 +132,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NIRV'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
-    scale:30
+    scale:90
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -378,7 +379,7 @@ var nirv_sg_series = runLength.map(function(i) {
 
 nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
-print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), 30)
+print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), 90)
     .setOptions({
       title: 'NIR_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
@@ -391,7 +392,7 @@ var featureCollection = nirv_sg_series.map(function(image) {
     var NIRV_Median = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
-      scale: 30
+      scale: 90
       }).get('sum');
     return ee.Feature(null, {
       'Date': date,
