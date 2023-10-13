@@ -53,7 +53,7 @@ var mask_clouds = function(image) {
 //Buffered space to ensure all dates in the GPP set are captured
 var start_date = '2016-05-10';
 var end_date = '2016-10-31';
-var cur_scale = 250
+var cur_scale = 500
 
 
 var originalCollection = modis
