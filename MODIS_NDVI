@@ -4,7 +4,7 @@ var modis = ee.ImageCollection("MODIS/061/MOD09Q1");
 
 
 var pt = ee.Geometry.Polygon([
-  [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.792867, 36.847045], [-121.791167, 36.844645]]
+  [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.793867, 36.847045], [-121.792167, 36.844645]]
 ]);
 
 Map.setCenter(-121.789167, 36.846645, 15)
@@ -51,7 +51,7 @@ var mask_clouds = function(image) {
 };
 
 //Buffered space to ensure all dates in the GPP set are captured
-var start_date = '2016-04-10';
+var start_date = '2016-05-10';
 var end_date = '2016-10-31';
 var cur_scale = 250
 
