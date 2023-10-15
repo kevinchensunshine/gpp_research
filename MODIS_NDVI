@@ -58,8 +58,8 @@ var mask_clouds = function(image) {
 
 
 //Buffered space to ensure all dates in the GPP set are captured
-var start_date = '2016-04-10';
-var end_date = '2016-10-31';
+var start_date = '2016-01-1';
+var end_date = '2017-12-31';
 var cur_scale = 250
 
 
@@ -67,7 +67,6 @@ var originalCollection = modis
 .filterDate(start_date, end_date)
 .filterBounds(pt)
 .map(rescale)
-.map(mask_clouds)
 .map(dataset_ndvi)
 .map(dataset_nirv)
 
