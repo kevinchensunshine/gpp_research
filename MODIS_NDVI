@@ -55,7 +55,7 @@ var mask_clouds = function(image) {
   var qual = 1 << 0
   var qual_mask = qa.bitwiseAnd(qual).eq(0)
   var mask = state.bitwiseAnd(modis_cloud).eq(0)
-      return image.updateMask(mask).updateMask(qual_mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-8, 'days').*/millis());
+      return image.updateMask(mask).updateMask(qa).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-8, 'days').*/millis());
 };
 
 
@@ -63,7 +63,7 @@ var mask_clouds = function(image) {
 //Buffered space to ensure all dates in the GPP set are captured
 var start_date = '2016-02-28';
 var end_date = '2017-08-30';
-var cur_scale = 250
+var cur_scale = 500
 
 
 var originalCollection = modis
