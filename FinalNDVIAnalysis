@@ -5,7 +5,7 @@ var polygon = ee.Geometry.Polygon([
   [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.793867, 36.847045], [-121.792167, 36.844645]]
 ]);
 
-var cur_scale = 30
+var cur_scale = 60
 
 var centerPoint = polygon
 var boundingBox = centerPoint;
@@ -57,8 +57,10 @@ var originalCollection = ee.ImageCollection('LANDSAT/LC08/C02/T1_L2')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(maskClouds)
-  .map(dataset_ndvi)
   .map(applyScaleFactors)
+  .map(dataset_ndvi)
+  .map(dataset_nirv)
+
   
 var temporalCollection = function(collection, start, count, interval, units) {
   // Create a sequence of numbers, one for each time interval.
@@ -81,9 +83,6 @@ var temporalCollection = function(collection, start, count, interval, units) {
 };
 
 
-originalCollection = originalCollection.map(dataset_nirv)
-
-print(originalCollection)
   
 var rgbVis = {
   bands: ['SR_B4', 'SR_B3', 'SR_B2'],
