@@ -36,6 +36,11 @@ function dataset_ndvi(image) {
   return image.addBands(ndvi);
 }
 
+function dataset_nirv(image) {
+  var nirv = image.select('NDVI').multiply(image.select('sur_refl_b02')).rename('NIRV');
+  return image.addBands(nirv);
+}
+
 var bitwiseExtract = function(input, fromBit, toBit) {
   if (toBit === undefined) toBit = fromBit
   var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
@@ -50,10 +55,12 @@ var mask_clouds = function(image) {
       return image.updateMask(mask).copyProperties(image).set('system:time_start', ee.Date(image.get('system:time_start'))/*.advance(-8, 'days')*/.millis()).set('system:time_end', ee.Date(image.get('system:time_end'))./*advance(-8, 'days').*/millis());
 };
 
+
+
 //Buffered space to ensure all dates in the GPP set are captured
 var start_date = '2016-04-10';
 var end_date = '2016-10-31';
-var cur_scale = 1000
+var cur_scale = 250
 
 
 var originalCollection = modis
@@ -62,6 +69,7 @@ var originalCollection = modis
 .map(rescale)
 .map(mask_clouds)
 .map(dataset_ndvi)
+.map(dataset_nirv)
 
 //Currently using mean. Not sure if this is the best metric for this or median, but results are similar
 print(Chart.image.series(originalCollection.select('sur_refl_b02'), pt, ee.Reducer.median(), cur_scale)//.select('NDVI')
@@ -400,6 +408,62 @@ print(Chart.image.series(nir_sg_series, pt, ee.Reducer.median(), cur_scale)//.se
 
 nir_sg_series = ee.ImageCollection(nir_sg_series)
 
+var modis_res_nirv = Mod_col.filterDate(start_date, end_date).filterBounds(pt).map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(start_date), 'hour')
+  img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+print(modis_res_nirv, 'modis_res')
+
+
+// Step 2: Set up Savitzky-Golay smoothing
+var window_size = 7
+var half_window = (window_size - 1)/2
+
+var imageAxis = 0;
+var bandAxis = 1;
+
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+var array = modis_res_nirv.toArray();
+
+// For the remainder, use modis_res as a list of images
+modis_res = modis_res_nirv.toList(modis_res_nirv.size())
+
+var runLength = ee.List.sequence(0, modis_res_nirv.size().subtract(window_size))
+
+// Run the SG filter over the series, and get the smoothed image 
+var nirv_sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+print(nirv_sg_series, 'sg_series')
+
+print(Chart.image.series(nirv_sg_series, pt, ee.Reducer.median(), cur_scale)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIR_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
+
+nirv_sg_series = ee.ImageCollection(nirv_sg_series)
+
+print(Chart.image.series(nirv_sg_series.select("sum"), pt, ee.Reducer.median(), cur_scale)//.select('NDVI')
+    //.setSeriesNames(['fitted'])
+    .setOptions({
+      title: 'NIRV_SG_timeseries_3rd Order',
+      lineWidth: 1,
+      pointSize: 3,
+}));
 /*
 var featureCollection = nir_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
@@ -424,7 +488,7 @@ Export.table.toDrive({
 /*
 Code to piecewise multiple NIRV and NDVI
 */
-
+/*
 var index = 0
 var nir_sg_list = nir_sg_series.toList(nir_sg_series.size())
 function mul_img(ndvi_image) {
@@ -461,5 +525,5 @@ Export.table.toDrive({
   description: 'NIRV_MODIS250',
   fileFormat: 'CSV'
 });
-
+*/
 
