@@ -374,7 +374,7 @@ print(modis_res_nir, 'modis_res')
 
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 7
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
@@ -425,7 +425,7 @@ print(modis_res_nirv, 'modis_res')
 
 
 // Step 2: Set up Savitzky-Golay smoothing
-var window_size = 7
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 var imageAxis = 0;
@@ -449,14 +449,6 @@ var nirv_sg_series = runLength.map(function(i) {
 })
 
 print(nirv_sg_series, 'sg_series')
-
-print(Chart.image.series(nirv_sg_series, pt, ee.Reducer.median(), cur_scale)//.select('NDVI')
-    //.setSeriesNames(['fitted'])
-    .setOptions({
-      title: 'NIR_SG_timeseries_3rd Order',
-      lineWidth: 1,
-      pointSize: 3,
-}));
 
 nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
