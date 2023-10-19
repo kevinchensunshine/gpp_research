@@ -87,13 +87,15 @@ var temporalCollection = function(collection, start, count, interval, units) {
 };
 
 
-  
 var rgbVis = {
   bands: ['SR_B4', 'SR_B3', 'SR_B2'],
   min: 0.0,
   max: 0.3
 };
 
+/*
+Map Visualization Components
+*/
 Map.setCenter(-121.789167, 36.846645, 17)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
 
@@ -103,6 +105,7 @@ Map.addLayer(polygon,
 
 var dataset = ee.ImageCollection('USDA/NASS/CDL')
                   .filter(ee.Filter.date(startDate, endDate))
+                  .filterBounds(polygon)
                   .first();
 var cropLandcover = dataset.select('cropland');
 Map.addLayer(cropLandcover, {}, 'Crop Landcover');
