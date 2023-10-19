@@ -6,7 +6,7 @@ var polygon = /* color: #d63000 */ee.Geometry.Polygon(
           [-121.792167, 36.844645]]]),
     cropland = ee.ImageCollection("USDA/NASS/CDL");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
-var startDate = '2016-04-1';
+var startDate = '2016-06-1';
 var endDate = '2016-12-30';
 
 var cur_scale = 30
@@ -101,10 +101,10 @@ Map.addLayer(polygon,
              {'color': 'green'},
              'Geometry [black]: geometry');
 
-var cropLandcover = cropland
-      .filter(ee.Filter.date(startDate, endDate))
-      .first()
-      .select('cropland');
+var dataset = ee.ImageCollection('USDA/NASS/CDL')
+                  .filter(ee.Filter.date(startDate, endDate))
+                  .first();
+var cropLandcover = dataset.select('cropland');
 Map.addLayer(cropLandcover, {}, 'Crop Landcover');
 
 
