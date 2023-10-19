@@ -103,11 +103,11 @@ Map.addLayer(polygon,
              {'color': 'green'},
              'Geometry [black]: geometry');
 
-var dataset = ee.ImageCollection('USDA/NASS/CDL')
+var cropLandcover = cropland
                   .filter(ee.Filter.date(startDate, endDate))
                   .filterBounds(polygon)
-                  .first();
-var cropLandcover = dataset.select('cropland');
+                  .first()
+                  .select('cropland');
 Map.addLayer(cropLandcover, {}, 'Crop Landcover');
 
 
