@@ -11,7 +11,7 @@ var cropland = ee.ImageCollection("USDA/NASS/CDL"),
 
 
 var startDate = '2016-01-1';
-var endDate = '2017-12-30';
+var endDate = '2016-12-30';
 
 var cur_scale = 30
 
@@ -347,7 +347,7 @@ var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img)
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 13
+var window_size = 21
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
