@@ -1,5 +1,6 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var modis = ee.ImageCollection("MODIS/061/MOD09Q1");
+var dataset = ee.ImageCollection("MODIS/061/MOD09Q1"),
+    modis = ee.ImageCollection("MODIS/061/MOD09Q1");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
 
@@ -61,8 +62,8 @@ var mask_clouds = function(image) {
 
 
 //Buffered space to ensure all dates in the GPP set are captured
-var start_date = '2016-01-1';
-var end_date = '2017-12-30';
+var start_date = '2016-04-1';
+var end_date = '2016-12-30';
 var cur_scale = 250
 
 
@@ -98,7 +99,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 7;
+var n = 2;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
