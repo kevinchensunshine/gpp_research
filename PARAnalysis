@@ -15,7 +15,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_0000_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -30,7 +30,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_0300_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -45,7 +45,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_0600_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -60,7 +60,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_0900_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -75,7 +75,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_1200_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -90,7 +90,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_1500_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -105,7 +105,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_1800_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -120,7 +120,7 @@ var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('GMT_2100_PAR'),
     region: geometry,
     reducer: ee.Reducer.median(),
-    scale: 2000
+    scale: 500
     }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
@@ -135,42 +135,42 @@ var exportable = originalCollection.map(function(image) {
   var PAR_0000 = image.select('GMT_0000_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_0000_PAR');
   var PAR_0300 = image.select('GMT_0300_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_0300_PAR');
   var PAR_0600 = image.select('GMT_0600_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_0600_PAR');
   var PAR_0900 = image.select('GMT_0900_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_0900_PAR');
   var PAR_1200 = image.select('GMT_1200_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_1200_PAR');
   var PAR_1500 = image.select('GMT_1500_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_1500_PAR');
   var PAR_1800 = image.select('GMT_1800_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_1800_PAR');
   var PAR_2100 = image.select('GMT_2100_PAR').reduceRegion({
     reducer: ee.Reducer.median(),
     geometry: geometry,
-    scale: 2000
+    scale: 500
   }).get('GMT_2100_PAR');
   
   var date = ee.Date(image.get('system:time_start'));
