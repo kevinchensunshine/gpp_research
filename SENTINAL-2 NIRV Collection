@@ -1,15 +1,23 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var cropland = ee.ImageCollection("USDA/NASS/CDL"),
-    centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.66809167, 36.88797778]);
+    centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.66809167, 36.88797778]),
+    geometry = /* color: #98ff00 */ee.Geometry.MultiPoint(),
+    geometry2 = /* color: #0b4a8b */ee.Geometry.Polygon(
+        [[[-121.66745090174572, 36.88922051141972],
+          [-121.6671571998586, 36.88902422313945],
+          [-121.66657650160687, 36.88845788035454],
+          [-121.66598507451909, 36.888099623468854],
+          [-121.6642235336938, 36.889728391607996],
+          [-121.6666355102052, 36.89036819781926]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var startDate = '2023-06-9';
+var startDate = '2023-07-9';
 var endDate = '2023-08-31';
 
 var cur_scale = 30
 
 
-var boundingBox = centerPoint;
+var boundingBox = geometry2;
 
 
 function applyScaleFactors(image) {
@@ -96,9 +104,6 @@ Map Visualization Components
 */
 Map.setCenter(-121.66809167, 36.88797778, 17)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
-
-var cropLandcover = cropland.select('cropland');
-Map.addLayer(cropLandcover, {}, 'Crop Landcover');
 
 Map.addLayer(centerPoint,
              {'color': 'green'},
