@@ -3,17 +3,19 @@ var cropland = ee.ImageCollection("USDA/NASS/CDL"),
     centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.66809167, 36.88797778]),
     geometry = /* color: #98ff00 */ee.Geometry.MultiPoint(),
     geometry2 = /* color: #0b4a8b */ee.Geometry.Polygon(
-        [[[-121.66789883065121, 36.88835276323897],
-          [-121.66781434106724, 36.88829269625081],
-          [-121.66774728584187, 36.88817470738656],
-          [-121.66765340852635, 36.888094260329176],
-          [-121.6673617182412, 36.88833291969875],
-          [-121.66776203799145, 36.8886305724446],
-          [-121.668022212877, 36.88845627090827]]]);
+        [[[-121.66823410677807, 36.887578324518465],
+          [-121.6681496171941, 36.88750753055933],
+          [-121.6678599386205, 36.88731660106964],
+          [-121.6677526502599, 36.88742708279894],
+          [-121.66768090111397, 36.887481250980045],
+          [-121.6678743547623, 36.88797975684331],
+          [-121.66797125029461, 36.88800201426569],
+          [-121.66822337855312, 36.88782342076717],
+          [-121.66832664312969, 36.887782392600855]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
 var startDate = '2023-01-9';
-var endDate = '2023-09-26';
+var endDate = '2023-09-27';
 
 var cur_scale = 10
 
@@ -64,7 +66,7 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
-var originalCollection = ee.ImageCollection('COPERNICUS/S2_SR')
+var originalCollection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 5))
