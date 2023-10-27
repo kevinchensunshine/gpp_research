@@ -3,16 +3,16 @@ var cropland = ee.ImageCollection("USDA/NASS/CDL"),
     centerPoint = /* color: #d63000 */ee.Geometry.Point([-121.66809167, 36.88797778]),
     geometry = /* color: #98ff00 */ee.Geometry.MultiPoint(),
     geometry2 = /* color: #0b4a8b */ee.Geometry.Polygon(
-        [[[-121.66745090174572, 36.88922051141972],
-          [-121.6671571998586, 36.88902422313945],
-          [-121.66657650160687, 36.88845788035454],
-          [-121.66598507451909, 36.888099623468854],
-          [-121.6642235336938, 36.889728391607996],
-          [-121.6666355102052, 36.89036819781926]]]);
+        [[[-121.66801148342984, 36.88845895297739],
+          [-121.66770168828862, 36.88817256213273],
+          [-121.66749247598545, 36.888266953241455],
+          [-121.66755953121083, 36.888417120673985],
+          [-121.66757629496242, 36.888507757315715],
+          [-121.66772716927426, 36.88862842720362]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var startDate = '2023-05-9';
-var endDate = '2023-08-31';
+var startDate = '2023-01-9';
+var endDate = '2023-09-26';
 
 var cur_scale = 10
 
@@ -66,7 +66,7 @@ function dataset_nirv(image) {
 var originalCollection = ee.ImageCollection('COPERNICUS/S2_SR')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
-  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 5))
   .map(maskClouds)
   .map(applyScaleFactors)
   .map(dataset_ndvi)
@@ -417,7 +417,7 @@ print(featureCollection)
 // Export the feature collection to a CSV file
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NIRV_LANDSAT',
+  description: 'NIRV_SENTINEL2',
   fileFormat: 'CSV'
 });
 
