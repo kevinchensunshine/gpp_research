@@ -2,8 +2,8 @@ var startDate = '2016-01-1';
 var endDate = '2017-12-30';
 
 var cur_scale = 30
+var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
 
-var centerPoint = polygon
 var boundingBox = centerPoint;
 
 
@@ -51,7 +51,6 @@ var originalCollection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(maskClouds)
-  .map(applyScaleFactors)
   .map(dataset_ndvi)
   .map(dataset_nirv)
 
@@ -78,7 +77,7 @@ var temporalCollection = function(collection, start, count, interval, units) {
 
 
 var rgbVis = {
-  bands: ['SR_B4', 'SR_B3', 'SR_B2'],
+  bands: ['B4', 'B3', 'B2'],
   min: 0.0,
   max: 0.3
 };
@@ -89,7 +88,7 @@ Map Visualization Components
 Map.setCenter(-121.789167, 36.846645, 17)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
 
-Map.addLayer(polygon,
+Map.addLayer(centerPoint,
              {'color': 'green'},
              'Geometry [black]: geometry');
 
@@ -110,7 +109,7 @@ var chart = ui.Chart.image.series({
   print(chart)
   
 var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('SR_B5'),
+    imageCollection: originalCollection.select('B5'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
     scale:cur_scale
@@ -196,7 +195,7 @@ var originalCollection = originalCollection.map(function(image) {
 // Convert days to milliseconds
 
 // Specify the time-window to look for unmasked pixel
-var days = 45;
+var days = 90;
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
