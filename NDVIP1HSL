@@ -6,7 +6,7 @@ var geometry = /* color: #98ff00 */ee.Geometry.Polygon(
           [-121.78927965277863, 36.84947726815222]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 var startDate = '2016-01-1';
-var endDate = '2017-12-30';
+var endDate = '2016-12-30';
 
 var cur_scale = 30
 var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
