@@ -14,7 +14,7 @@ var cropland = ee.ImageCollection("USDA/NASS/CDL"),
           [-121.66802087130199, 36.887799554717]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var startDate = '2023-05-9';
+var startDate = '2023-01-9';
 var endDate = '2023-10-27';
 
 var cur_scale = 10
