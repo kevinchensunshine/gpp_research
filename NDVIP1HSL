@@ -5,7 +5,7 @@ var geometry = /* color: #98ff00 */ee.Geometry.Polygon(
           [-121.78920455092621, 36.84610314620703],
           [-121.78927965277863, 36.84947726815222]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
-var startDate = '2016-01-1';
+var startDate = '2016-03-1';
 var endDate = '2016-12-30';
 
 var cur_scale = 30
@@ -145,7 +145,7 @@ var chart = ui.Chart.image.series({
     });
   print(chart)
   
-  
+
 var featureCollection = originalCollection.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     
@@ -155,25 +155,24 @@ var featureCollection = originalCollection.map(function(image) {
       scale: cur_scale
     });
     
-    var NIRV_Median = reduction.get('NIRV');
+    var NDVI_Median = reduction.get('NDVI');
     
     
     return ee.Feature(null, {
       'Date': date,
-      'NIRV': NIRV_Median
+      'NDVI': NDVI_Median
     });
 });
 
-featureCollection = featureCollection.filter(ee.Filter.notNull(['NIRV']));
+featureCollection = featureCollection.filter(ee.Filter.notNull(['NDVI']));
 
 print(featureCollection)
 // Export the feature collection to a CSV file
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NIRV_HSL_2016_Unsmoothed',
+  description: 'NDVI_HSL_2016_Unsmoothed',
   fileFormat: 'CSV'
 });
-
 
   
 var bandNames = ee.Image(originalCollection.first()).bandNames();
@@ -181,7 +180,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 7;
+var n = 5;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -232,7 +231,7 @@ var originalCollection = originalCollection.map(function(image) {
 // Convert days to milliseconds
 
 // Specify the time-window to look for unmasked pixel
-var days = 120;
+var days = 45;
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
@@ -356,7 +355,7 @@ var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
+  img = img.select(['NDVI', 'NIRV']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -413,7 +412,7 @@ nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
 print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), cur_scale)
     .setOptions({
-      title: 'NIRV_SG_timeseries_3rd Custom Order',
+      title: 'NDVI_SG_timeseries_3rd Custom Order',
       interpolateNulls: true,
       lineWidth: 1,
       pointSize: 3,
@@ -421,14 +420,14 @@ print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), cu
 
 var featureCollection = nirv_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var NIRV_Median = image.reduceRegion({
+    var NDVI_MEDIAN = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: boundingBox,
       scale: cur_scale
       }).get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NIRV': NIRV_Median
+      'NDVI': NDVI_MEDIAN
     });
   });
 
@@ -436,7 +435,7 @@ print(featureCollection)
 // Export the feature collection to a CSV file
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NIRV_HSL_2016',
+  description: 'NDVI_HSL_2016',
   fileFormat: 'CSV'
 });
 
