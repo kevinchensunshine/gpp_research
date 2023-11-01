@@ -164,6 +164,8 @@ var featureCollection = originalCollection.map(function(image) {
     });
 });
 
+featureCollection = featureCollection.filter(ee.Filter.notNull(['NIRV']));
+
 print(featureCollection)
 // Export the feature collection to a CSV file
 Export.table.toDrive({
