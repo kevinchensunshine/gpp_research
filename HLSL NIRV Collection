@@ -148,6 +148,27 @@ var chart = ui.Chart.image.series({
     });
   print(chart)
 
+var featureCollection = originalCollection.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var NIRV_Median = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: cur_scale
+      }).get('NIRV');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIRV': NIRV_Median
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NIRV_HLS_2023_Unsmoothed',
+  fileFormat: 'CSV'
+});
+
   
 var bandNames = ee.Image(originalCollection.first()).bandNames();
 var numBands = bandNames.size();
@@ -409,7 +430,7 @@ print(featureCollection)
 // Export the feature collection to a CSV file
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NIRV_SENTINEL2',
+  description: 'NIRV_HLS_2023',
   fileFormat: 'CSV'
 });
 
