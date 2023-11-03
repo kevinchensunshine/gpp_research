@@ -13,7 +13,7 @@ var endDate = '2023-10-27';
 var cur_scale = 30
 var centerPoint = ee.Geometry.Point(-121.66809167, 36.88797778)
 
-var boundingBox = geometry;
+var boundingBox = polygon;
 
 
 function applyScaleFactors(image) {
