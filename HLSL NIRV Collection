@@ -405,14 +405,21 @@ var nirv_sg_series = runLength.map(function(i) {
 
 nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
-print(ui.Chart.image.series(nirv_sg_series, boundingBox, ee.Reducer.median(), cur_scale)
-    .setOptions({
-      title: 'NIRV SG Smoothed',
+var chart = ui.Chart.image.series({
+    imageCollection: nirv_sg_series.select('sum'),
+    region: boundingBox,
+    reducer: ee.Reducer.median(),
+    scale:cur_scale
+    }).setOptions({
       interpolateNulls: true,
       lineWidth: 1,
       pointSize: 3,
-      colors: ['red']
-}));
+      title: 'NIRV',
+      colors: ['red'],
+      vAxis: {title: 'NIRV'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+    });
+  print(chart)
 
 var featureCollection = nirv_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
