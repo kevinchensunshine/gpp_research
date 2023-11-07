@@ -143,8 +143,9 @@ var chart = ui.Chart.image.series({
       lineWidth: 1,
       pointSize: 3,
       title: 'NIRV',
+      fontSize: 18,
       vAxis: {title: 'NIRV'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+      hAxis: {title: 'Date', format: 'YYYY-MMM'}
     });
   print(chart)
 
@@ -415,9 +416,10 @@ var chart = ui.Chart.image.series({
       lineWidth: 1,
       pointSize: 3,
       title: 'NIRV',
+      fontSize: 18,
       colors: ['red'],
       vAxis: {title: 'NIRV'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
+      hAxis: {title: 'Date', format: 'YYYY-MMM'}
     });
   print(chart)
 
