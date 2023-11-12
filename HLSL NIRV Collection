@@ -7,7 +7,7 @@ var geometry = /* color: #ffc82d */ee.Geometry.Polygon(
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
 var startDate = '2023-01-9';
-var endDate = '2023-10-29';
+var endDate = '2023-11-12';
 
 var cur_scale = 30
 var centerPoint = ee.Geometry.Point(-121.66809167, 36.88797778)
@@ -176,7 +176,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 1;
+var n = 5;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -351,14 +351,14 @@ var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NDVI', 'NIRV']).set('date', dstamp)
+  img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 17
+var window_size = 13
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
@@ -432,7 +432,7 @@ var featureCollection = nirv_sg_series.map(function(image) {
       }).get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NDVI': NIRV_Median
+      'NIRV': NIRV_Median
     });
   });
 
