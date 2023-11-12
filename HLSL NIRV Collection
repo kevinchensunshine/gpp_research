@@ -351,7 +351,7 @@ var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
-  img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
+  img = img.select(['NDVI', 'NIRV']).set('date', dstamp)
   return img.addBands(ee.Image(1).toFloat().rename('constant')).
     addBands(ee.Image(ddiff).toFloat().rename('t')).
     addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
@@ -432,7 +432,7 @@ var featureCollection = nirv_sg_series.map(function(image) {
       }).get('sum');
     return ee.Feature(null, {
       'Date': date,
-      'NIRV': NIRV_Median
+      'NDVI': NIRV_Median
     });
   });
 
