@@ -358,7 +358,7 @@ var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img)
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 13
+var window_size = 17
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
