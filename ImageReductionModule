@@ -1,0 +1,76 @@
+/**
+ * Creation of a small tool to reduce an image/imagecollection's size by only keeping necessary bands
+ * @param {ee.Image} any image
+ * @param {List} list of bands to keep
+ * @return {ee.Image} reduced
+ */
+
+var bands = ['B8', 'B4']
+var properties = ['B8', 'B4']
+var ImageCleaner = (function() {
+    function selectBands(image, bands) {
+        return image.select(bands);
+    }
+
+    function modifyProperties(image, properties) {
+        return image.set(properties);
+    }
+
+    return {
+        selectBands: selectBands,
+        modifyProperties: modifyProperties
+    };
+})();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+var ndviParams = {max: 1, min: -1, palette: ["blue", "white", "green"]}
+
+/**
+ * Function to mask clouds using the Sentinel-2 QA band
+ * @param {ee.Image} image Sentinel-2 image
+ * @return {ee.Image} cloud masked Sentinel-2 image
+ */
+function maskS2clouds(image) {
+  var qa = image.select('QA60');
+
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function reduce_region_ndvi(image) {
+  image = image.select("NDVI");
+  return image.reduceRegions({
+    collection: cover_crop_fields,
+    reducer: ee.Reducer.median(),
+    // scale: 30
+  })
+}
+
+var startDate = '2023-01-9';
+var endDate = '2023-10-27';
+var centerPoint = ee.Geometry.Point(-121.66809167, 36.88797778)
+
+var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
+                  .filterDate(startDate, endDate)
+                  // Pre-filter to get less cloudy granules.
+                  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
+                  .filterBounds(centerPoint)
+                  .map(maskS2clouds)
+                  .map(selectBands)
+                  .map(dataset_ndvi);
+
+print(dataset)
