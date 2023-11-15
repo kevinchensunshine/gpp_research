@@ -57,33 +57,44 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
+var bands = ['B1','B5', 'B4', 'B3', 'B2'];
+var propertiesToKeep = ['system:index', 'system:time_start', 'system:time_end'];
+
+function selectBandsAndKeepProperties(image) {
+    // Select the specified bands
+    var selectedBandsImage = image.select(bands);
+
+    // Create an object to hold the properties to keep
+    var properties = {};
+    propertiesToKeep.forEach(function(prop) {
+        properties[prop] = image.get(prop);
+    });
+
+    // Create a new image with the selected bands
+    var newImage = ee.Image.constant(0).select([0], [bands[0]]);
+
+    // Add the rest of the bands
+    for (var i = 1; i < bands.length; i++) {
+        newImage = newImage.addBands(selectedBandsImage.select([bands[i]]));
+    }
+
+    // Set the selected properties on the new image
+    return newImage.set(properties);
+}
+
+
 var originalCollection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .filterBounds(boundingBox)
   .map(maskClouds)
+  .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
   .map(dataset_nirv)
+  
+print(originalCollection)
 
   
-var temporalCollection = function(collection, start, count, interval, units) {
-  // Create a sequence of numbers, one for each time interval.
-  var sequence = ee.List.sequence(0, ee.Number(count).subtract(1));
 
-  var originalStartDate = ee.Date(start);
-
-  return ee.ImageCollection(sequence.map(function(i) {
-    // Get the start date of the current sequence.
-    var startDate = originalStartDate.advance(ee.Number(interval).multiply(i), units);
-
-    // Get the end date of the current sequence.
-    var endDate = originalStartDate.advance(
-      ee.Number(interval).multiply(ee.Number(i).add(1)), units);
-
-    return collection.filterDate(startDate, endDate).mean()
-        .set('system:time_start', startDate.millis())
-        .set('system:time_end', endDate.millis());
-  }));
-};
 
 
 var rgbVis = {
@@ -176,7 +187,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 5;
+var n = 1;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
