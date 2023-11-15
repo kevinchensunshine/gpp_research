@@ -5,22 +5,24 @@
  * @return {ee.Image} reduced
  */
 
-var bands = ['B8', 'B4']
-var properties = ['B8', 'B4']
-var ImageCleaner = (function() {
-    function selectBands(image, bands) {
-        return image.select(bands);
-    }
+var bands = ['B8', 'B4'];
+var propertiesToKeep = ['system:index', 'system:time_start', 'CLOUDY_PIXEL_PERCENTAGE'];
 
-    function modifyProperties(image, properties) {
-        return image.set(properties);
-    }
+function selectBandsAndKeepProperties(image) {
+    // Select the specified bands
+    var selectedBandsImage = image.select(bands);
 
-    return {
-        selectBands: selectBands,
-        modifyProperties: modifyProperties
-    };
-})();
+    // Create an empty dictionary to store the properties to keep
+    var properties = ee.Dictionary({});
+
+    // Iterate over the properties to keep and set them in the dictionary
+    propertiesToKeep.forEach(function(prop) {
+        properties = properties.set(prop, image.get(prop));
+    });
+
+    // Create a new image with the selected bands and set the properties
+    return ee.Image(selectedBandsImage).setMulti(properties);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +72,7 @@ var dataset = ee.ImageCollection('COPERNICUS/S2')  ///S2_SR
                   .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',80))
                   .filterBounds(centerPoint)
                   .map(maskS2clouds)
-                  .map(selectBands)
+                  .map(selectBandsAndKeepProperties)
                   .map(dataset_ndvi);
 
 print(dataset)
