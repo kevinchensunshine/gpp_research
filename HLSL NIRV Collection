@@ -238,7 +238,7 @@ var originalCollection = originalCollection.map(function(image) {
 // Convert days to milliseconds
 
 // Specify the time-window to look for unmasked pixel
-var days = 90;
+var days = 45;
 var millis = ee.Number(days).multiply(1000*60*60*24)
 
 var maxDiffFilter = ee.Filter.maxDifference({
@@ -358,6 +358,23 @@ var interpolateImages = function(image) {
 var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
+
+var chart = ui.Chart.image.series({
+    imageCollection: regularCol.select('NIRV'),
+    region: boundingBox,
+    reducer: ee.Reducer.median(),
+    scale:cur_scale
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NIRV',
+      fontSize: 18,
+      vAxis: {title: 'NIRV'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM'}
+    });
+  print(chart)
+
 
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
