@@ -12,17 +12,24 @@ function selectBandsAndKeepProperties(image) {
     // Select the specified bands
     var selectedBandsImage = image.select(bands);
 
-    // Create an empty dictionary to store the properties to keep
-    var properties = ee.Dictionary({});
-
-    // Iterate over the properties to keep and set them in the dictionary
+    // Create an object to hold the properties to keep
+    var properties = {};
     propertiesToKeep.forEach(function(prop) {
-        properties = properties.set(prop, image.get(prop));
+        properties[prop] = image.get(prop);
     });
 
-    // Create a new image with the selected bands and set the properties
-    return ee.Image(selectedBandsImage).setMulti(properties);
+    // Create a new image with the selected bands
+    var newImage = ee.Image.constant(0).select([0], [bands[0]]);
+
+    // Add the rest of the bands
+    for (var i = 1; i < bands.length; i++) {
+        newImage = newImage.addBands(selectedBandsImage.select([bands[i]]));
+    }
+
+    // Set the selected properties on the new image
+    return newImage.set(properties);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
