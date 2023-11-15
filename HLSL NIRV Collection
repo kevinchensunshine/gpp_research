@@ -6,8 +6,8 @@ var geometry = /* color: #ffc82d */ee.Geometry.Polygon(
           [-121.6685583750657, 36.88928971620196]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var startDate = '2023-05-9';
-var endDate = '2023-11-12';
+var startDate = '2023-02-9';
+var endDate = '2023-11-14';
 
 var cur_scale = 30
 var centerPoint = ee.Geometry.Point(-121.66809167, 36.88797778)
@@ -187,7 +187,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 2;
+var n = 5;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -360,7 +360,7 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
 var chart = ui.Chart.image.series({
-    imageCollection: regularCol.select('NIRV'),
+    imageCollection: interpolatedCol.select('NIRV'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
     scale:cur_scale
@@ -376,7 +376,7 @@ var chart = ui.Chart.image.series({
   print(chart)
 
 
-var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
+var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
@@ -386,7 +386,7 @@ var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img)
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 13
+var window_size = 17
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
