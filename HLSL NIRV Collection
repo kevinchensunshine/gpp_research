@@ -6,7 +6,7 @@ var geometry = /* color: #ffc82d */ee.Geometry.Polygon(
           [-121.6685583750657, 36.88928971620196]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 
-var startDate = '2023-01-9';
+var startDate = '2023-05-9';
 var endDate = '2023-11-12';
 
 var cur_scale = 30
@@ -187,7 +187,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 1;
+var n = 2;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
