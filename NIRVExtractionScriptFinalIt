@@ -68,6 +68,47 @@ function selectBandsAndKeepProperties(image) {
     return newImage.set(properties);
 }
 
+function createFeatureCollection(startDates, endDates, geometries, names) {
+    var features = [];
+
+    for (var i = 0; i < startDates.length; i++) {
+        var feature = ee.Feature(geometries[i], {
+            'name': names[i],
+            'startDate': startDates[i],
+            'endDate': endDates[i]
+        });
+        features.push(feature);
+    }
+
+    // Create a FeatureCollection
+    var featureCollection = ee.FeatureCollection(features);
+
+    return featureCollection;
+}
+
+function FeatureAccessor(featureCollection) {
+    this.featureCollection = featureCollection;
+
+    this.getFeatureByName = function(name) {
+        return this.featureCollection.filter(ee.Filter.eq('name', name)).first();
+    };
+
+    this.getStartDate = function(name) {
+        var feature = this.getFeatureByName(name);
+        return feature.get('startDate');
+    };
+
+    this.getEndDate = function(name) {
+        var feature = this.getFeatureByName(name);
+        return feature.get('endDate');
+    };
+
+    this.getGeometry = function(name) {
+        var feature = this.getFeatureByName(name);
+        return feature.geometry();
+    };
+}
+
 //Define collection bounds
 
 var startDate_2023 = '2023-02-9';
@@ -85,19 +126,37 @@ var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581
                               [-121.78920455092621, 36.84610314620703],
                               [-121.78927965277863, 36.84947726815222],
                               [-121.79385013694001, 36.84691020164581]])
+                              
+//Turn these into a a feature collection for scalable indexing
+var start_date_list = [startDate_2023, startDate_2016]
+//
+var end_date_list = [endDate_2023, endDate_2016]
+//
+var region_list = [geometry_2023, geometry_2016]
+//
+var names = ["2023", "2016"]
+
+var parameters = createFeatureCollection(start_date_list, end_date_list, region_list, names)
+var parameter_accessor = new FeatureAccessor(parameters)
+
+//Use parameters to get values for a specific feature: e.g
+//var filteredFeature = myFeatureCollection.filter(ee.Filter.eq('name', featureName)).first();
+
 //Get each collection
 
 var originalCollection_2023 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
-  .filterDate(startDate_2023, endDate_2023)
-  .filterBounds(geometry_2023)
+  .filterDate(parameter_accessor.getStartDate("2023"), 
+              parameter_accessor.getEndDate("2023"))
+  .filterBounds(parameter_accessor.getGeometry("2023"))
   .map(maskClouds)
   .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
   .map(dataset_nirv)
   
 var originalCollection_2016 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
-  .filterDate(startDate_2016, endDate_2016)
-  .filterBounds(geometry_2016)
+  .filterDate(parameter_accessor.getStartDate("2016"), 
+              parameter_accessor.getEndDate("2016"))
+  .filterBounds(parameter_accessor.getGeometry("2016"))
   .map(maskClouds)
   .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
@@ -296,9 +355,10 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
 //Define region to smooth over
-var startDate = '2023-02-9';
-var endDate = '2023-11-14';
-var geometry = geometry_2023
+var startDate = parameter_accessor.getStartDate("2023");
+var endDate = parameter_accessor.getEndDate("2023");
+var geometry = parameter_accessor.getGeometry("2023")
+
 var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
