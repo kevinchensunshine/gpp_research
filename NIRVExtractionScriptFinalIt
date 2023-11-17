@@ -1,5 +1,4 @@
 var cur_scale = 30
-var cur_field = ""
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -138,6 +137,7 @@ var names = ["2023", "2016"]
 
 var parameters = createFeatureCollection(start_date_list, end_date_list, region_list, names)
 var parameter_accessor = new FeatureAccessor(parameters)
+var cur_field = "2016" //set name here, alternatively set it manually for each instance
 
 //Use parameters to get values for a specific feature: e.g
 //var filteredFeature = myFeatureCollection.filter(ee.Filter.eq('name', featureName)).first();
@@ -355,10 +355,11 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
 //Define region to smooth over
-var startDate = parameter_accessor.getStartDate("2023");
-var endDate = parameter_accessor.getEndDate("2023");
-var geometry = parameter_accessor.getGeometry("2023")
+var startDate = parameter_accessor.getStartDate(cur_field);
+var endDate = parameter_accessor.getEndDate(cur_field);
+var geometry = parameter_accessor.getGeometry(cur_field)
 
+//interpolates with whatever is chosen first in img.select
 var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
@@ -449,8 +450,11 @@ var featureCollection = nirv_sg_series.map(function(image) {
 
 print(featureCollection)
 // Export the feature collection to a CSV file
+
+var desc = 'NIRV_HLS_' + cur_field;
 Export.table.toDrive({
   collection: featureCollection,
-  description: 'NIRV_HLS_2023',
+  description: desc,
+  folder: linear_interp,
   fileFormat: 'CSV'
 });
