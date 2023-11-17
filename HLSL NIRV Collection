@@ -5,15 +5,7 @@ var geometry = /* color: #ffc82d */ee.Geometry.Polygon(
           [-121.66700268465287, 36.887865267169495],
           [-121.6685583750657, 36.88928971620196]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
-
-var startDate = '2023-02-9';
-var endDate = '2023-11-14';
-
 var cur_scale = 30
-var centerPoint = ee.Geometry.Point(-121.66809167, 36.88797778)
-
-var boundingBox = geometry;
-
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -82,20 +74,37 @@ function selectBandsAndKeepProperties(image) {
     return newImage.set(properties);
 }
 
+//Define collection bounds
 
-var originalCollection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
-  .filterDate(startDate, endDate)
+var startDate_2023 = '2023-02-9';
+var endDate_2023 = '2023-11-14';
+                              
+var startDate_2016 = '2016-04-1';
+var endDate_2016 = '2016-12-30';
+var geometry_2016 = ee.Geometry.Polygon([-121.79385013694001, 36.84691020164581],
+                              [-121.79189748877717, 36.84425718950863],
+                              [-121.78920455092621, 36.84610314620703],
+                              [-121.78927965277863, 36.84947726815222],
+                              [-121.79385013694001, 36.84691020164581])
+//Get each collection
+
+var originalCollection_2023 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
+  .filterDate(startDate_2023, endDate_2023)
   .filterBounds(boundingBox)
   .map(maskClouds)
   .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
   .map(dataset_nirv)
   
-print(originalCollection)
-
+var originalCollection_2016 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
+  .filterDate(startDate_2016, endDate_2016)
+  .filterBounds(geometry2)
+  .map(maskClouds)
+  .map(selectBandsAndKeepProperties)
+  .map(dataset_ndvi)
+  .map(dataset_nirv)
   
-
-
+var originalCollection = originalCollection_2016.merge(originalCollection_2023)
 
 var rgbVis = {
   bands: ['B4', 'B3', 'B2'],
