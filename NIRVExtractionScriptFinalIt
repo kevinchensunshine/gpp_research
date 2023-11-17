@@ -455,6 +455,6 @@ var desc = 'NIRV_HLS_' + cur_field;
 Export.table.toDrive({
   collection: featureCollection,
   description: desc,
-  folder: linear_interp,
+  folder: 'linear_interp',
   fileFormat: 'CSV'
 });
