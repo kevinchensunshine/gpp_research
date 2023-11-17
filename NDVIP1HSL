@@ -1,9 +1,14 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var geometry = /* color: #98ff00 */ee.Geometry.Polygon(
-        [[[-121.79385013694001, 36.84691020164581],
-          [-121.79189748877717, 36.84425718950863],
-          [-121.78920455092621, 36.84610314620703],
-          [-121.78927965277863, 36.84947726815222]]]);
+var geometry = /* color: #98ff00 */ee.Feature(
+        ee.Geometry.Polygon(
+            [[[-121.79385013694001, 36.84691020164581],
+              [-121.79189748877717, 36.84425718950863],
+              [-121.78920455092621, 36.84610314620703],
+              [-121.78927965277863, 36.84947726815222]]]),
+        {
+          "Name": "goes_albedo_2016",
+          "system:index": "0"
+        });
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 var startDate = '2016-04-1';
 var endDate = '2016-12-30';
@@ -11,7 +16,7 @@ var endDate = '2016-12-30';
 var cur_scale = 30
 var centerPoint = ee.Geometry.Point(-121.789167, 36.846645)
 
-var boundingBox = geometry;
+var boundingBox = geometry.geometry();
 
 
 function applyScaleFactors(image) {
@@ -92,43 +97,7 @@ var rgbVis = {
 /*
 Map Visualization Components
 */
-Map.setCenter(-121.789167, 36.846645, 17)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
-
-Map.addLayer(centerPoint,
-             {'color': 'green'},
-             'Geometry [black]: geometry');
-
-
-var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('NDVI'),
-    region: boundingBox,
-    reducer: ee.Reducer.median(),
-    scale:cur_scale
-    }).setOptions({
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-      title: 'NDVI over Time at Clicked Point',
-      vAxis: {title: 'NDVI'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
-    });
-  print(chart)
-  
-var chart = ui.Chart.image.series({
-    imageCollection: originalCollection.select('B5'),
-    region: boundingBox,
-    reducer: ee.Reducer.median(),
-    scale:cur_scale
-    }).setOptions({
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-      title: 'NIR over Time at Clicked Point',
-      vAxis: {title: 'NIR'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM', gridlines: {count: 12}}
-    });
-  print(chart)
   
 var chart = ui.Chart.image.series({
     imageCollection: originalCollection.select('NIRV'),
