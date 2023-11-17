@@ -72,7 +72,12 @@ function selectBandsAndKeepProperties(image) {
 
 var startDate_2023 = '2023-02-9';
 var endDate_2023 = '2023-11-14';
-                              
+var geometry_2023 = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213],
+                                        [-121.66793609708007, 36.887290332607236],
+                                        [-121.66700268465287, 36.887865267169495],
+                                        [-121.6685583750657, 36.88928971620196],
+                                        [-121.66842962854085, 36.88854317230213]])
+                                                                  
 var startDate_2016 = '2016-04-1';
 var endDate_2016 = '2016-12-30';
 var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581],
@@ -84,7 +89,7 @@ var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581
 
 var originalCollection_2023 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate_2023, endDate_2023)
-  .filterBounds(geometry)
+  .filterBounds(geometry_2023)
   .map(maskClouds)
   .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
@@ -111,27 +116,6 @@ Map Visualization Components
 */
 Map.setCenter(-121.66809167, 36.88797778, 17)
 Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
-
-var featureCollection = originalCollection.map(function(image) {
-    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var NIRV_Median = image.reduceRegion({
-      reducer: ee.Reducer.median(),
-      geometry: boundingBox,
-      scale: cur_scale
-      }).get('NIRV');
-    return ee.Feature(null, {
-      'Date': date,
-      'NIRV': NIRV_Median
-    });
-  });
-
-print(featureCollection)
-// Export the feature collection to a CSV file
-Export.table.toDrive({
-  collection: featureCollection,
-  description: 'NIRV_HLS_2023_Unsmoothed',
-  fileFormat: 'CSV'
-});
 
   
 var bandNames = ee.Image(originalCollection.first()).bandNames();
@@ -311,23 +295,10 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
 var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
 
-var chart = ui.Chart.image.series({
-    imageCollection: interpolatedCol.select('NIRV'),
-    region: boundingBox,
-    reducer: ee.Reducer.median(),
-    scale:cur_scale
-    }).setOptions({
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-      title: 'NIRV',
-      fontSize: 18,
-      vAxis: {title: 'NIRV'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM'}
-    });
-  print(chart)
-
-
+//Define region to smooth over
+var startDate = '2023-02-9';
+var endDate = '2023-11-14';
+var geometry = geometry_2023
 var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
@@ -388,7 +359,7 @@ nirv_sg_series = ee.ImageCollection(nirv_sg_series)
 
 var chart = ui.Chart.image.series({
     imageCollection: nirv_sg_series.select('sum'),
-    region: boundingBox,
+    region: geometry,
     reducer: ee.Reducer.median(),
     scale:cur_scale
     }).setOptions({
@@ -407,7 +378,7 @@ var featureCollection = nirv_sg_series.map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var NIRV_Median = image.reduceRegion({
       reducer: ee.Reducer.median(),
-      geometry: boundingBox,
+      geometry: geometry,
       scale: cur_scale
       }).get('sum');
     return ee.Feature(null, {
@@ -423,8 +394,3 @@ Export.table.toDrive({
   description: 'NIRV_HLS_2023',
   fileFormat: 'CSV'
 });
-
-
-
-
-
