@@ -1,0 +1,430 @@
+var cur_scale = 30
+var cur_field = ""
+
+function applyScaleFactors(image) {
+  var opticalBands = image.select('B.').multiply(0.0001);
+  return image.addBands(opticalBands, null, true)
+}
+
+var bitwiseExtract = function(input, fromBit, toBit) {
+  if (toBit === undefined) toBit = fromBit
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
+  return input.rightShift(fromBit).bitwiseAnd(mask)
+}
+
+function maskAerosols(image) {
+  var qa_aerosol = image.select(['SR_QA_AEROSOL']);
+  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7)
+
+  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0)
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function maskClouds(image) {
+  var qa = image.select('Fmask');
+  var cirrus = image.select('B9')
+
+  // Bit 1 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 1;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function dataset_nirv(image) {
+  var nirv = image.select('NDVI').multiply(image.select('B5')).rename('NIRV');
+  return image.addBands(nirv);
+}
+
+var bands = ['B1','B5', 'B4', 'B3', 'B2'];
+var propertiesToKeep = ['system:index', 'system:time_start', 'system:time_end'];
+
+function selectBandsAndKeepProperties(image) {
+    // Select the specified bands
+    var selectedBandsImage = image.select(bands);
+
+    // Create an object to hold the properties to keep
+    var properties = {};
+    propertiesToKeep.forEach(function(prop) {
+        properties[prop] = image.get(prop);
+    });
+
+    // Create a new image with the selected bands
+    var newImage = ee.Image.constant(0).select([0], [bands[0]]);
+
+    // Add the rest of the bands
+    for (var i = 1; i < bands.length; i++) {
+        newImage = newImage.addBands(selectedBandsImage.select([bands[i]]));
+    }
+
+    // Set the selected properties on the new image
+    return newImage.set(properties);
+}
+
+//Define collection bounds
+
+var startDate_2023 = '2023-02-9';
+var endDate_2023 = '2023-11-14';
+                              
+var startDate_2016 = '2016-04-1';
+var endDate_2016 = '2016-12-30';
+var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581],
+                              [-121.79189748877717, 36.84425718950863],
+                              [-121.78920455092621, 36.84610314620703],
+                              [-121.78927965277863, 36.84947726815222],
+                              [-121.79385013694001, 36.84691020164581]])
+//Get each collection
+
+var originalCollection_2023 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
+  .filterDate(startDate_2023, endDate_2023)
+  .filterBounds(geometry)
+  .map(maskClouds)
+  .map(selectBandsAndKeepProperties)
+  .map(dataset_ndvi)
+  .map(dataset_nirv)
+  
+var originalCollection_2016 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
+  .filterDate(startDate_2016, endDate_2016)
+  .filterBounds(geometry_2016)
+  .map(maskClouds)
+  .map(selectBandsAndKeepProperties)
+  .map(dataset_ndvi)
+  .map(dataset_nirv)
+  
+var originalCollection = originalCollection_2016.merge(originalCollection_2023)
+
+var rgbVis = {
+  bands: ['B4', 'B3', 'B2'],
+  min: 0.01,
+  max: 0.18,
+};
+
+/*
+Map Visualization Components
+*/
+Map.setCenter(-121.66809167, 36.88797778, 17)
+Map.addLayer(originalCollection, rgbVis, 'Multi-band RGB image')
+
+var featureCollection = originalCollection.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var NIRV_Median = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: cur_scale
+      }).get('NIRV');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIRV': NIRV_Median
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NIRV_HLS_2023_Unsmoothed',
+  fileFormat: 'CSV'
+});
+
+  
+var bandNames = ee.Image(originalCollection.first()).bandNames();
+var numBands = bandNames.size();
+var initBands = ee.List.repeat(ee.Image(), numBands);
+var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
+
+var n = 5;
+var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
+var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
+var timeStart = ee.Date(firstImage.get('system:time_start'))
+var timeEnd = ee.Date(lastImage.get('system:time_start'))
+
+var totalDays = timeEnd.difference(timeStart, 'day');
+var daysToInterpolate = ee.List.sequence(0, totalDays, n)
+
+var initImages = daysToInterpolate.map(function(day) {
+  var image = initImage.set({
+    'system:index': ee.Number(day).format('%d'),
+    'system:time_start': timeStart.advance(day, 'day').millis(),
+    // Set a property so we can identify interpolated images
+    'type': 'interpolated'
+  })
+  return image
+})
+
+var initCol = ee.ImageCollection.fromImages(initImages)
+
+// Merge original and empty collections
+var originalCollection = originalCollection.merge(initCol)
+
+// Interpolation
+
+// Add a band containing timestamp to each image
+// This will be used to do pixel-wise interpolation later
+var originalCollection = originalCollection.map(function(image) {
+  var timeImage = image.metadata('system:time_start').rename('timestamp')
+  // The time image doesn't have a mask. 
+  // We set the mask of the time band to be the same as the first band of the image
+  var timeImageMasked = timeImage.updateMask(image.mask().select(0))
+  return image.addBands(timeImageMasked).toFloat();
+})
+
+// For each image in the collection, we need to find all images
+// before and after the specified time-window
+
+// This is accomplished using Joins
+// We need to do 2 joins
+// Join 1: Join the collection with itself to find all images before each image
+// Join 2: Join the collection with itself to find all images after each image
+
+// We first define the filters needed for the join
+
+// Define a maxDifference filter to find all images within the specified days
+// The filter needs the time difference in milliseconds
+// Convert days to milliseconds
+
+// Specify the time-window to look for unmasked pixel
+var days = 45;
+var millis = ee.Number(days).multiply(1000*60*60*24)
+
+var maxDiffFilter = ee.Filter.maxDifference({
+  difference: millis,
+  leftField: 'system:time_start',
+  rightField: 'system:time_start'
+})
+
+// We need a lessThanOrEquals filter to find all images after a given image
+// This will compare the given image's timestamp against other images' timestamps
+var lessEqFilter = ee.Filter.lessThanOrEquals({
+  leftField: 'system:time_start',
+  rightField: 'system:time_start'
+})
+
+// We need a greaterThanOrEquals filter to find all images before a given image
+// This will compare the given image's timestamp against other images' timestamps
+var greaterEqFilter = ee.Filter.greaterThanOrEquals({
+  leftField: 'system:time_start',
+  rightField: 'system:time_start'
+})
+
+
+// Apply the joins
+
+// For the first join, we need to match all images that are after the given image.
+// To do this we need to match 2 conditions
+// 1. The resulting images must be within the specified time-window of target image
+// 2. The target image's timestamp must be lesser than the timestamp of resulting images
+// Combine two filters to match both these conditions
+var filter1 = ee.Filter.and(maxDiffFilter, lessEqFilter)
+// This join will find all images after, sorted in descending order
+// This will gives us images so that closest is last
+var join1 = ee.Join.saveAll({
+  matchesKey: 'after',
+  ordering: 'system:time_start',
+  ascending: false})
+  
+var join1Result = join1.apply({
+  primary: originalCollection,
+  secondary: originalCollection,
+  condition: filter1
+})
+// Each image now as a property called 'after' containing
+// all images that come after it within the time-window
+
+// Do the second join now to match all images within the time-window
+// that come before each image
+var filter2 = ee.Filter.and(maxDiffFilter, greaterEqFilter)
+// This join will find all images before, sorted in ascending order
+// This will gives us images so that closest is last
+var join2 = ee.Join.saveAll({
+  matchesKey: 'before',
+  ordering: 'system:time_start',
+  ascending: true})
+  
+var join2Result = join2.apply({
+  primary: join1Result,
+  secondary: join1Result,
+  condition: filter2
+})
+
+// Each image now as a property called 'before' containing
+// all images that come after it within the time-window
+var joinedCol = join2Result;
+
+// Do the interpolation
+
+// We now write a function that will be used to interpolate all images
+// This function takes an image and replaces the masked pixels
+// with the interpolated value from before and after images.
+
+var interpolateImages = function(image) {
+  var image = ee.Image(image);
+  // We get the list of before and after images from the image property
+  // Mosaic the images so we a before and after image with the closest unmasked pixel
+  var beforeImages = ee.List(image.get('before'))
+  var beforeMosaic = ee.ImageCollection.fromImages(beforeImages).mosaic()
+  var afterImages = ee.List(image.get('after'))
+  var afterMosaic = ee.ImageCollection.fromImages(afterImages).mosaic()
+
+  // Interpolation formula
+  // y = y1 + (y2-y1)*((t – t1) / (t2 – t1))
+  // y = interpolated image
+  // y1 = before image
+  // y2 = after image
+  // t = interpolation timestamp
+  // t1 = before image timestamp
+  // t2 = after image timestamp
+  
+  // We first compute the ratio (t – t1) / (t2 – t1)
+
+  // Get image with before and after times
+  var t1 = beforeMosaic.select('timestamp').rename('t1')
+  var t2 = afterMosaic.select('timestamp').rename('t2')
+
+  var t = image.metadata('system:time_start').rename('t')
+
+  var timeImage = ee.Image.cat([t1, t2, t])
+
+  var timeRatio = timeImage.expression('(t - t1) / (t2 - t1)', {
+    't': timeImage.select('t'),
+    't1': timeImage.select('t1'),
+    't2': timeImage.select('t2'),
+  })
+  // You can replace timeRatio with a constant value 0.5
+  // if you wanted a simple average
+  
+  // Compute an image with the interpolated image y
+  var interpolated = beforeMosaic
+    .add((afterMosaic.subtract(beforeMosaic).multiply(timeRatio)))
+  // Replace the masked pixels in the current image with the average value
+  var result = image.unmask(interpolated)
+  return result.copyProperties(image, ['system:time_start'])
+}
+
+var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
+
+var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
+
+var chart = ui.Chart.image.series({
+    imageCollection: interpolatedCol.select('NIRV'),
+    region: boundingBox,
+    reducer: ee.Reducer.median(),
+    scale:cur_scale
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NIRV',
+      fontSize: 18,
+      vAxis: {title: 'NIRV'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM'}
+    });
+  print(chart)
+
+
+var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
+  var dstamp = ee.Date(img.get('system:time_start'))
+  var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
+  img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
+  return img.addBands(ee.Image(1).toFloat().rename('constant')).
+    addBands(ee.Image(ddiff).toFloat().rename('t')).
+    addBands(ee.Image(ddiff).pow(ee.Image(2)).toFloat().rename('t2')).
+    addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
+})
+
+var window_size = 17
+var half_window = (window_size - 1)/2
+
+// Define the axes of variation in the collection array.
+var imageAxis = 0;
+var bandAxis = 1;
+
+// Set polynomial order
+var order = 3
+var coeffFlattener = [['constant', 'x', 'x2', 'x3']]
+var indepSelectors = ['constant', 't', 't2', 't3']
+
+// // Change to order = 2 as follows:
+// var order = 2
+// var coeffFlattener = [['constant', 'x', 'x2']]
+// var indepSelectors = ['constant', 't', 't2']
+
+// Convert the collection to an array.
+var array = modis_res_nirv.toArray();
+
+// Solve 
+function getLocalFit(i) {
+  // Get a slice corresponding to the window_size of the SG smoother
+  var subarray = array.arraySlice(imageAxis, ee.Number(i).int(), ee.Number(i).add(window_size).int())
+  var predictors = subarray.arraySlice(bandAxis, 2, 2 + order + 1)
+  var response = subarray.arraySlice(bandAxis, 0, 1); // NDVI
+  var coeff = predictors.matrixSolve(response)
+
+  coeff = coeff.arrayProject([0]).arrayFlatten(coeffFlattener)
+  return coeff  
+}
+
+
+// For the remainder, use modis_res as a list of images
+modis_res_nirv = modis_res_nirv.toList(modis_res_nirv.size())
+
+
+var runLength = ee.List.sequence(0, modis_res_nirv.size().subtract(window_size))
+
+// Run the SG filter over the series, and get the smoothed image 
+var nirv_sg_series = runLength.map(function(i) {
+  var ref = ee.Image(modis_res_nirv.get(ee.Number(i).add(half_window)))
+  return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
+})
+
+
+nirv_sg_series = ee.ImageCollection(nirv_sg_series)
+
+var chart = ui.Chart.image.series({
+    imageCollection: nirv_sg_series.select('sum'),
+    region: boundingBox,
+    reducer: ee.Reducer.median(),
+    scale:cur_scale
+    }).setOptions({
+      interpolateNulls: true,
+      lineWidth: 1,
+      pointSize: 3,
+      title: 'NIRV',
+      fontSize: 18,
+      colors: ['red'],
+      vAxis: {title: 'NIRV'},
+      hAxis: {title: 'Date', format: 'YYYY-MMM'}
+    });
+  print(chart)
+
+var featureCollection = nirv_sg_series.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var NIRV_Median = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: boundingBox,
+      scale: cur_scale
+      }).get('sum');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIRV': NIRV_Median
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+Export.table.toDrive({
+  collection: featureCollection,
+  description: 'NIRV_HLS_2023',
+  fileFormat: 'CSV'
+});
+
+
+
+
+
