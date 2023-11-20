@@ -118,7 +118,7 @@ var geometry_2023 = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213
                                         [-121.6685583750657, 36.88928971620196],
                                         [-121.66842962854085, 36.88854317230213]])
                                                                   
-var startDate_2016 = '2016-07-1';
+var startDate_2016 = '2016-05-1';
 var endDate_2016 = '2016-12-30';
 var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581],
                               [-121.79189748877717, 36.84425718950863],
@@ -137,7 +137,7 @@ var names = ["2023", "2016"]
 
 var parameters = createFeatureCollection(start_date_list, end_date_list, region_list, names)
 var parameter_accessor = new FeatureAccessor(parameters)
-var cur_field = "2023" //set name here, alternatively set it manually for each instance
+var cur_field = "2016" //set name here, alternatively set it manually for each instance
 
 //Use parameters to get values for a specific feature: e.g
 //var filteredFeature = myFeatureCollection.filter(ee.Filter.eq('name', featureName)).first();
