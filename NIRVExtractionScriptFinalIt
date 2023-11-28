@@ -370,7 +370,7 @@ var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 31
+var window_size = 101
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
