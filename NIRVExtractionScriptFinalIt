@@ -110,8 +110,8 @@ function FeatureAccessor(featureCollection) {
 
 //Define collection bounds
 
-var startDate_2023 = '2023-07-1';
-var endDate_2023 = '2023-11-19';
+var startDate_2023 = '2023-05-1';
+var endDate_2023 = '2023-11-28';
 var geometry_2023 = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213],
                                         [-121.66793609708007, 36.887290332607236],
                                         [-121.66700268465287, 36.887865267169495],
@@ -456,3 +456,46 @@ Export.table.toDrive({
   folder: 'linear_interp',
   fileFormat: 'CSV'
 });
+
+/*
+Testing library SG
+*/
+
+var distanceFunction = function(infromedImage, estimationImage) {
+  return ee.Image.constant(
+      ee.Number(infromedImage.get('system:time_start'))
+      .subtract(
+        ee.Number(estimationImage.get('system:time_start')))
+        );
+  }
+
+var oeel=require('users/OEEL/lib:loadAll');
+
+var order = 3;
+
+var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
+  regularCol, 
+  maxDiffFilter,
+  distanceFunction,
+  order)
+  
+var chart = ui.Chart.image.series({
+  imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
+  region: geometry,
+  reducer: ee.Reducer.mean(),
+  scale: 20
+}).setOptions({
+      lineWidth: 1,
+      title: 'NDVI Time Series',
+      interpolateNulls: false,
+      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
+      hAxis: {title: '', format: 'YYYY-MM'},
+      lineWidth: 1,
+      pointSize: 4,
+      series: {
+        0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
+        1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
+      },
+
+    })
+print(chart);
