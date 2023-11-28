@@ -358,7 +358,7 @@ var endDate = parameter_accessor.getEndDate(cur_field);
 var geometry = parameter_accessor.getGeometry(cur_field)
 
 //interpolates with whatever is chosen first in img.select
-var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function(img) {
+var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
   var ddiff = dstamp.difference(ee.Date(startDate), 'hour')
   img = img.select(['NIRV', 'NDVI']).set('date', dstamp)
@@ -368,7 +368,7 @@ var modis_res_nirv = interpolatedCol.filterDate(startDate, endDate).map(function
     addBands(ee.Image(ddiff).pow(ee.Image(3)).toFloat().rename('t3'))
 })
 
-var window_size = 101
+var window_size = 9
 var half_window = (window_size - 1)/2
 
 // Define the axes of variation in the collection array.
