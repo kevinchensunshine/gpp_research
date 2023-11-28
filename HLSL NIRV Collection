@@ -88,6 +88,7 @@ var originalCollection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .filterBounds(geometry)
   .map(maskClouds)
+  .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
   .map(dataset_nirv)
   
