@@ -88,7 +88,6 @@ var originalCollection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .filterBounds(geometry)
   .map(maskClouds)
-  .map(selectBandsAndKeepProperties)
   .map(dataset_ndvi)
   .map(dataset_nirv)
   
@@ -349,10 +348,10 @@ var interpolateImages = function(image) {
 
 var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
-var regularCol = interpolatedCol.filter(ee.Filter.eq('type', 'interpolated'))
+var regularCol = interpolatedCol.filter(ee.Filter.neq('type', 'interpolated'))
 
 var chart = ui.Chart.image.series({
-    imageCollection: interpolatedCol.select('NIRV'),
+    imageCollection: regularCol.select('NIRV'),
     region: boundingBox,
     reducer: ee.Reducer.median(),
     scale:cur_scale
