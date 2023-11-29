@@ -352,11 +352,6 @@ var interpolatedCol = ee.ImageCollection(joinedCol.map(interpolateImages))
 
 var regularCol = interpolatedCol.filter(ee.Filter.neq('type', 'interpolated'))
 
-//Define region to smooth over
-var startDate = parameter_accessor.getStartDate(cur_field);
-var endDate = parameter_accessor.getEndDate(cur_field);
-var geometry = parameter_accessor.getGeometry(cur_field)
-
 /*
 //interpolates with whatever is chosen first in img.select
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
@@ -418,6 +413,30 @@ var nirv_sg_series = runLength.map(function(i) {
 /*
 Testing library SG
 */
+var startDate = parameter_accessor.getStartDate(cur_field);
+var endDate = parameter_accessor.getEndDate(cur_field);
+var geometry = parameter_accessor.getGeometry(cur_field)
+
+var chart = ui.Chart.image.series({
+  imageCollection: regularCol.filterDate(startDate, endDate).get('NIRV'),
+  region: geometry,
+  reducer: ee.Reducer.mean(),
+  scale: cur_scale
+}).setOptions({
+      lineWidth: 1,
+      title: 'NDVI Time Series',
+      interpolateNulls: false,
+      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
+      hAxis: {title: '', format: 'YYYY-MM'},
+      lineWidth: 1,
+      pointSize: 4,
+      series: {
+        0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
+        1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
+      },
+
+    })
+print(chart);
 
 var distanceFunction = function(infromedImage, estimationImage) {
   return ee.Image.constant(
@@ -443,7 +462,7 @@ var chart = ui.Chart.image.series({
   imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
   region: geometry,
   reducer: ee.Reducer.mean(),
-  scale: 20
+  scale: cur_scale
 }).setOptions({
       lineWidth: 1,
       title: 'NDVI Time Series',
