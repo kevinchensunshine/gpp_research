@@ -413,50 +413,6 @@ var nirv_sg_series = runLength.map(function(i) {
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
 
-
-nirv_sg_series = ee.ImageCollection(nirv_sg_series)
-
-var chart = ui.Chart.image.series({
-    imageCollection: nirv_sg_series.select('sum'),
-    region: geometry,
-    reducer: ee.Reducer.median(),
-    scale:cur_scale
-    }).setOptions({
-      interpolateNulls: true,
-      lineWidth: 1,
-      pointSize: 3,
-      title: 'NIRV',
-      fontSize: 18,
-      colors: ['red'],
-      vAxis: {title: 'NIRV'},
-      hAxis: {title: 'Date', format: 'YYYY-MMM'}
-    });
-  print(chart)
-
-var featureCollection = nirv_sg_series.map(function(image) {
-    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
-    var NIRV_Median = image.reduceRegion({
-      reducer: ee.Reducer.median(),
-      geometry: geometry,
-      scale: cur_scale
-      }).get('sum');
-    return ee.Feature(null, {
-      'Date': date,
-      'NIRV': NIRV_Median
-    });
-  });
-
-print(featureCollection)
-// Export the feature collection to a CSV file
-
-var desc = 'NIRV_HLS_' + cur_field;
-Export.table.toDrive({
-  collection: featureCollection,
-  description: desc,
-  folder: 'linear_interp',
-  fileFormat: 'CSV'
-});
-
 /*
 Testing library SG
 */
@@ -499,3 +455,28 @@ var chart = ui.Chart.image.series({
 
     })
 print(chart);
+
+var featureCollection = sgFilteredCol.map(function(image) {
+    var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
+    var NIRV_Median = image.reduceRegion({
+      reducer: ee.Reducer.median(),
+      geometry: geometry,
+      scale: cur_scale
+      }).get('NIRV');
+    return ee.Feature(null, {
+      'Date': date,
+      'NIRV': NIRV_Median
+    });
+  });
+
+print(featureCollection)
+// Export the feature collection to a CSV file
+
+var desc = 'NIRV_HLS_' + cur_field;
+Export.table.toDrive({
+  collection: featureCollection,
+  description: desc,
+  folder: 'linear_interp',
+  fileFormat: 'CSV'
+});
+
