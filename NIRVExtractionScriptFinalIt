@@ -435,7 +435,9 @@ var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
   regularCol.filterDate(startDate, endDate), 
   maxDiffFilter,
   distanceFunction,
-  order)
+  order,
+  ee.List(['NIRV'])
+  )
   
 var chart = ui.Chart.image.series({
   imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
@@ -461,7 +463,7 @@ print(chart);
 var featureCollection = sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']).map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var NIRV_Median = image.reduceRegion({
-      reducer: ee.Reducer.median(),
+      reducer: ee.Reducer.mean(),
       geometry: geometry,
       scale: cur_scale
       }).get('NIRV_sg');
