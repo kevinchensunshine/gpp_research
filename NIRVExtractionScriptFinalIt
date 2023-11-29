@@ -357,6 +357,7 @@ var startDate = parameter_accessor.getStartDate(cur_field);
 var endDate = parameter_accessor.getEndDate(cur_field);
 var geometry = parameter_accessor.getGeometry(cur_field)
 
+/*
 //interpolates with whatever is chosen first in img.select
 var modis_res_nirv = regularCol.filterDate(startDate, endDate).map(function(img) {
   var dstamp = ee.Date(img.get('system:time_start'))
@@ -412,6 +413,7 @@ var nirv_sg_series = runLength.map(function(i) {
   var ref = ee.Image(modis_res_nirv.get(ee.Number(i).add(half_window)))
   return getLocalFit(i).multiply(ref.select(indepSelectors)).reduce(ee.Reducer.sum()).copyProperties(ref,['date','system:time_start'])
 })
+*/
 
 /*
 Testing library SG
@@ -444,7 +446,7 @@ var chart = ui.Chart.image.series({
       lineWidth: 1,
       title: 'NDVI Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
+      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -456,18 +458,18 @@ var chart = ui.Chart.image.series({
     })
 print(chart);
 
-var featureCollection = sgFilteredCol.map(function(image) {
+var featureCollection = sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']).map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var NIRV_Median = image.reduceRegion({
       reducer: ee.Reducer.median(),
       geometry: geometry,
       scale: cur_scale
-      }).get('NIRV');
+      }).get('NIRV_sg');
     return ee.Feature(null, {
       'Date': date,
       'NIRV': NIRV_Median
     });
-  });
+  }).filter(ee.Filter.notNull(['NIRV']));
 
 print(featureCollection)
 // Export the feature collection to a CSV file
