@@ -418,7 +418,29 @@ var endDate = parameter_accessor.getEndDate(cur_field);
 var geometry = parameter_accessor.getGeometry(cur_field)
 
 var chart = ui.Chart.image.series({
-  imageCollection: regularCol.filterDate(startDate, endDate).get('NIRV'),
+  imageCollection: originalCollection.filterDate(startDate, endDate).select(['NIRV']),
+  region: geometry,
+  reducer: ee.Reducer.mean(),
+  scale: cur_scale
+}).setOptions({
+      lineWidth: 1,
+      title: 'NDVI Time Series',
+      interpolateNulls: false,
+      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
+      hAxis: {title: '', format: 'YYYY-MM'},
+      lineWidth: 1,
+      pointSize: 4,
+      series: {
+        0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
+        1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
+      },
+
+    })
+print(chart);
+
+
+var chart = ui.Chart.image.series({
+  imageCollection: interpolatedCol.filterDate(startDate, endDate).filter(ee.Filter.eq('type', 'interpolated')).select(['NIRV']),
   region: geometry,
   reducer: ee.Reducer.mean(),
   scale: cur_scale
@@ -451,7 +473,7 @@ var oeel=require('users/OEEL/lib:loadAll');
 var order = 3;
 
 var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
-  regularCol.filterDate(startDate, endDate), 
+  interpolatedCol.filterDate(startDate, endDate).filter(ee.Filter.eq('type', 'interpolated')), 
   maxDiffFilter,
   distanceFunction,
   order,
