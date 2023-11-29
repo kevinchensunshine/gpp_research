@@ -424,9 +424,9 @@ var chart = ui.Chart.image.series({
   scale: cur_scale
 }).setOptions({
       lineWidth: 1,
-      title: 'NDVI Time Series',
+      title: 'NIRV Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
+      vAxis: {title: 'NIRV', viewWindow: {min: 0, max: 0.3}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -446,9 +446,9 @@ var chart = ui.Chart.image.series({
   scale: cur_scale
 }).setOptions({
       lineWidth: 1,
-      title: 'NDVI Time Series',
+      title: 'Interpolated NIRV Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
+      vAxis: {title: 'NIRV', viewWindow: {min: 0, max: 0.3}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
@@ -487,9 +487,9 @@ var chart = ui.Chart.image.series({
   scale: cur_scale
 }).setOptions({
       lineWidth: 1,
-      title: 'NDVI Time Series',
+      title: 'Smoothed NIRV Time Series',
       interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 0.3}},
+      vAxis: {title: 'NIRV', viewWindow: {min: 0, max: 0.3}},
       hAxis: {title: '', format: 'YYYY-MM'},
       lineWidth: 1,
       pointSize: 4,
