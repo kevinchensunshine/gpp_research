@@ -486,23 +486,4 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol)
 print(matching.size());
-var chart = ui.Chart.image.series({
-    imageCollection: matching.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
-    region: geometry,
-    reducer: ee.Reducer.mean(),
-    scale: 30
-  }).setOptions({
-        lineWidth: 1,
-        title: 'NDVI Time Series',
-        interpolateNulls: false,
-        vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
-        hAxis: {title: '', format: 'YYYY-MM'},
-        lineWidth: 1,
-        pointSize: 4,
-        series: {
-          0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
-          1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
-        },
-  
-      })
-  print(chart);
+print(matching.first())
