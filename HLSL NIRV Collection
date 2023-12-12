@@ -186,6 +186,7 @@ var timeEnd = ee.Date(lastImage.get('system:time_start'))
 
 var totalDays = timeEnd.difference(timeStart, 'day');
 var daysToInterpolate = ee.List.sequence(0, totalDays, n)
+print(daysToInterpolate)
 
 var initImages = daysToInterpolate.map(function(day) {
   var image = initImage.set({
