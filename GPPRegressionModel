@@ -1,1 +1,33 @@
-//Define 
+//Define the rectangular hyperbola model
+
+class SquareHyperbolaModel {
+  
+  //define the model constants
+  constructor(a, b) {
+    this.a = a;
+    this.b = b;
+  }
+  
+  //run the model over the input array x, which should be a set of nirv values
+  fit(x) {
+    
+  }
+  
+  //run the model over an imagecollection input, which should have an NDVI band
+  fit_image_collection(x) {
+    var applyHyperbola = function(image) {
+        var ndvi = image.select('NDVI');
+
+        var hyperbolaNDVI = ndvi.expression(
+            '((a * x) / (b + x))', {
+                'x': ndvi,
+                'a': a,
+                'b': b
+            });
+
+        return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
+    };
+
+    return imageCollection.map(applyHyperbola);
+  }
+}
