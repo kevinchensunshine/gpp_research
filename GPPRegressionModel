@@ -1,40 +1,35 @@
 //Define the rectangular hyperbola model
 
-class SquareHyperbolaModel {
-  
-  //define the model constants
-  constructor(a, b) {
-    this.a = a;
-    this.b = b;
+var a = 1;
+var b = 1;
+
+//run the model over the input array x, which should be a set of nirv values
+function fit(x) {
+  var applyHyperbola = function(nirvp) {
+    return (a * nirvp) / (b + nirvp);
   }
   
-  //run the model over the input array x, which should be a set of nirv values
-  fit(x) {
-    var applyHyperbola = function(nirvp) {
-      return (a * nirvp) / (b + nirvp);
-    }
-    
-    return x.map(applyHyperbola);
-  }
-  
-  //run the model over an imagecollection input, which should have an NDVI band
-  fit_image_collection(x) {
-    var applyHyperbola = function(image) {
-        var nirv = image.select('NIRV');
-
-        var hyperbolaNDVI = nirv.expression(
-            '((a * x) / (b + x))', {
-                'x': nirv,
-                'a': a,
-                'b': b
-            });
-
-        return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
-    };
-
-    return x.map(applyHyperbola);
-  }
+  return x.map(applyHyperbola);
 }
+
+//run the model over an imagecollection input, which should have an NDVI band
+function fit_image_collection(x) {
+  var applyHyperbola = function(image) {
+      var nirv = image.select('NIRV');
+
+      var hyperbolaNDVI = nirv.expression(
+          '((a * x) / (b + x))', {
+              'x': nirv,
+              'a': a,
+              'b': b
+          });
+
+      return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
+  };
+
+  return x.map(applyHyperbola);
+}
+
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -78,18 +73,20 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
+var geometry = ee.Geometry.Point(-121.789167, 36.846645)
 //load nirv data
 var startDate = '2023-02-9';
 var endDate = '2023-11-14';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  //.filterBounds(geometry)
+  .filterBounds(geometry)
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
+print(nirv_collection)
 
 //load par data
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(startDate, endDate)
-  //.filterBounds(geometry)
-
+  .filterBounds(geometry)
+print(par_collection)
