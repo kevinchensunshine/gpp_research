@@ -10,17 +10,21 @@ class SquareHyperbolaModel {
   
   //run the model over the input array x, which should be a set of nirv values
   fit(x) {
+    var applyHyperbola = function(nirvp) {
+      return (a * nirvp) / (b + nirvp);
+    }
     
+    return x.map(applyHyperbola);
   }
   
   //run the model over an imagecollection input, which should have an NDVI band
   fit_image_collection(x) {
     var applyHyperbola = function(image) {
-        var ndvi = image.select('NDVI');
+        var nirv = image.select('NIRV');
 
-        var hyperbolaNDVI = ndvi.expression(
+        var hyperbolaNDVI = nirv.expression(
             '((a * x) / (b + x))', {
-                'x': ndvi,
+                'x': nirv,
                 'a': a,
                 'b': b
             });
@@ -28,6 +32,6 @@ class SquareHyperbolaModel {
         return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
     };
 
-    return imageCollection.map(applyHyperbola);
+    return x.map(applyHyperbola);
   }
 }
