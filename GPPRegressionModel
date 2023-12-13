@@ -478,4 +478,3 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry).filterDate(loc_start, endDate))
 print(matching.size());
-print(matching)
