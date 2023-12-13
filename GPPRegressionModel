@@ -478,3 +478,6 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry).filterDate(loc_start, endDate))
 print(matching.size());
+var range = matching.reduceColumns(ee.Reducer.minMax(), ['system:time_start'])
+print('Date range: ', ee.Date(range.get('min')), ee.Date(range.get('max')))
+print(matching.sum())
