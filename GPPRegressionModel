@@ -291,7 +291,7 @@ var sgFilteredCol = sg_smooth(nirv_collection.filterBounds(geometry).select(['NI
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-09-09'
+var loc_start = '2023-10-30'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, endDate)
   .filterBounds(geometry)
@@ -307,8 +307,8 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   var firstImage = ee.Image(nirv_collection.sort('system:time_start').first())
   var timeStart = ee.Date(firstImage.get('system:time_start'))
   
-  var daysToInterpolate = par_collection
-    .aggregate_array("system:time_start")
+  var daysToInterpolate = ee.List(par_collection
+    .aggregate_array("system:time_start")).distinct()
 
   print(daysToInterpolate)
   
@@ -476,6 +476,6 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   return interpolatedCol
 }
 
-var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry))
+var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry).filterDate(loc_start, endDate))
 print(matching.size());
-print(matching.first())
+print(matching)
