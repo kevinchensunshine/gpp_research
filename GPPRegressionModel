@@ -287,11 +287,11 @@ function sg_smooth(originalCollection) {
   return sgFilteredCol
 }
 
-var sgFilteredCol = sg_smooth(nirv_collection);
+var sgFilteredCol = sg_smooth(nirv_collection.filterBounds(geometry).select(['NIRV']));
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-10-09'
+var loc_start = '2023-09-09'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, endDate)
   .filterBounds(geometry)
@@ -476,6 +476,6 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   return interpolatedCol
 }
 
-var matching = match_nirv_to_par(par_collection, sgFilteredCol)
+var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry))
 print(matching.size());
 print(matching.first())
