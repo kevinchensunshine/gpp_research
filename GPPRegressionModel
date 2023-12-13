@@ -307,23 +307,15 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   var firstImage = ee.Image(nirv_collection.sort('system:time_start').first())
   var timeStart = ee.Date(firstImage.get('system:time_start'))
   
-  function get_time_delta(ms_since_epoch) {
-    var timeDelta = ee.Number(ms_since_epoch).subtract(timeStart.millis());
-    var minutesDelta = timeDelta.divide(60000).round();
-  
-    return minutesDelta.gte(0) ? minutesDelta : null;
-  }
-  
   var daysToInterpolate = par_collection
     .aggregate_array("system:time_start")
-    .map(get_time_delta)
-    .removeAll([null])
+
   print(daysToInterpolate)
   
-  var initImages = daysToInterpolate.map(function(minutes) {
+  var initImages = daysToInterpolate.map(function(millis) {
     var image = initImage.set({
-      'system:index': ee.Number(minutes).format('%d'),
-      'system:time_start': timeStart.advance(minutes, 'minutes').millis(),
+      'system:index': ee.Number(millis).format('%d'),
+      'system:time_start': millis,
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
