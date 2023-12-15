@@ -297,7 +297,7 @@ print(chart)
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-09-30'
+var loc_start = '2023-10-30'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, endDate)
   .filterBounds(geometry)
