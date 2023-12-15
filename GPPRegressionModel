@@ -1,8 +1,9 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var geometry = /* color: #d63000 */ee.Geometry.Polygon(
-        [[[-121.66964260292262, 36.88973036563582],
-          [-121.66954067898006, 36.8888422435209],
-          [-121.6689184064886, 36.889133994920456]]]);
+        [[[-121.66766313266902, 36.88847540733146],
+          [-121.66749415337283, 36.88857623386986],
+          [-121.6677543260736, 36.888816496615135],
+          [-121.66771141246792, 36.88862771971043]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
 
@@ -483,12 +484,15 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 }
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol)
-print(matching.geometry())
 
-var nirvp_collection = par_collection.map(function(par_image) {
-  var date = par_image.get('system:time_start');
-  var nirv_image = matching.filter(ee.Filter.equals('system:time_start', date)).first();
-  return par_image.addBands(nirv_image);
+//verify sizes
+print(matching.size())
+print(par_collection.size())
+
+var nirvp_collection = matching.map(function(nirv_image) {
+  var date = nirv_image.get('system:time_start');
+  var par_image = par_collection.filter(ee.Filter.equals('system:time_start', date)).first();
+  return nirv_image.addBands(par_image);
 });
 
 var multiplyBands = function(image) {
@@ -502,4 +506,14 @@ nirvp_collection = nirvp_collection.map(multiplyBands);
 
 var firstMultipliedImage = ee.Image(nirvp_collection.first());
 Map.addLayer(firstMultipliedImage, {bands: ['NIRVP'], min: 0, max: 1}, 'First multiplied image');
+var point = ee.Geometry.Point([-121.66766313266902,36.88847540733146])
+var pixelValue = firstMultipliedImage.sample({
+  region: point,
+  scale: 30
+}).first()
+print(pixelValue.get('NIRVP'))
+print(pixelValue.get('d_0_NIRV'))
+print(pixelValue.get('GMT_0000_PAR'))
+
+
 
