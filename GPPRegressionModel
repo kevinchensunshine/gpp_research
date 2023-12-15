@@ -1,3 +1,9 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var geometry = /* color: #d63000 */ee.Geometry.Polygon(
+        [[[-121.66964260292262, 36.88973036563582],
+          [-121.66954067898006, 36.8888422435209],
+          [-121.6689184064886, 36.889133994920456]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
 
 var a = 1;
@@ -68,7 +74,6 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
-var geometry = ee.Geometry.Point(-121.789167, 36.846645)
 //load nirv data
 var startDate = '2023-2-9';
 var endDate = '2023-12-12';
@@ -78,8 +83,6 @@ var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
-print(nirv_collection)
-
 //First apply an SG Smoother to clean data
 //---------------------------------------------------------------------------------------
 
@@ -97,6 +100,7 @@ var timeEnd = ee.Date(lastImage.get('system:time_start'))
 var totalDays = timeEnd.difference(timeStart, 'day');
 var daysToInterpolate = ee.List.sequence(0, totalDays, n)
 
+//BUGGY FIX SO THAT IT COPIES THE GEOMETRY AS WELL
 var initImages = daysToInterpolate.map(function(day) {
   var image = initImage.set({
     'system:index': ee.Number(day).format('%d'),
@@ -104,7 +108,7 @@ var initImages = daysToInterpolate.map(function(day) {
     // Set a property so we can identify interpolated images
     'smoothed': 'true'
   })
-  return image
+  return image.clip(geometry)
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
@@ -277,12 +281,13 @@ var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
   maxDiffFilter,
   distanceFunction,
   order)
+print(sgFilteredCol.geometry())
 
 var chart = ui.Chart.image.series({
   imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
   region: geometry,
   reducer: ee.Reducer.mean(),
-  scale: 20
+  scale: 30
 }).setOptions({
       lineWidth: 1,
       title: 'NDVI Time Series',
@@ -329,7 +334,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
-    return image
+    return image.clip(geometry)
   })
   
   var initCol = ee.ImageCollection.fromImages(initImages)
@@ -487,6 +492,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 }
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol)
+print(matching.geometry())
 /*
 print(matching.size());
 var range = matching.reduceColumns(ee.Reducer.minMax(), ['system:time_start'])
@@ -499,7 +505,7 @@ var chart = ui.Chart.image.series({
   imageCollection: matching.select(['NIRV', 'd_0_NIRV', 'Hyperbola_NDVI'], ['NIRV', 'NIRV_sg', 'Modeled']),
   region: geometry,
   reducer: ee.Reducer.mean(),
-  scale: 20
+  scale: 30
 }).setOptions({
       lineWidth: 1,
       title: 'NDVI Time Series',
