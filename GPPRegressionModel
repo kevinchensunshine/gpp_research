@@ -21,7 +21,7 @@ var applyHyperbola = function(image) {
             'b': b
         });
 
-    return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
+    return image.addBands(hyperbolaNDVI.rename('Hyperbola_GPP'), null, true);
 };
 
 function applyScaleFactors(image) {
@@ -505,7 +505,6 @@ var multiplyBands = function(image) {
 nirvp_collection = nirvp_collection.map(multiplyBands);
 
 var firstMultipliedImage = ee.Image(nirvp_collection.first());
-Map.addLayer(firstMultipliedImage, {bands: ['NIRVP'], min: 0, max: 1}, 'First multiplied image');
 var point = ee.Geometry.Point([-121.66766313266902,36.88847540733146])
 var pixelValue = firstMultipliedImage.sample({
   region: point,
@@ -515,5 +514,12 @@ print(pixelValue.get('NIRVP'))
 print(pixelValue.get('d_0_NIRV'))
 print(pixelValue.get('GMT_0000_PAR'))
 
+var gpp_regressed = nirvp_collection.map(applyHyperbola).select('Hyperbola_GPP')
+var gpp_pixel = gpp_regressed.first().sample({
+  region: point,
+  scale: 30
+}).first()
+print(gpp_pixel)
+Map.addLayer(gpp_regressed, {bands: ['Hyperbola_GPP', 'Hyperbola_GPP', 'Hyperbola_GPP'], min: 0, max: 1}, 'First multiplied image');
 
 
