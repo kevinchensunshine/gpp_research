@@ -6,8 +6,8 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
 
-var a = 1;
-var b = 1;
+var a = 0.7478;
+var b = 105.2422;
 
 //run the model over an imagecollection input, which should have an NDVI band
 var applyHyperbola = function(image) {
@@ -484,31 +484,22 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 
 var matching = match_nirv_to_par(par_collection, sgFilteredCol)
 print(matching.geometry())
-/*
-print(matching.size());
-var range = matching.reduceColumns(ee.Reducer.minMax(), ['system:time_start'])
-print('Date range: ', ee.Date(range.get('min')), ee.Date(range.get('max')))
-print(matching.sum())
-*/
 
-matching = matching.map(applyHyperbola)
-var chart = ui.Chart.image.series({
-  imageCollection: matching.select(['NIRV', 'd_0_NIRV', 'Hyperbola_NDVI'], ['NIRV', 'NIRV_sg', 'Modeled']),
-  region: geometry,
-  reducer: ee.Reducer.mean(),
-  scale: 30
-}).setOptions({
-      lineWidth: 1,
-      title: 'NDVI Time Series',
-      interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
-      hAxis: {title: '', format: 'YYYY-MM'},
-      lineWidth: 1,
-      pointSize: 4,
-      series: {
-        0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
-        1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
-      },
+var nirvp_collection = par_collection.map(function(par_image) {
+  var date = par_image.get('system:time_start');
+  var nirv_image = matching.filter(ee.Filter.equals('system:time_start', date)).first();
+  return par_image.addBands(nirv_image);
+});
 
-    })
-print(chart)
+var multiplyBands = function(image) {
+  var nirvBand = image.select('d_0_NIRV');
+  var parBand = image.select('GMT_0000_PAR');
+
+  return image.addBands(nirvBand.multiply(parBand).rename('NIRVP'));
+};
+
+nirvp_collection = nirvp_collection.map(multiplyBands);
+
+var firstMultipliedImage = ee.Image(nirvp_collection.first());
+Map.addLayer(firstMultipliedImage, {bands: ['NIRVP'], min: 0, max: 1}, 'First multiplied image');
+
