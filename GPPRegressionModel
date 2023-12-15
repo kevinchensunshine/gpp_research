@@ -12,7 +12,7 @@ var b = 105.2422;
 
 //run the model over an imagecollection input, which should have an NDVI band
 var applyHyperbola = function(image) {
-    var nirv = image.select('d_0_NIRV');
+    var nirv = image.select('NIRVP');
 
     var hyperbolaNDVI = nirv.expression(
         '((a * x) / (b + x))', {
@@ -484,7 +484,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   return interpolatedCol
 }
 
-var matching = match_nirv_to_par(par_collection, sgFilteredCol)
+var matching = match_nirv_to_par(par_collection, sgFilteredCol.select(['d_0_NIRV']))
 
 //verify sizes
 print(matching.size())
