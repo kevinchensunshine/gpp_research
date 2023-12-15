@@ -184,7 +184,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 1;
+var n = 3;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -484,7 +484,7 @@ var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
 var chart = ui.Chart.image.series({
   imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
   region: geometry,
-  reducer: ee.Reducer.mean(),
+  reducer: ee.Reducer.median(),
   scale: cur_scale
 }).setOptions({
       lineWidth: 1,
@@ -505,7 +505,7 @@ print(chart);
 var featureCollection = sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']).map(function(image) {
     var date = ee.Date(image.get('system:time_start')).format('yyyy-MM-dd HH:mm:ss');
     var NIRV_Median = image.reduceRegion({
-      reducer: ee.Reducer.mean(),
+      reducer: ee.Reducer.median(),
       geometry: geometry,
       scale: cur_scale
       }).get('NIRV_sg');
