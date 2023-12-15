@@ -9,15 +9,6 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
 var a = 1;
 var b = 1;
 
-//run the model over the input array x, which should be a set of nirv values
-function fit(x) {
-  var applyHyperbola = function(nirvp) {
-    return (a * nirvp) / (b + nirvp);
-  }
-  
-  return x.map(applyHyperbola);
-}
-
 //run the model over an imagecollection input, which should have an NDVI band
 var applyHyperbola = function(image) {
     var nirv = image.select('d_0_NIRV');
@@ -306,7 +297,7 @@ print(chart)
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-09-09'
+var loc_start = '2023-09-30'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, endDate)
   .filterBounds(geometry)
