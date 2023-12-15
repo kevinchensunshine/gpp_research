@@ -13,23 +13,18 @@ function fit(x) {
 }
 
 //run the model over an imagecollection input, which should have an NDVI band
-function fit_image_collection(x) {
-  var applyHyperbola = function(image) {
-      var nirv = image.select('NIRV');
+var applyHyperbola = function(image) {
+    var nirv = image.select('d_0_NIRV');
 
-      var hyperbolaNDVI = nirv.expression(
-          '((a * x) / (b + x))', {
-              'x': nirv,
-              'a': a,
-              'b': b
-          });
+    var hyperbolaNDVI = nirv.expression(
+        '((a * x) / (b + x))', {
+            'x': nirv,
+            'a': a,
+            'b': b
+        });
 
-      return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
-  };
-
-  return x.map(applyHyperbola);
-}
-
+    return image.addBands(hyperbolaNDVI.rename('Hyperbola_NDVI'), null, true);
+};
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -476,8 +471,13 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   return interpolatedCol
 }
 
-var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterBounds(geometry).filterDate(loc_start, endDate))
+var matching = match_nirv_to_par(par_collection, sgFilteredCol.filterDate(loc_start, endDate))
+/*
 print(matching.size());
 var range = matching.reduceColumns(ee.Reducer.minMax(), ['system:time_start'])
 print('Date range: ', ee.Date(range.get('min')), ee.Date(range.get('max')))
 print(matching.sum())
+*/
+matching = matching.map(applyHyperbola).filterBounds(geometry)
+print(matching)
+print(matching.geometry())
