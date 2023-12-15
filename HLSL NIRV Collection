@@ -504,6 +504,8 @@ var chart = ui.Chart.image.series({
 
     })
 print(chart);
+print(sgFilteredCol);
+print(sgFilteredCol.geometry())
 
 
 
