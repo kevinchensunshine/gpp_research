@@ -17,16 +17,30 @@ var b = 105.2422;
 
 //run the model over an imagecollection input, which should have an NDVI band
 var applyHyperbola = function(image) {
-    var nirv = image.select('NIRVP');
+    // Define a helper function to apply the hyperbolic formula to a band
+    var applyHyperbolicFormula = function(bandName) {
+        var band = image.select(bandName);
+        return band.expression(
+            '((a * x) / (b + x))', {
+                'x': band,
+                'a': a,
+                'b': b
+            }).rename(bandName + '_Hyperbola_GPP');
+    };
 
-    var hyperbolaNDVI = nirv.expression(
-        '((a * x) / (b + x))', {
-            'x': nirv,
-            'a': a,
-            'b': b
-        });
+    // Apply the formula to each NIRVP band
+    var hyperbolaBands = [
+        applyHyperbolicFormula('NIRVP0000'),
+        applyHyperbolicFormula('NIRVP0300'),
+        applyHyperbolicFormula('NIRVP0600'),
+        applyHyperbolicFormula('NIRVP0900'),
+        applyHyperbolicFormula('NIRVP1200'),
+        applyHyperbolicFormula('NIRVP1500'),
+        applyHyperbolicFormula('NIRVP1800'),
+        applyHyperbolicFormula('NIRVP2100')
+    ];
 
-    return image.addBands(hyperbolaNDVI.rename('Hyperbola_GPP'), null, true);
+    return image.addBands(hyperbolaBands, null, true);
 };
 
 function applyScaleFactors(image) {
@@ -503,46 +517,56 @@ var nirvp_collection = matching.map(function(nirv_image) {
 
 var multiplyBands = function(image) {
   var nirvBand = image.select('d_0_NIRV');
-  var parBand = image.select('GMT_0000_PAR');
-
-  return image.addBands(nirvBand.multiply(parBand).rename('NIRVP'));
+  var par0000Band = image.select('GMT_0000_PAR');
+  var par0300Band = image.select('GMT_0300_PAR');
+  var par0600Band = image.select('GMT_0600_PAR');
+  var par0900Band = image.select('GMT_0900_PAR');
+  var par1200Band = image.select('GMT_1200_PAR');
+  var par1500Band = image.select('GMT_1500_PAR');
+  var par1800Band = image.select('GMT_1800_PAR');
+  var par2100Band = image.select('GMT_2100_PAR');
+  return image.addBands([nirvBand.multiply(par0000Band).rename('NIRVP0000'), 
+                        nirvBand.multiply(par0300Band).rename('NIRVP0300'),
+                        nirvBand.multiply(par0600Band).rename('NIRVP0600'),
+                        nirvBand.multiply(par0900Band).rename('NIRVP0900'),
+                        nirvBand.multiply(par1200Band).rename('NIRVP1200'),
+                        nirvBand.multiply(par1500Band).rename('NIRVP1500'),
+                        nirvBand.multiply(par1800Band).rename('NIRVP1800'),
+                        nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
 };
 
 nirvp_collection = nirvp_collection.map(multiplyBands);
 
-var firstMultipliedImage = ee.Image(nirvp_collection.first());
-var point = ee.Geometry.Point([-121.66766313266902,36.88847540733146])
-var pixelValue = firstMultipliedImage.sample({
-  region: point,
-  scale: 30
-}).first()
-print(pixelValue)
+var gpp_regressed = nirvp_collection.map(applyHyperbola)
 
-var gpp_regressed = nirvp_collection.map(applyHyperbola).select('Hyperbola_GPP')
-var gpp_pixel = gpp_regressed.first().sample({
-  region: point,
-  scale: 30
-}).first()
-print(gpp_pixel)
+var gpp_image = gpp_regressed.first()
 
 //apply min_max normalization to visualize result:
+var bands = ['NIRVP0000_Hyperbola_GPP',
+              'NIRVP0300_Hyperbola_GPP',
+              'NIRVP0600_Hyperbola_GPP',
+              'NIRVP0900_Hyperbola_GPP',
+              'NIRVP1200_Hyperbola_GPP',
+              'NIRVP1500_Hyperbola_GPP',
+              'NIRVP1800_Hyperbola_GPP',
+              'NIRVP2100_Hyperbola_GPP']
+              
+var singleBand = gpp_image.select(bands).toArray();
 
-var minMax = gpp_regressed.first().reduceRegion({
+var minMax = gpp_image.select(bands[0]).reduceRegion({
   reducer: ee.Reducer.minMax(),
   geometry: geometry2, // Or specify your region of interest
   scale: 30, // Adjust according to your image's resolution
   maxPixels: 1e9
 });
 
-var min = minMax.get('Hyperbola_GPP_min');
-var max = minMax.get('Hyperbola_GPP_max');
-var normalizedImage = gpp_regressed.first().expression(
-  '(b("Hyperbola_GPP") - min) / (max - min)', {
-    'Hyperbola_GPP': gpp_regressed.first().select('Hyperbola_GPP'),
-    'min': min,
-    'max': max
-  });
+var min = ee.Image.constant(minMax.get(bands[0] + '_min'));
+var max = ee.Image.constant(minMax.get(bands[0] + '_max'));
+var normalizedImage = gpp_image.select(bands[0])
+                                .subtract(min)
+                                .divide(max.subtract(min))
+                                .rename('Normalized_Hyperbola_GPP');
 
-Map.addLayer(normalizedImage, {bands: ['Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
+Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
 
 
