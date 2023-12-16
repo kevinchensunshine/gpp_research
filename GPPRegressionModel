@@ -3,10 +3,15 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
         [[[-121.66754243326335, 36.887392050775176],
           [-121.66680214344697, 36.88801846879452],
           [-121.66823712369629, 36.88930775401036],
-          [-121.66900423721309, 36.888786467379845]]]);
+          [-121.66900423721309, 36.888786467379845]]]),
+    geometry2 = /* color: #98ff00 */ee.Geometry.Polygon(
+        [[[-121.79345518166257, 36.847117807283986],
+          [-121.79319768959714, 36.8426874951304],
+          [-121.78937822395993, 36.844610762943375],
+          [-121.78929239327145, 36.84931569634027]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
-Map.setCenter(-121.66764972162395, 36.88842606667395, 15)
+Map.setCenter(-121.79103381747437,36.84689684630422, 20)
 var a = 0.7478;
 var b = 105.2422;
 
@@ -67,11 +72,11 @@ function dataset_nirv(image) {
 }
 
 //load nirv data
-var startDate = '2023-2-9';
-var endDate = '2023-12-12';
+var startDate = '2016-01-1';
+var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  .filterBounds(geometry)
+  .filterBounds(geometry2)
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
@@ -101,7 +106,7 @@ var initImages = daysToInterpolate.map(function(day) {
     // Set a property so we can identify interpolated images
     'smoothed': 'true'
   })
-  return image.clip(geometry)
+  return image.clip(geometry2)
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
@@ -278,7 +283,7 @@ print(sgFilteredCol.geometry())
 
 var chart = ui.Chart.image.series({
   imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
-  region: geometry,
+  region: geometry2,
   reducer: ee.Reducer.mean(),
   scale: 30
 }).setOptions({
@@ -299,10 +304,10 @@ print(chart)
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-10-30'
+var loc_start = '2016-08-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
-  .filterDate(loc_start, endDate)
-  .filterBounds(geometry)
+  .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
+  .filterBounds(geometry2)
 print(par_collection)
 
 function match_nirv_to_par(par_collection, nirv_collection) {
@@ -327,7 +332,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
-    return image.clip(geometry)
+    return image.clip(geometry2)
   })
   
   var initCol = ee.ImageCollection.fromImages(initImages)
@@ -519,6 +524,25 @@ var gpp_pixel = gpp_regressed.first().sample({
   scale: 30
 }).first()
 print(gpp_pixel)
-Map.addLayer(gpp_regressed, {bands: ['Hyperbola_GPP', 'Hyperbola_GPP', 'Hyperbola_GPP'], min: 0, max: 1}, 'First multiplied image');
+
+//apply min_max normalization to visualize result:
+
+var minMax = gpp_regressed.first().reduceRegion({
+  reducer: ee.Reducer.minMax(),
+  geometry: geometry2, // Or specify your region of interest
+  scale: 30, // Adjust according to your image's resolution
+  maxPixels: 1e9
+});
+
+var min = minMax.get('Hyperbola_GPP_min');
+var max = minMax.get('Hyperbola_GPP_max');
+var normalizedImage = gpp_regressed.first().expression(
+  '(b("Hyperbola_GPP") - min) / (max - min)', {
+    'Hyperbola_GPP': gpp_regressed.first().select('Hyperbola_GPP'),
+    'min': min,
+    'max': max
+  });
+
+Map.addLayer(normalizedImage, {bands: ['Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
 
 
