@@ -4,7 +4,10 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
           [-121.66680214344697, 36.88801846879452],
           [-121.66823712369629, 36.88930775401036],
           [-121.66900423721309, 36.888786467379845]]]),
-    geometry2 = /* color: #98ff00 */ee.Geometry.Polygon(
+    geometry2 = 
+    /* color: #98ff00 */
+    /* shown: false */
+    ee.Geometry.Polygon(
         [[[-121.79345518166257, 36.847117807283986],
           [-121.79319768959714, 36.8426874951304],
           [-121.78937822395993, 36.844610762943375],
@@ -322,7 +325,6 @@ var loc_start = '2016-08-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
   .filterBounds(geometry2)
-print(par_collection)
 
 function match_nirv_to_par(par_collection, nirv_collection) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
@@ -337,8 +339,6 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   var daysToInterpolate = ee.List(par_collection
     .aggregate_array("system:time_start")).distinct()
 
-  print(daysToInterpolate)
-  
   var initImages = daysToInterpolate.map(function(millis) {
     var image = initImage.set({
       'system:index': ee.Number(millis).format('%d'),
@@ -506,8 +506,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
 var matching = match_nirv_to_par(par_collection, sgFilteredCol.select(['d_0_NIRV']))
 
 //verify sizes
-print(matching.size())
-print(par_collection.size())
+print(matching.size() + ' ' + par_collection.size())
 
 var nirvp_collection = matching.map(function(nirv_image) {
   var date = nirv_image.get('system:time_start');
@@ -567,6 +566,6 @@ var normalizedImage = gpp_image.select(bands[0])
                                 .divide(max.subtract(min))
                                 .rename('Normalized_Hyperbola_GPP');
 
-Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
+Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
 
 
