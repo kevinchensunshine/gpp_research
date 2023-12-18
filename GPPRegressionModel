@@ -594,6 +594,31 @@ var normalizedImage = gpp_image.select(bands[0])
                                 //.divide(max.subtract(min))
                                 .rename('Normalized_Hyperbola_GPP');
 
-Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
+Map.addLayer(gpp_image, {bands: [bands[0]], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
+
+var exportParams = {
+  description: 'Normalized_Hyperbola_GPP_PNG',
+  image: normalizedImage.select(['Normalized_Hyperbola_GPP']),
+  scale: 30, // Adjust this to the resolution you want
+  region: normalizedImage.geometry(), // Define the region or use the image's geometry
+  maxPixels: 1e9,
+  fileFormat: 'PNG'
+};
+
+for (var i = 0; i < 8; i++) {
+  var exportParams = {
+    description: bands[i],
+    image: gpp_image.select(bands[i]),
+    scale: 30, // Adjust this to the resolution you want
+    region: geometry2, // Define the region or use the image's geometry
+    maxPixels: 1e9,
+    fileFormat: 'GeoTiff',
+    folder: 'Kevin_Chen/Dataset/demo_images'
+  };
+
+  Export.image.toDrive(exportParams);
+  print('Export initiated for Normalized_Hyperbola_GPP as PNG');
+}
+
 
 
