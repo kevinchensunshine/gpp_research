@@ -546,7 +546,48 @@ var bands = ['NIRVP0000_Hyperbola_GPP',
               'NIRVP1500_Hyperbola_GPP',
               'NIRVP1800_Hyperbola_GPP',
               'NIRVP2100_Hyperbola_GPP']
-              
+
+function getTimeFromBandName(bandName) {
+  var timeString = bandName.match(/\d+/)[0];
+  var time = ee.Number.parse(timeString);
+  return time.multiply(3600000);
+}
+
+// Split bands into separate images
+var imageList = bands.map(function(bandName) {
+  var time = getTimeFromBandName(bandName);
+  var singleBandImage = gpp_image.select([bandName]).rename('Prediced_GPP');
+  return singleBandImage.set('system:time_start', time);
+});
+
+// Convert the list of images into an image collection
+var imageCollection = ee.ImageCollection(imageList);
+
+print(imageCollection)
+
+var visParams = {
+  bands: ['Prediced_GPP'], // Specify the band to visualize
+  min: 0,
+  max: 4000,
+  palette: ['blue', 'green', 'red']
+};
+
+// Define arguments for animation
+var videoArgs = {
+  dimensions: 600,
+  region: geometry2,
+  framesPerSecond: 2,
+  crs: 'EPSG:3857',
+  min: 0,
+  max: 4000,
+  palette: ['blue', 'green', 'red']
+};
+
+// Generate a URL for an animated GIF
+var url = imageCollection.getVideoThumbURL(videoArgs);
+print(url);
+
+/*              
 var singleBand = gpp_image.select(bands).toArray();
 
 var minMax = gpp_image.select(bands[0]).reduceRegion({
@@ -564,5 +605,5 @@ var normalizedImage = gpp_image.select(bands[0])
                                 .rename('Normalized_Hyperbola_GPP');
 
 Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
-
+*/
 
