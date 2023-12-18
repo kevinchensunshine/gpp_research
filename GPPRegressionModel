@@ -8,13 +8,13 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
     /* color: #98ff00 */
     /* shown: false */
     ee.Geometry.Polygon(
-        [[[-121.79345518166257, 36.847117807283986],
-          [-121.79319768959714, 36.8426874951304],
+        [[[-121.79316550308896, 36.84709205039706],
+          [-121.79319768959714, 36.84238698016512],
           [-121.78937822395993, 36.844610762943375],
-          [-121.78929239327145, 36.84931569634027]]]);
+          [-121.78920656258298, 36.849556086622584]]]);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
-Map.setCenter(-121.79103381747437,36.84689684630422, 20)
+Map.setCenter(-121.79103381747437,36.84689684630422, 17)
 var a = 0.7478;
 var b = 105.2422;
 
@@ -321,7 +321,7 @@ print(chart)
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2016-08-01'
+var loc_start = '2016-10-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
   .filterBounds(geometry2)
@@ -546,7 +546,7 @@ var bands = ['NIRVP0000_Hyperbola_GPP',
               'NIRVP1500_Hyperbola_GPP',
               'NIRVP1800_Hyperbola_GPP',
               'NIRVP2100_Hyperbola_GPP']
-
+/*
 function getTimeFromBandName(bandName) {
   var timeString = bandName.match(/\d+/)[0];
   var time = ee.Number.parse(timeString);
@@ -557,13 +557,13 @@ function getTimeFromBandName(bandName) {
 var imageList = bands.map(function(bandName) {
   var time = getTimeFromBandName(bandName);
   var singleBandImage = gpp_image.select([bandName]).rename('Prediced_GPP');
-  return singleBandImage.set('system:time_start', time);
+  return singleBandImage.set('system:time_start', time).clip(geometry2);
 });
 
 // Convert the list of images into an image collection
 var imageCollection = ee.ImageCollection(imageList);
 
-print(imageCollection)
+print(imageCollection.first())
 
 var visParams = {
   bands: ['Prediced_GPP'], // Specify the band to visualize
@@ -572,22 +572,11 @@ var visParams = {
   palette: ['blue', 'green', 'red']
 };
 
-// Define arguments for animation
-var videoArgs = {
-  dimensions: 600,
-  region: geometry2,
-  framesPerSecond: 2,
-  crs: 'EPSG:3857',
-  min: 0,
-  max: 4000,
-  palette: ['blue', 'green', 'red']
-};
-
 // Generate a URL for an animated GIF
-var url = imageCollection.getVideoThumbURL(videoArgs);
+var url = imageCollection.getVideoThumbURL(visParams);
 print(url);
-
-/*              
+*/
+          
 var singleBand = gpp_image.select(bands).toArray();
 
 var minMax = gpp_image.select(bands[0]).reduceRegion({
@@ -597,13 +586,14 @@ var minMax = gpp_image.select(bands[0]).reduceRegion({
   maxPixels: 1e9
 });
 
+
 var min = ee.Image.constant(minMax.get(bands[0] + '_min'));
 var max = ee.Image.constant(minMax.get(bands[0] + '_max'));
 var normalizedImage = gpp_image.select(bands[0])
-                                .subtract(min)
-                                .divide(max.subtract(min))
+                                //.subtract(min)
+                                //.divide(max.subtract(min))
                                 .rename('Normalized_Hyperbola_GPP');
 
 Map.addLayer(normalizedImage, {bands: ['Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP', 'Normalized_Hyperbola_GPP'], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
-*/
+
 
