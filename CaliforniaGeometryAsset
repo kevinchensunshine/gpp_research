@@ -12,9 +12,12 @@ var cropLandcover = dataset.select('cropland')
 
 // Create a mask where the cropland is equal to 211 (strawberries)
 var strawberriesMask = cropLandcover.eq(221);
-
 // Apply the mask to the dataset
 var strawberries = cropLandcover.updateMask(strawberriesMask);
+
+var confidenceThreshold = 60;
+var highConfidenceMask = dataset.select('confidence').gt(confidenceThreshold);
+var strawberries = strawberries.updateMask(highConfidenceMask);
 
 // Add the layer to the map
 
