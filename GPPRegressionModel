@@ -4,11 +4,51 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
           [-121.66680214344697, 36.88801846879452],
           [-121.66823712369629, 36.88930775401036],
           [-121.66900423721309, 36.888786467379845]]]),
-    geometry2 = /* color: #98ff00 */ee.Geometry.Polygon(
-        [[[-121.79337985280273, 36.85123011180355],
-          [-121.79326183691337, 36.84156270823423],
-          [-121.7777696275416, 36.84165715592991],
-          [-121.77837037947431, 36.85153059395181]]]),
+    geometry2 = /* color: #98ff00 */ee.Geometry({
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -121.81878573659179,
+                36.87976187577679
+              ],
+              [
+                -121.81579239263847,
+                36.7451643075781
+              ],
+              [
+                -121.64177090165049,
+                36.7373835705702
+              ],
+              [
+                -121.64466762449995,
+                36.87934136049436
+              ]
+            ]
+          ],
+          "geodesic": true,
+          "evenOdd": true
+        },
+        {
+          "type": "LineString",
+          "coordinates": [
+            [
+              -121.81561358088685,
+              36.73940059313937
+            ],
+            [
+              -121.63983233088685,
+              36.740501091898714
+            ]
+          ],
+          "geodesic": true
+        }
+      ],
+      "coordinates": []
+    }),
     strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
