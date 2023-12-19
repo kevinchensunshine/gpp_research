@@ -30,6 +30,8 @@ Map.addLayer(strawberryGeometry, {color: 'red'}, 'Strawberry Geometry');
 
 var assetId = 'users/kevinlc3/strawberry_california_landcover';
 
+print(vectorStrawberryFields.size())
+
 Export.table.toAsset({
   collection: vectorStrawberryFields,
   description: 'strawberry_fields_geometry',
