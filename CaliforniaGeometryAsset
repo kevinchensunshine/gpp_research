@@ -1,4 +1,4 @@
-Map.setCenter(-121.789167, 36.846645, 10);
+Map.setCenter(-121.789167, 36.846645, 17);
 
 var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
@@ -8,7 +8,7 @@ var dataset = ee.ImageCollection('USDA/NASS/CDL')
                   .filterBounds(california_bound)
                   .first();
                   
-var cropLandcover = dataset.select('cropland');
+var cropLandcover = dataset.select('cropland')
 
 // Create a mask where the cropland is equal to 211 (strawberries)
 var strawberriesMask = cropLandcover.eq(221);
@@ -16,5 +16,31 @@ var strawberriesMask = cropLandcover.eq(221);
 // Apply the mask to the dataset
 var strawberries = cropLandcover.updateMask(strawberriesMask);
 
+Map.addLayer(strawberries, {color: 'red'}, 'Strawberry Geometry');
+
+
 // Add the layer to the map
-Map.addLayer(strawberries, {palette: ['red']}, 'Strawberry Landcover');
+
+var vectorStrawberryFields = strawberries.reduceToVectors({
+  geometry: california_bound.geometry(),
+  scale: 30, // Adjust the scale based on your data's resolution
+  maxPixels: 1e9
+});
+
+var strawberryGeometry = vectorStrawberryFields.geometry();
+
+Map.addLayer(strawberryGeometry, {color: 'red'}, 'Strawberry Geometry');
+
+var assetId = 'users/kevinlc3/strawberry_california_landcover';
+
+var exportParams = {
+  image: strawberries,
+  description: 'Strawberry_Landcover_Export',
+  assetId: assetId,
+  scale: 30, // Set the scale (resolution) appropriately
+  region: california_bound.geometry(), 
+  maxPixels: 1e9
+};
+
+// Export the image
+Export.image.toAsset(exportParams);
