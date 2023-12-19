@@ -1,4 +1,4 @@
-Map.setCenter(-121.789167, 36.846645, 17);
+Map.setCenter(-121.789167, 36.846645, 10);
 
 var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
@@ -11,7 +11,7 @@ var dataset = ee.ImageCollection('USDA/NASS/CDL')
 var cropLandcover = dataset.select('cropland');
 
 // Create a mask where the cropland is equal to 211 (strawberries)
-var strawberriesMask = cropLandcover.eq(211);
+var strawberriesMask = cropLandcover.eq(221);
 
 // Apply the mask to the dataset
 var strawberries = cropLandcover.updateMask(strawberriesMask);
