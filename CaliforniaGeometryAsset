@@ -30,14 +30,8 @@ Map.addLayer(strawberryGeometry, {color: 'red'}, 'Strawberry Geometry');
 
 var assetId = 'users/kevinlc3/strawberry_california_landcover';
 
-var exportParams = {
-  image: strawberries,
-  description: 'Strawberry_Landcover_Export',
-  assetId: assetId,
-  scale: 30, // Set the scale (resolution) appropriately
-  region: california_bound.geometry(), 
-  maxPixels: 1e9
-};
-
-// Export the image
-Export.image.toAsset(exportParams);
+Export.table.toAsset({
+  collection: vectorStrawberryFields,
+  description: 'strawberry_fields_geometry',
+  assetId: 'users/kevinlc3/strawberry_fields_geometry'
+});
