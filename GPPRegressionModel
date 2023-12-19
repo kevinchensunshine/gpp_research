@@ -4,14 +4,11 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
           [-121.66680214344697, 36.88801846879452],
           [-121.66823712369629, 36.88930775401036],
           [-121.66900423721309, 36.888786467379845]]]),
-    geometry2 = 
-    /* color: #98ff00 */
-    /* shown: false */
-    ee.Geometry.Polygon(
-        [[[-121.79316550308896, 36.84709205039706],
-          [-121.79319768959714, 36.84238698016512],
-          [-121.78937822395993, 36.844610762943375],
-          [-121.78920656258298, 36.849556086622584]]]),
+    geometry2 = /* color: #98ff00 */ee.Geometry.Polygon(
+        [[[-121.79337985280273, 36.85123011180355],
+          [-121.79326183691337, 36.84156270823423],
+          [-121.7777696275416, 36.84165715592991],
+          [-121.77837037947431, 36.85153059395181]]]),
     strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
@@ -97,7 +94,7 @@ var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  .filterBounds(strawberry_fields_california)
+  .filterBounds(geometry2)
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
@@ -127,7 +124,7 @@ var initImages = daysToInterpolate.map(function(day) {
     // Set a property so we can identify interpolated images
     'smoothed': 'true'
   })
-  return image.clip(strawberry_fields_california)
+  return image.clip(geometry2)
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
@@ -305,7 +302,7 @@ if (debug) print(sgFilteredCol.geometry())
 if (debug) {
   var chart = ui.Chart.image.series({
     imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
-    region: strawberry_fields_california,
+    region: geometry2,
     reducer: ee.Reducer.mean(),
     scale: 30
   }).setOptions({
@@ -330,7 +327,7 @@ if (debug) {
 var loc_start = '2016-09-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
-  .filterBounds(strawberry_fields_california)
+  .filterBounds(geometry2)
 
 function match_nirv_to_par(par_collection, nirv_collection) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
@@ -352,7 +349,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
-    return image.clip(strawberry_fields_california)
+    return image.clip(geometry2)
   })
   
   var initCol = ee.ImageCollection.fromImages(initImages)
