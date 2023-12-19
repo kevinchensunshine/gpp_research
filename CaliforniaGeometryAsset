@@ -4,7 +4,7 @@ var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
             
 var dataset = ee.ImageCollection('USDA/NASS/CDL')
-                  .filter(ee.Filter.date('2018-01-01', '2019-12-31'))
+                  .filter(ee.Filter.date('2022-01-01', '2022-10-02'))
                   .filterBounds(california_bound)
                   .first();
                   
@@ -15,9 +15,6 @@ var strawberriesMask = cropLandcover.eq(221);
 
 // Apply the mask to the dataset
 var strawberries = cropLandcover.updateMask(strawberriesMask);
-
-Map.addLayer(strawberries, {color: 'red'}, 'Strawberry Geometry');
-
 
 // Add the layer to the map
 
