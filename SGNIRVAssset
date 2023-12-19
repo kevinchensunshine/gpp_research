@@ -48,7 +48,7 @@ function dataset_nirv(image) {
 }
 
 //load nirv data
-var startDate = '2016-01-1';
+var startDate = '2016-01-01';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
@@ -257,25 +257,3 @@ var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
   order)
   
 if (debug) print(sgFilteredCol.geometry())
-if (debug) {
-  var chart = ui.Chart.image.series({
-    imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
-    region: strawberry_fields_california,
-    reducer: ee.Reducer.mean(),
-    scale: 30
-  }).setOptions({
-        lineWidth: 1,
-        title: 'NDVI Time Series',
-        interpolateNulls: false,
-        vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
-        hAxis: {title: '', format: 'YYYY-MM'},
-        lineWidth: 1,
-        pointSize: 4,
-        series: {
-          0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
-          1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
-        },
-  
-      })
-  print(chart)
-}
