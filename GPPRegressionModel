@@ -509,9 +509,9 @@ function match_nirv_to_par(par_collection, nirv_collection) {
   return interpolatedCol
 }
 
-var matching = match_nirv_to_par(par_collection, sgFilteredCol.select(['d_0_NIRV']))
+var nirvp_collection = match_nirv_to_par(par_collection, sgFilteredCol.select(['d_0_NIRV']))
 
-var nirvp_collection = matching.map(function(nirv_image) {
+var nirvp_collection = nirvp_collection.map(function(nirv_image) {
   var date = nirv_image.get('system:time_start');
   var par_image = par_collection.filter(ee.Filter.equals('system:time_start', date)).first();
   return nirv_image.addBands(par_image);
