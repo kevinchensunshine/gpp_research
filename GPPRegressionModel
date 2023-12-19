@@ -89,8 +89,8 @@ function dataset_nirv(image) {
 }
 
 //load nirv data
-var startDate = '2023-01-1';
-var endDate = '2023-12-30';
+var startDate = '2016-01-1';
+var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .filterBounds(geometry2)
@@ -321,7 +321,7 @@ print(chart)
 //---------------------------------------------------------------------------------------
 
 //load par data
-var loc_start = '2023-09-01'
+var loc_start = '2016-09-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
   .filterBounds(geometry2)
