@@ -110,7 +110,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 15;
+var n = 3;
 var firstImage = ee.Image(nirv_collection.sort('system:time_start').first())
 var lastImage = ee.Image(nirv_collection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
