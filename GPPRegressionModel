@@ -11,9 +11,13 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
         [[[-121.79316550308896, 36.84709205039706],
           [-121.79319768959714, 36.84238698016512],
           [-121.78937822395993, 36.844610762943375],
-          [-121.78920656258298, 36.849556086622584]]]);
+          [-121.78920656258298, 36.849556086622584]]]),
+    strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
+
+var debug = 0
+
 Map.setCenter(-121.79103381747437,36.84689684630422, 17)
 var a = 0.7478;
 var b = 105.2422;
@@ -93,7 +97,7 @@ var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  .filterBounds(geometry2)
+  .filterBounds(strawberry_fields_california)
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
@@ -106,7 +110,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 3;
+var n = 5;
 var firstImage = ee.Image(nirv_collection.sort('system:time_start').first())
 var lastImage = ee.Image(nirv_collection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -123,7 +127,7 @@ var initImages = daysToInterpolate.map(function(day) {
     // Set a property so we can identify interpolated images
     'smoothed': 'true'
   })
-  return image.clip(geometry2)
+  return image.clip(strawberry_fields_california)
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
@@ -296,35 +300,37 @@ var sgFilteredCol = oeel.ImageCollection.SavatskyGolayFilter(
   maxDiffFilter,
   distanceFunction,
   order)
-print(sgFilteredCol.geometry())
-
-var chart = ui.Chart.image.series({
-  imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
-  region: geometry2,
-  reducer: ee.Reducer.mean(),
-  scale: 30
-}).setOptions({
-      lineWidth: 1,
-      title: 'NDVI Time Series',
-      interpolateNulls: false,
-      vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
-      hAxis: {title: '', format: 'YYYY-MM'},
-      lineWidth: 1,
-      pointSize: 4,
-      series: {
-        0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
-        1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
-      },
-
-    })
-print(chart)
+  
+if (debug) print(sgFilteredCol.geometry())
+if (debug) {
+  var chart = ui.Chart.image.series({
+    imageCollection: sgFilteredCol.select(['NIRV', 'd_0_NIRV'], ['NIRV', 'NIRV_sg']),
+    region: strawberry_fields_california,
+    reducer: ee.Reducer.mean(),
+    scale: 30
+  }).setOptions({
+        lineWidth: 1,
+        title: 'NDVI Time Series',
+        interpolateNulls: false,
+        vAxis: {title: 'NDVI', viewWindow: {min: 0, max: 1}},
+        hAxis: {title: '', format: 'YYYY-MM'},
+        lineWidth: 1,
+        pointSize: 4,
+        series: {
+          0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
+          1: {color: '#238b45', lineWidth: 2 }, // Smoothed NDVI
+        },
+  
+      })
+  print(chart)
+}
 //---------------------------------------------------------------------------------------
 
 //load par data
 var loc_start = '2016-09-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
-  .filterBounds(geometry2)
+  .filterBounds(strawberry_fields_california)
 
 function match_nirv_to_par(par_collection, nirv_collection) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
@@ -346,7 +352,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
-    return image.clip(geometry2)
+    return image.clip(strawberry_fields_california)
   })
   
   var initCol = ee.ImageCollection.fromImages(initImages)
@@ -576,12 +582,10 @@ var visParams = {
 var url = imageCollection.getVideoThumbURL(visParams);
 print(url);
 */
-          
-var singleBand = gpp_image.select(bands).toArray();
-
+          /*
 var minMax = gpp_image.select(bands[7]).reduceRegion({
   reducer: ee.Reducer.minMax(),
-  geometry: geometry2, // Or specify your region of interest
+  geometry: strawberry_fields_california, // Or specify your region of interest
   scale: 30, // Adjust according to your image's resolution
   maxPixels: 1e9
 });
@@ -589,12 +593,12 @@ var minMax = gpp_image.select(bands[7]).reduceRegion({
 
 var min = ee.Image.constant(minMax.get(bands[7] + '_min'));
 var max = ee.Image.constant(minMax.get(bands[7] + '_max'));
-print(minMax.get(bands[7] + '_max'))
+if (debug) print(minMax.get(bands[7] + '_max'))
 var normalizedImage = gpp_image.select(bands[7])
                                 //.subtract(min)
                                 //.divide(max.subtract(min))
                                 .rename('Normalized_Hyperbola_GPP');
-
+*/
 Map.addLayer(gpp_image, {bands: [bands[7]], min: 0, max: 1}, 'Normalized Hyperbola_GPP');
 /*
 var exportParams = {
