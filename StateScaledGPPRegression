@@ -129,7 +129,7 @@ for (var i = 0; i < n; i += stride) {
   }
   var batch = field_list.slice(i, end);
   
-  batch = ee.FeatureCollection(batch.map(extract_geometry));
+  batch = ee.FeatureCollection(batch);
   
   var crop_field = batch.geometry().dissolve();
     
