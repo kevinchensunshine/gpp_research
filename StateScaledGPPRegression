@@ -70,7 +70,7 @@ function batch_process_feature(crop_field, index) {
   
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry())
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3)
-  nirv_field = alignCollections(par_field, nirv_field)
+  nirv_field = alignCollections(par_field, nirv_field, crop_field.geometry())
   
   var multiplyBands = function(image) {
     var nirvBand = image.select('d_0_NIRV');
