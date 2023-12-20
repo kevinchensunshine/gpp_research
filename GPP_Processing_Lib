@@ -267,7 +267,7 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
   var initCol = ee.ImageCollection.fromImages(initImages)
   
   // Merge original and empty collections
-  var to_interpolate_collection = to_interpolate_collection.merge(initCol)
+  to_interpolate_collection = to_interpolate_collection.merge(initCol)
   
   // Add a band containing timestamp to each image
   // This will be used to do pixel-wise interpolation later
@@ -367,13 +367,13 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
   // This function takes an image and replaces the masked pixels
   // with the interpolated value from before and after images.
   
-  var interpolateImages = function(image) {
-    var image = ee.Image(image);
+  var interpolateImages = function(img) {
+    var img_ = ee.Image(img);
     // We get the list of before and after images from the image property
     // Mosaic the images so we a before and after image with the closest unmasked pixel
-    var beforeImages = ee.List(image.get('before'))
+    var beforeImages = ee.List(img_.get('before'))
     var beforeMosaic = ee.ImageCollection.fromImages(beforeImages).mosaic()
-    var afterImages = ee.List(image.get('after'))
+    var afterImages = ee.List(img_.get('after'))
     var afterMosaic = ee.ImageCollection.fromImages(afterImages).mosaic()
   
     // Interpolation formula
@@ -391,7 +391,7 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
     var t1 = beforeMosaic.select('timestamp').rename('t1')
     var t2 = afterMosaic.select('timestamp').rename('t2')
   
-    var t = image.metadata('system:time_start').rename('t')
+    var t = img_.metadata('system:time_start').rename('t')
   
     var timeImage = ee.Image.cat([t1, t2, t])
   
@@ -407,8 +407,8 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
     var interpolated = beforeMosaic
       .add((afterMosaic.subtract(beforeMosaic).multiply(timeRatio)))
     // Replace the masked pixels in the current image with the average value
-    var result = image.unmask(interpolated)
-    return result.copyProperties(image, ['system:time_start'])
+    var result = img_.unmask(interpolated)
+    return result.copyProperties(img_, ['system:time_start'])
   }
 
   return ee.ImageCollection(joinedCol.map(interpolateImages)).filter(ee.Filter.eq('type', 'interpolated'))
