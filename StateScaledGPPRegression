@@ -59,8 +59,15 @@ var loc_start = '2016-09-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
 
-function batch_process_feature(crop_field, index) {
-  index = ee.Number(index); 
+var n = strawberry_fields_high_conf.size()
+var field_list = strawberry_fields_high_conf.toList(n);
+
+for (var i = 0; i < n; i++) {
+  
+  print(i)
+  
+  index = ee.Number(i); 
+  var crop_field = field_list.get(i)
   // Filter NIRV data for the specific field
   var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
                                   .map(maskClouds)
@@ -71,7 +78,7 @@ function batch_process_feature(crop_field, index) {
   
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry())
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3)
-  nirv_field = gpp_utils.alignCollections(par_field, nirv_field, crop_field.geometry())
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field.geometry())
   
   var multiplyBands = function(image) {
     var nirvBand = image.select('d_0_NIRV');
@@ -108,22 +115,28 @@ function batch_process_feature(crop_field, index) {
     return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
   });
   
-  var image_id = 'field_' + index.format('%d');
-  var assetId = 'users/your_username/california_gpp_map/' + image_id;
+  var image_id = ee.String('field_').cat(index.format());
+  var assetId = ee.String('users/kevinlc3/california_gpp_map/').cat(image_id);
+
+  // The Export call needs to be handled differently since it's a client-side operation
+  // You can't directly use index or crop_field in the Export parameters
   
-  print(image_id)
-
-  // Export logic
-  // ...Export.image.toAsset...
-
-  // Return the incremented index for the next iteration
-  return index.add(1);
-
-  // Export or store results
-  // Placeholder for exporting or storing the processed image
-  // Export.image.toAsset({...});
+  var export_bands = 
+              ['NIRVP0000_Hyperbola_GPP',
+              'NIRVP0300_Hyperbola_GPP',
+              'NIRVP0600_Hyperbola_GPP',
+              'NIRVP0900_Hyperbola_GPP',
+              'NIRVP1200_Hyperbola_GPP',
+              'NIRVP1500_Hyperbola_GPP',
+              'NIRVP1800_Hyperbola_GPP',
+              'NIRVP2100_Hyperbola_GPP']
+  // Create an export task and start it
+  Export.image.toAsset({
+    image: processed_collection.select(export_bands[6]), // Assuming processed_collection is the image to be exported
+    description: image_id,
+    assetId: assetId,
+    scale: 30,
+    region: crop_field.geometry(),
+    maxPixels: 1e9
+  });
 }
-
-// Apply batch processing to each feature
-var startIndex = ee.Number(1);
-var endIndex = strawberry_fields_high_conf.iterate(batch_process_feature, startIndex);
