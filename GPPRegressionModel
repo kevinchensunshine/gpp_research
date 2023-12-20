@@ -49,9 +49,12 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
       ],
       "coordinates": []
     }),
-    strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry");
+    strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry"),
+    strawberry_fields_california_highconf = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry_highconf");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
+
+
 
 var debug = 0
 
@@ -133,7 +136,7 @@ var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  .filterBounds(strawberry_fields_california)
+  .filterBounds(strawberry_fields_california_highconf)
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
@@ -163,7 +166,7 @@ var initImages = daysToInterpolate.map(function(day) {
     // Set a property so we can identify interpolated images
     'smoothed': 'true'
   })
-  return image.clip(strawberry_fields_california)
+  return image.clip(strawberry_fields_california_highconf)
 })
 
 var initCol = ee.ImageCollection.fromImages(initImages)
@@ -367,7 +370,7 @@ if (debug) {
 var loc_start = '2016-09-01'
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
-  .filterBounds(strawberry_fields_california)
+  .filterBounds(strawberry_fields_california_highconf)
 
 function match_nirv_to_par(par_collection, nirv_collection) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
@@ -389,7 +392,7 @@ function match_nirv_to_par(par_collection, nirv_collection) {
       // Set a property so we can identify interpolated images
       'type': 'interpolated'
     })
-    return image.clip(strawberry_fields_california)
+    return image.clip(strawberry_fields_california_highconf)
   })
   
   var initCol = ee.ImageCollection.fromImages(initImages)
