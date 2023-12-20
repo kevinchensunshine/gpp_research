@@ -1,103 +1,38 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry_highconf");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
 //https://google-earth-engine.com/Advanced-Topics/Scaling-up-in-Earth-Engine/
 
 //init globals
 
-var debug = 0
-
-var a = 0.7478;
-var b = 105.2422;
-
-//run the model over an imagecollection input, which should have an NDVI band
-var applyHyperbola = function(image) {
-    // Define a helper function to apply the hyperbolic formula to a band
-    var applyHyperbolicFormula = function(bandName) {
-        var band = image.select(bandName);
-        return band.expression(
-            '((a * x) / (b + x))', {
-                'x': band,
-                'a': a,
-                'b': b
-            }).rename(bandName + '_Hyperbola_GPP');
-    };
-
-    // Apply the formula to each NIRVP band
-    var hyperbolaBands = [
-        applyHyperbolicFormula('NIRVP0000'),
-        applyHyperbolicFormula('NIRVP0300'),
-        applyHyperbolicFormula('NIRVP0600'),
-        applyHyperbolicFormula('NIRVP0900'),
-        applyHyperbolicFormula('NIRVP1200'),
-        applyHyperbolicFormula('NIRVP1500'),
-        applyHyperbolicFormula('NIRVP1800'),
-        applyHyperbolicFormula('NIRVP2100')
-    ];
-
-    return image.addBands(hyperbolaBands, null, true);
-};
-
-function applyScaleFactors(image) {
-  var opticalBands = image.select('B.').multiply(0.0001);
-  return image.addBands(opticalBands, null, true)
-}
-
-var bitwiseExtract = function(input, fromBit, toBit) {
-  if (toBit === undefined) toBit = fromBit
-  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
-  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
-  return input.rightShift(fromBit).bitwiseAnd(mask)
-}
-
-function maskAerosols(image) {
-  var qa_aerosol = image.select(['SR_QA_AEROSOL']);
-  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7)
-
-  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0)
-  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
-}
-
-function maskClouds(image) {
-  var qa = image.select('Fmask');
-  var cirrus = image.select('B9')
-
-  // Bit 1 and 11 are clouds and cirrus, respectively.
-  var cloudBitMask = 1 << 1;
-
-  // Both flags should be set to zero, indicating clear conditions.
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
-  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
-}
-
-function dataset_ndvi(image) {
-  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
-  return image.addBands(ndvi);
-}
-
-function dataset_nirv(image) {
-  var nirv = image.select('NDVI').multiply(image.select('B5')).rename('NIRV');
-  return image.addBands(nirv);
-}
-
-//load nirv data
 var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
-  
-var loc_start = '2016-09-01'
-var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
-  .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
-  .filterBounds(strawberry_fields_california_highconf)
-
-//create a batch processing function for each feature, where each feature will represent a field
 
 function batch_process_feature(crop_field) {
-  //take a look at some relevant metadata
-  var nirv_field = nirv_collection.filterBounds(crop_field)
+  // Filter NIRV data for the specific field
+  var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
                                   .map(maskClouds)
                                   .map(dataset_ndvi)
                                   .map(dataset_nirv)
-                                  .select(['NIRV'])
+                                  .select(['NIRV']);
   
+  // Filter PAR data for the specific field (if needed)
+  var par_field = par_collection.filterBounds(crop_field.geometry());
+  // ... apply any necessary processing to par_field ...
+
+  // Combine NIRV and PAR data (if necessary)
+  // ... code to combine NIRV and PAR data ...
+
+  // Apply any models or additional processing
+  // For example, applying hyperbola model
+  var processedImage = nirv_field.map(applyHyperbola);
+
+  // Export or store results
+  // Placeholder for exporting or storing the processed image
+  // Export.image.toAsset({...});
 }
 
-strawberry_fields_california_highconf.map(batch_process_feature)
+// Apply batch processing to each feature
+strawberry_fields_california_highconf.map(batch_process_feature);
