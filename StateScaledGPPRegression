@@ -7,6 +7,15 @@ var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberr
 
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
 
+var bands = ['NIRVP0000',
+            'NIRVP0300',
+            'NIRVP0600',
+            'NIRVP0900',
+            'NIRVP1200',
+            'NIRVP1500',
+            'NIRVP1800',
+            'NIRVP2100'];
+
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -50,6 +59,26 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
+function multiplyBands(image) {
+  var nirvBand = image.select('d_0_NIRV');
+  var par0000Band = image.select('GMT_0000_PAR');
+  var par0300Band = image.select('GMT_0300_PAR');
+  var par0600Band = image.select('GMT_0600_PAR');
+  var par0900Band = image.select('GMT_0900_PAR');
+  var par1200Band = image.select('GMT_1200_PAR');
+  var par1500Band = image.select('GMT_1500_PAR');
+  var par1800Band = image.select('GMT_1800_PAR');
+  var par2100Band = image.select('GMT_2100_PAR');
+  return image.addBands([nirvBand.multiply(par0000Band).rename('NIRVP0000'), 
+                        nirvBand.multiply(par0300Band).rename('NIRVP0300'),
+                        nirvBand.multiply(par0600Band).rename('NIRVP0600'),
+                        nirvBand.multiply(par0900Band).rename('NIRVP0900'),
+                        nirvBand.multiply(par1200Band).rename('NIRVP1200'),
+                        nirvBand.multiply(par1500Band).rename('NIRVP1500'),
+                        nirvBand.multiply(par1800Band).rename('NIRVP1800'),
+                        nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
+}
+
 var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
@@ -59,13 +88,12 @@ var loc_start = '2016-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
-var n = strawberry_fields_high_conf.size();
+var n = strawberry_fields_high_conf.size().getInfo();
 var field_list = strawberry_fields_high_conf.toList(n);
 
 for (var i = 0; i < n; i++) {
   
   print(i);
-  
   index = ee.Number(i); 
   var crop_field = field_list.get(i);
   // Filter NIRV data for the specific field
@@ -80,36 +108,7 @@ for (var i = 0; i < n; i++) {
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
   nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field.geometry());
   
-  var multiplyBands = function(image) {
-    var nirvBand = image.select('d_0_NIRV');
-    var par0000Band = image.select('GMT_0000_PAR');
-    var par0300Band = image.select('GMT_0300_PAR');
-    var par0600Band = image.select('GMT_0600_PAR');
-    var par0900Band = image.select('GMT_0900_PAR');
-    var par1200Band = image.select('GMT_1200_PAR');
-    var par1500Band = image.select('GMT_1500_PAR');
-    var par1800Band = image.select('GMT_1800_PAR');
-    var par2100Band = image.select('GMT_2100_PAR');
-    return image.addBands([nirvBand.multiply(par0000Band).rename('NIRVP0000'), 
-                          nirvBand.multiply(par0300Band).rename('NIRVP0300'),
-                          nirvBand.multiply(par0600Band).rename('NIRVP0600'),
-                          nirvBand.multiply(par0900Band).rename('NIRVP0900'),
-                          nirvBand.multiply(par1200Band).rename('NIRVP1200'),
-                          nirvBand.multiply(par1500Band).rename('NIRVP1500'),
-                          nirvBand.multiply(par1800Band).rename('NIRVP1800'),
-                          nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
-  };
-  
-  var nirvp_field = nirv_field.map(multiplyBands);
-
-  var bands = ['NIRVP0000',
-              'NIRVP0300',
-              'NIRVP0600',
-              'NIRVP0900',
-              'NIRVP1200',
-              'NIRVP1500',
-              'NIRVP1800',
-              'NIRVP2100']
+  var nirvp_field = nirv_field.map(multiplyBands).first();
               
   var processed_collection = nirv_field.map(function(image) {
     return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
