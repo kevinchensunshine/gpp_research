@@ -24,7 +24,8 @@ var export_bands =
             'NIRVP1200_Hyperbola_GPP',
             'NIRVP1500_Hyperbola_GPP',
             'NIRVP1800_Hyperbola_GPP',
-            'NIRVP2100_Hyperbola_GPP'];
+            'NIRVP2100_Hyperbola_GPP',
+            'timestamp'];
 
 
 function applyScaleFactors(image) {
@@ -166,7 +167,7 @@ for (var i = 0; i < n; i += stride) {
 
   // save image to imagecollection asset to combine later
   Export.image.toAsset({
-    image: predicted_gpp_field, // Assuming processed_collection is the image to be exported
+    image: predicted_gpp_field.select(export_bands),
     description: image_id,
     assetId: assetId,
     scale: 30,
