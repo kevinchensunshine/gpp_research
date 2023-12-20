@@ -98,14 +98,14 @@ var field_list = strawberry_fields_high_conf.toList(n);
 for (var i = 0; i < n; i++) {
   
   print(i);
-  var crop_field = ee.Feature(field_list.get(i));
+  var crop_field = ee.Feature(field_list.get(i)).geometry();
   // Filter NIRV data for the specific field
   var nirv_field = nirv_collection.filterBounds(crop_field)
                                   .map(maskClouds)
                                   .map(dataset_ndvi)
                                   .map(dataset_nirv)
                                   .select(['NIRV']);
-  var par_field = par_collection.filterBounds(crop_field.geometry());
+  var par_field = par_collection.filterBounds(crop_field);
   
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field);
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
