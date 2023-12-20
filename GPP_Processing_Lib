@@ -3,7 +3,7 @@
  */
 
 //Usage: Input an image, the bands you want to 
-function applyHyperbola(image, nirv_band, par_bands, a, b) {
+function applyHyperbola(image, par_bands, a, b) {
   var applyHyperbolicFormula = function(bandName) {
     var band = image.select(bandName);
     return band.expression(
