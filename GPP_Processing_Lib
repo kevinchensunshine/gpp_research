@@ -3,7 +3,7 @@
  */
 
 //Usage: Input an image, the bands you want to 
-function applyHyperbola(image, par_bands, a, b) {
+exports.applyHyperbola = function(image, par_bands, a, b) {
   var applyHyperbolicFormula = function(bandName) {
     var band = image.select(bandName);
     return band.expression(
@@ -27,7 +27,7 @@ function applyHyperbola(image, par_bands, a, b) {
 /*
  * Interpolate at granularity-days with a given collection at a region of interest. Gap filling and inteprolation
  */
-function interpolateCollection(original_collection, granularity, roi) {
+exports.interpolateCollection = function(original_collection, granularity, roi) {
   var bandNames = ee.Image(original_collection.first()).bandNames();
   var numBands = bandNames.size();
   var initBands = ee.List.repeat(ee.Image(), numBands);
@@ -210,7 +210,7 @@ function interpolateCollection(original_collection, granularity, roi) {
  *  Wrapper around the oeel SG filter implementation with the parameters defined in this project, intended to abstract some boilerplate code
  */
 
-function applySGFilter(interpolatedCollection, order) {
+exports.applySGFilter = function(interpolatedCollection, order) {
   var maxDiffFilter = ee.Filter.maxDifference({
     difference: millis,
     leftField: 'system:time_start',
@@ -238,7 +238,7 @@ function applySGFilter(interpolatedCollection, order) {
  *  Function to matching up the dates of an imagecollection. This is necessary to allow for piecewise multiplication of PAR and NIRV
  */
  
-function alignCollections(base_collection, to_interpolate_collection, roi) {
+exports.alignCollections = function(base_collection, to_interpolate_collection, roi) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
   var bandNames = ee.Image(to_interpolate_collection.first()).bandNames();
   var numBands = bandNames.size();
