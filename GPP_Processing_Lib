@@ -211,6 +211,9 @@ exports.interpolateCollection = function(original_collection, granularity, roi) 
  */
 
 exports.applySGFilter = function(interpolatedCollection, order) {
+  var days = 45;
+  var millis = ee.Number(days).multiply(1000*60*60*24)
+  
   var maxDiffFilter = ee.Filter.maxDifference({
     difference: millis,
     leftField: 'system:time_start',
