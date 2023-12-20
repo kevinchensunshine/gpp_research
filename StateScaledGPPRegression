@@ -24,7 +24,7 @@ var export_bands =
             'NIRVP1200_Hyperbola_GPP',
             'NIRVP1500_Hyperbola_GPP',
             'NIRVP1800_Hyperbola_GPP',
-            'NIRVP2100_Hyperbola_GPP']
+            'NIRVP2100_Hyperbola_GPP'];
 
 
 function applyScaleFactors(image) {
@@ -70,7 +70,14 @@ function dataset_nirv(image) {
 }
 
 function run_hyperbola(image) {
-  return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
+  return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422);
+}
+
+function combine_bands(nirv_image) {
+  var date = nirv_image.get('system:time_start');
+  var par_image = par_field
+                  .filter(ee.Filter.equals('system:time_start', date)).first();
+  return nirv_image.addBands(par_image);
 }
 
 function multiplyBands(image) {
@@ -93,6 +100,10 @@ function multiplyBands(image) {
                         nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
 }
 
+function extract_geometry(feature) {
+  return ee.Feature(feature).geometry();
+}
+
 var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
@@ -105,34 +116,55 @@ var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
 var n = strawberry_fields_high_conf.size().getInfo();
 var field_list = strawberry_fields_high_conf.toList(n);
 
-for (var i = 0; i < n; i++) {
+var stride = 16;
+
+for (var i = 0; i < n; i += stride) {
   
   print(i);
-  var crop_field = ee.Feature(field_list.get(i)).geometry();
+  
+  //Process fields in batches of 16
+  var end = i + stride;
+  if (end > n) {
+      end = n;
+  }
+  var batch = field_list.slice(i, end);
+  
+  var crop_field = batch.map(extract_geometry).reduce(ee.Reducer.union());
+    
   // Filter NIRV data for the specific field
+  //Reduce geometry to batched area
   var nirv_field = nirv_collection.filterBounds(crop_field)
                                   .map(maskClouds)
                                   .map(dataset_ndvi)
                                   .map(dataset_nirv)
                                   .select(['NIRV']);
+                                  
   var par_field = par_collection.filterBounds(crop_field);
   
+  //Interpolate to 10-day intervals
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field);
+  
+  //Apply an SG-filter
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
+  
+  //Interpolate matching values for PAR
   nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field);
   
-  var nirvp_field = nirv_field.map(multiplyBands).first();
-              
+  //Combine nirv and par bands into one image collection
+  var nirvp_collection = nirv_field.map(combine_bands);
+  
+  //temporary: calculate nirvp and take the first image - will work because assuming only want one par day
+  var nirvp_field = nirvp_collection.map(multiplyBands).first();
+  
+  //Run the rectangular hyperbola
   var predicted_gpp_field = run_hyperbola(nirvp_field);
   
   var image_id = 'field_' + i;
   var assetId = 'users/kevinlc3/california_gpp_map/' + image_id;
 
-  // The Export call needs to be handled differently since it's a client-side operation
-  // You can't directly use index or crop_field in the Export parameters
-  // Create an export task and start it
+  // save image to imagecollection asset to combine later
   Export.image.toAsset({
-    image: predicted_gpp_field.select(export_bands[6]), // Assuming processed_collection is the image to be exported
+    image: predicted_gpp_field, // Assuming processed_collection is the image to be exported
     description: image_id,
     assetId: assetId,
     scale: 30,
@@ -140,3 +172,5 @@ for (var i = 0; i < n; i++) {
     maxPixels: 1e9
   });
 }
+
+print("finished");
