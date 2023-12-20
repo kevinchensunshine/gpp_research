@@ -54,8 +54,6 @@ var geometry = /* color: #d63000 */ee.Geometry.Polygon(
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //Define the rectangular hyperbola model
 
-
-
 var debug = 0
 
 var a = 0.7478;
