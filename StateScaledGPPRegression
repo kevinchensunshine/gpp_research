@@ -98,25 +98,24 @@ var field_list = strawberry_fields_high_conf.toList(n);
 for (var i = 0; i < n; i++) {
   
   print(i);
-  index = ee.Number(i); 
-  var crop_field = field_list.get(i);
+  var crop_field = ee.Feature(field_list.get(i));
   // Filter NIRV data for the specific field
-  var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
+  var nirv_field = nirv_collection.filterBounds(crop_field)
                                   .map(maskClouds)
                                   .map(dataset_ndvi)
                                   .map(dataset_nirv)
                                   .select(['NIRV']);
   var par_field = par_collection.filterBounds(crop_field.geometry());
   
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry());
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field);
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
-  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field.geometry());
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field);
   
   var nirvp_field = nirv_field.map(multiplyBands).first();
               
   var predicted_gpp_field = nirvp_field.map(run_hyperbola);
   
-  var image_id = 'field_' + index;
+  var image_id = 'field_' + i;
   var assetId = 'users/kevinlc3/california_gpp_map/' + image_id;
 
   // The Export call needs to be handled differently since it's a client-side operation
@@ -137,7 +136,7 @@ for (var i = 0; i < n; i++) {
     description: image_id,
     assetId: assetId,
     scale: 30,
-    region: crop_field.geometry(),
+    region: crop_field,
     maxPixels: 1e9
   });
 }
