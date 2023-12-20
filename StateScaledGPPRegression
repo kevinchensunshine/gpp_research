@@ -59,6 +59,10 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
+function run_hyperbola(image) {
+  return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
+}
+
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
   var par0000Band = image.select('GMT_0000_PAR');
@@ -110,12 +114,10 @@ for (var i = 0; i < n; i++) {
   
   var nirvp_field = nirv_field.map(multiplyBands).first();
               
-  var processed_collection = nirv_field.map(function(image) {
-    return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
-  });
+  var predicted_gpp_field = nirvp_field.map(run_hyperbola);
   
-  var image_id = ee.String('field_').cat(index.format());
-  var assetId = ee.String('users/kevinlc3/california_gpp_map/').cat(image_id);
+  var image_id = 'field_' + index;
+  var assetId = 'users/kevinlc3/california_gpp_map/' + image_id;
 
   // The Export call needs to be handled differently since it's a client-side operation
   // You can't directly use index or crop_field in the Export parameters
@@ -131,7 +133,7 @@ for (var i = 0; i < n; i++) {
               'NIRVP2100_Hyperbola_GPP']
   // Create an export task and start it
   Export.image.toAsset({
-    image: processed_collection.select(export_bands[6]), // Assuming processed_collection is the image to be exported
+    image: predicted_gpp_field.select(export_bands[6]), // Assuming processed_collection is the image to be exported
     description: image_id,
     assetId: assetId,
     scale: 30,
