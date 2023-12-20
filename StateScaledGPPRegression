@@ -113,7 +113,7 @@ for (var i = 0; i < n; i++) {
   
   var nirvp_field = nirv_field.map(multiplyBands).first();
               
-  var predicted_gpp_field = nirvp_field.map(run_hyperbola);
+  var predicted_gpp_field = run_hyperbola(nirvp_field);
   
   var image_id = 'field_' + i;
   var assetId = 'users/kevinlc3/california_gpp_map/' + image_id;
