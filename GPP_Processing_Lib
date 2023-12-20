@@ -17,8 +17,7 @@ exports.applyHyperbola = function(image, par_bands, a, b) {
   // Apply the formula to each NIRVP band
   for (var i = 0; i < par_bands.length; i++) {
     var parBand = par_bands[i];
-    var combinedBandName = 'NIRV_' + parBand; // Combine NIRV band with PAR band
-    image = image.addBands(applyHyperbolicFormula(combinedBandName), null, true);
+    image = image.addBands(applyHyperbolicFormula(parBand), null, true);
   }
 
   return image;
