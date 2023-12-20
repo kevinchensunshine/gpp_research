@@ -10,27 +10,27 @@ var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib')
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
-  return image.addBands(opticalBands, null, true)
+  return image.addBands(opticalBands, null, true);
 }
 
 var bitwiseExtract = function(input, fromBit, toBit) {
-  if (toBit === undefined) toBit = fromBit
-  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
-  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
-  return input.rightShift(fromBit).bitwiseAnd(mask)
-}
+  if (toBit === undefined) toBit = fromBit;
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit);
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1);
+  return input.rightShift(fromBit).bitwiseAnd(mask);
+};
 
 function maskAerosols(image) {
   var qa_aerosol = image.select(['SR_QA_AEROSOL']);
-  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7)
+  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7);
 
-  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0)
+  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0);
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
 function maskClouds(image) {
   var qa = image.select('Fmask');
-  var cirrus = image.select('B9')
+  var cirrus = image.select('B9');
 
   // Bit 1 and 11 are clouds and cirrus, respectively.
   var cloudBitMask = 1 << 1;
@@ -53,21 +53,21 @@ function dataset_nirv(image) {
 var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
-  .filterDate(startDate, endDate)
+  .filterDate(startDate, endDate);
   
-var loc_start = '2016-09-01'
+var loc_start = '2016-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
-  .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
+  .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
-var n = strawberry_fields_high_conf.size()
+var n = strawberry_fields_high_conf.size();
 var field_list = strawberry_fields_high_conf.toList(n);
 
 for (var i = 0; i < n; i++) {
   
-  print(i)
+  print(i);
   
   index = ee.Number(i); 
-  var crop_field = field_list.get(i)
+  var crop_field = field_list.get(i);
   // Filter NIRV data for the specific field
   var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
                                   .map(maskClouds)
@@ -76,9 +76,9 @@ for (var i = 0; i < n; i++) {
                                   .select(['NIRV']);
   var par_field = par_collection.filterBounds(crop_field.geometry());
   
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry())
-  nirv_field = gpp_utils.applySGFilter(nirv_field, 3)
-  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field.geometry())
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry());
+  nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field.geometry());
   
   var multiplyBands = function(image) {
     var nirvBand = image.select('d_0_NIRV');
