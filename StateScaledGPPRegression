@@ -5,7 +5,7 @@ var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberr
 
 //init globals
 
-var gpp_utils = require('users/kevinlc3/ndvi_nir_collection/GPP_Processing_Lib');
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
 
 
 function applyScaleFactors(image) {
@@ -123,4 +123,4 @@ function batch_process_feature(crop_field, index) {
 
 // Apply batch processing to each feature
 var startIndex = ee.Number(1);
-var endIndex = strawberry_fields_california_highconf.iterate(processFeature, startIndex);
+var endIndex = strawberry_fields_high_conf.iterate(batch_process_feature, startIndex);
