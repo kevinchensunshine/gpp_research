@@ -204,3 +204,31 @@ function interpolateCollection(original_collection, granularity, roi) {
   
   return ee.ImageCollection(joinedCol.map(interpolateImages)).filter(ee.Filter.eq('smoothed', 'true'))
 }
+
+/*
+ *  Wrapper around the oeel SG filter implementation with the parameters defined in this project, intended to abstract some boilerplate code
+ */
+
+function applySGFilter(interpolatedCollection, order) {
+  var maxDiffFilter = ee.Filter.maxDifference({
+    difference: millis,
+    leftField: 'system:time_start',
+    rightField: 'system:time_start'
+  });
+
+  var distanceFunction = function(infromedImage, estimationImage) {
+    return ee.Image.constant(
+      ee.Number(infromedImage.get('system:time_start'))
+        .subtract(
+          ee.Number(estimationImage.get('system:time_start')))
+          );
+  };
+  
+  var oeel=require('users/OEEL/lib:loadAll');
+  
+  return oeel.ImageCollection.SavatskyGolayFilter(
+  interpolatedCol, 
+  maxDiffFilter,
+  distanceFunction,
+  order);
+}
