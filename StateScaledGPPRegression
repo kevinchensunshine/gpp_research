@@ -5,29 +5,116 @@ var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberr
 
 //init globals
 
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection/GPP_Processing_Lib');
+
+
+function applyScaleFactors(image) {
+  var opticalBands = image.select('B.').multiply(0.0001);
+  return image.addBands(opticalBands, null, true)
+}
+
+var bitwiseExtract = function(input, fromBit, toBit) {
+  if (toBit === undefined) toBit = fromBit
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit)
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1)
+  return input.rightShift(fromBit).bitwiseAnd(mask)
+}
+
+function maskAerosols(image) {
+  var qa_aerosol = image.select(['SR_QA_AEROSOL']);
+  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7)
+
+  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0)
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function maskClouds(image) {
+  var qa = image.select('Fmask');
+  var cirrus = image.select('B9')
+
+  // Bit 1 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 1;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function dataset_nirv(image) {
+  var nirv = image.select('NDVI').multiply(image.select('B5')).rename('NIRV');
+  return image.addBands(nirv);
+}
+
 var startDate = '2016-01-1';
 var endDate = '2016-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
+  
+var loc_start = '2016-09-01'
+var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
+  .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
 
-function batch_process_feature(crop_field) {
+function batch_process_feature(crop_field, index) {
   // Filter NIRV data for the specific field
   var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
                                   .map(maskClouds)
                                   .map(dataset_ndvi)
                                   .map(dataset_nirv)
                                   .select(['NIRV']);
-  
-  // Filter PAR data for the specific field (if needed)
   var par_field = par_collection.filterBounds(crop_field.geometry());
-  // ... apply any necessary processing to par_field ...
+  
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry())
+  nirv_field = gpp_utils.applySGFilter(nirv_field, 3)
+  nirv_field = alignCollections(par_field, nirv_field)
+  
+  var multiplyBands = function(image) {
+    var nirvBand = image.select('d_0_NIRV');
+    var par0000Band = image.select('GMT_0000_PAR');
+    var par0300Band = image.select('GMT_0300_PAR');
+    var par0600Band = image.select('GMT_0600_PAR');
+    var par0900Band = image.select('GMT_0900_PAR');
+    var par1200Band = image.select('GMT_1200_PAR');
+    var par1500Band = image.select('GMT_1500_PAR');
+    var par1800Band = image.select('GMT_1800_PAR');
+    var par2100Band = image.select('GMT_2100_PAR');
+    return image.addBands([nirvBand.multiply(par0000Band).rename('NIRVP0000'), 
+                          nirvBand.multiply(par0300Band).rename('NIRVP0300'),
+                          nirvBand.multiply(par0600Band).rename('NIRVP0600'),
+                          nirvBand.multiply(par0900Band).rename('NIRVP0900'),
+                          nirvBand.multiply(par1200Band).rename('NIRVP1200'),
+                          nirvBand.multiply(par1500Band).rename('NIRVP1500'),
+                          nirvBand.multiply(par1800Band).rename('NIRVP1800'),
+                          nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
+  };
+  
+  var nirvp_field = nirv_field.map(multiplyBands);
 
-  // Combine NIRV and PAR data (if necessary)
-  // ... code to combine NIRV and PAR data ...
+  var bands = ['NIRVP0000',
+              'NIRVP0300',
+              'NIRVP0600',
+              'NIRVP0900',
+              'NIRVP1200',
+              'NIRVP1500',
+              'NIRVP1800',
+              'NIRVP2100']
+              
+  var processed_collection = nirv_field.map(function(image) {
+    return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422)
+  });
+  
+  var image_id = 'field_' + index.format('%d');
+  var assetId = 'users/your_username/california_gpp_map/' + image_id;
 
-  // Apply any models or additional processing
-  // For example, applying hyperbola model
-  var processedImage = nirv_field.map(applyHyperbola);
+  // Export logic
+  // ...Export.image.toAsset...
+
+  // Return the incremented index for the next iteration
+  return index.add(1);
 
   // Export or store results
   // Placeholder for exporting or storing the processed image
@@ -35,4 +122,5 @@ function batch_process_feature(crop_field) {
 }
 
 // Apply batch processing to each feature
-strawberry_fields_california_highconf.map(batch_process_feature);
+var startIndex = ee.Number(1);
+var endIndex = strawberry_fields_california_highconf.iterate(processFeature, startIndex);
