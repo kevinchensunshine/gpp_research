@@ -15,6 +15,16 @@ var bands = ['NIRVP0000',
             'NIRVP1500',
             'NIRVP1800',
             'NIRVP2100'];
+            
+var export_bands = 
+            ['NIRVP0000_Hyperbola_GPP',
+            'NIRVP0300_Hyperbola_GPP',
+            'NIRVP0600_Hyperbola_GPP',
+            'NIRVP0900_Hyperbola_GPP',
+            'NIRVP1200_Hyperbola_GPP',
+            'NIRVP1500_Hyperbola_GPP',
+            'NIRVP1800_Hyperbola_GPP',
+            'NIRVP2100_Hyperbola_GPP']
 
 
 function applyScaleFactors(image) {
@@ -120,16 +130,6 @@ for (var i = 0; i < n; i++) {
 
   // The Export call needs to be handled differently since it's a client-side operation
   // You can't directly use index or crop_field in the Export parameters
-  
-  var export_bands = 
-              ['NIRVP0000_Hyperbola_GPP',
-              'NIRVP0300_Hyperbola_GPP',
-              'NIRVP0600_Hyperbola_GPP',
-              'NIRVP0900_Hyperbola_GPP',
-              'NIRVP1200_Hyperbola_GPP',
-              'NIRVP1500_Hyperbola_GPP',
-              'NIRVP1800_Hyperbola_GPP',
-              'NIRVP2100_Hyperbola_GPP']
   // Create an export task and start it
   Export.image.toAsset({
     image: predicted_gpp_field.select(export_bands[6]), // Assuming processed_collection is the image to be exported
