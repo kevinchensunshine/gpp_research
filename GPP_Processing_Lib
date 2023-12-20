@@ -1,41 +1,26 @@
-/**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var strawberry_fields_california_highconf = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry_highconf");
-/***** End of imports. If edited, may not auto-convert in the playground. *****/
-//https://google-earth-engine.com/Advanced-Topics/Scaling-up-in-Earth-Engine/
+/*
+ *  library of commonly used function in this study
+ */
 
-//init globals
+//Usage: Input an image, the bands you want to 
+function applyHyperbola(image, nirv_band, par_bands, a, b) {
+  var applyHyperbolicFormula = function(bandName) {
+      var band = image.select(bandName);
+      return band.expression(
+          '((a * x) / (b + x))', {
+              'x': band,
+              'a': a,
+              'b': b
+          }).rename(bandName + '_Hyperbola_GPP');
+  };
 
-var debug = 0
+  // Apply the formula to each NIRVP band
+  
+  for (band in par_bands) {
+    image.addBands(applyHyperbolicFormula(band), null, true);
+  }
 
-var a = 0.7478;
-var b = 105.2422;
-
-//run the model over an imagecollection input, which should have an NDVI band
-var applyHyperbola = function(image) {
-    // Define a helper function to apply the hyperbolic formula to a band
-    var applyHyperbolicFormula = function(bandName) {
-        var band = image.select(bandName);
-        return band.expression(
-            '((a * x) / (b + x))', {
-                'x': band,
-                'a': a,
-                'b': b
-            }).rename(bandName + '_Hyperbola_GPP');
-    };
-
-    // Apply the formula to each NIRVP band
-    var hyperbolaBands = [
-        applyHyperbolicFormula('NIRVP0000'),
-        applyHyperbolicFormula('NIRVP0300'),
-        applyHyperbolicFormula('NIRVP0600'),
-        applyHyperbolicFormula('NIRVP0900'),
-        applyHyperbolicFormula('NIRVP1200'),
-        applyHyperbolicFormula('NIRVP1500'),
-        applyHyperbolicFormula('NIRVP1800'),
-        applyHyperbolicFormula('NIRVP2100')
-    ];
-
-    return image.addBands(hyperbolaBands, null, true);
+  return image
 };
 
 function applyScaleFactors(image) {
