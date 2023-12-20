@@ -231,7 +231,7 @@ exports.applySGFilter = function(interpolatedCollection, order) {
   var oeel=require('users/OEEL/lib:loadAll');
   
   return oeel.ImageCollection.SavatskyGolayFilter(
-  interpolatedCol, 
+  interpolatedCollection, 
   maxDiffFilter,
   distanceFunction,
   order);
