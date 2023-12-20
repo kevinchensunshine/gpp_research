@@ -240,7 +240,6 @@ exports.applySGFilter = function(interpolatedCollection, order) {
 /*
  *  Function to matching up the dates of an imagecollection. This is necessary to allow for piecewise multiplication of PAR and NIRV
  */
- 
 exports.alignCollections = function(base_collection, to_interpolate_collection, roi) {
   //for each image in the par_collection, we want to interpolate a corresponding nirv image
   var bandNames = ee.Image(to_interpolate_collection.first()).bandNames();
