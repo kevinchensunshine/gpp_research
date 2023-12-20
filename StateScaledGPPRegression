@@ -60,6 +60,7 @@ var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'))
 
 function batch_process_feature(crop_field, index) {
+  index = ee.Number(index); 
   // Filter NIRV data for the specific field
   var nirv_field = nirv_collection.filterBounds(crop_field.geometry())
                                   .map(maskClouds)
@@ -70,7 +71,7 @@ function batch_process_feature(crop_field, index) {
   
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field.geometry())
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3)
-  nirv_field = alignCollections(par_field, nirv_field, crop_field.geometry())
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field, crop_field.geometry())
   
   var multiplyBands = function(image) {
     var nirvBand = image.select('d_0_NIRV');
@@ -109,6 +110,8 @@ function batch_process_feature(crop_field, index) {
   
   var image_id = 'field_' + index.format('%d');
   var assetId = 'users/your_username/california_gpp_map/' + image_id;
+  
+  print(image_id)
 
   // Export logic
   // ...Export.image.toAsset...
