@@ -5,7 +5,7 @@ var composite = predicted_gpp_collection.mosaic();
 Map.setCenter(-121.789167, 36.846645, 6);
 
 var vizParams={
-   bands: ['NIRVP1800_Hyperbola_GPP'],
+   bands: ['NIRVP1800_Hyperbola_GPP', 'NIRVP1800_Hyperbola_GPP', 'NIRVP1800_Hyperbola_GPP'],
    min: 0,
    max: 1
 };
