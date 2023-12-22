@@ -3,6 +3,11 @@
  */
 
 //Usage: Input an image, the bands you want to 
+
+/*
+ * Function to apply a retangular hyperbola model with parameters a, b to a given image.
+ * Input an image and specify the bands to evaluate
+ */
 exports.applyHyperbola = function(image, par_bands, a, b) {
   var applyHyperbolicFormula = function(bandName) {
     var band = image.select(bandName);
