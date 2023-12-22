@@ -115,10 +115,10 @@ var loc_start = '2016-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
-var n = strawberry_fields_high_conf.size().getInfo();
-var field_list = strawberry_fields_high_conf.toList(n);
+var n = strawberry_fields_california.size().getInfo();
+var field_list = strawberry_fields_california.toList(n);
 
-var stride = 16;
+var stride = 256;
 
 for (var i = 0; i < n; i += stride) {
   
@@ -146,7 +146,7 @@ for (var i = 0; i < n; i += stride) {
   var par_field = par_collection.filterBounds(crop_field);
   
   //Interpolate to 10-day intervals
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 10, crop_field);
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 15, crop_field);
   
   //Apply an SG-filter
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
