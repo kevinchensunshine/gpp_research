@@ -1,5 +1,6 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry_highconf");
+var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry_highconf"),
+    strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_geometry");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 //https://google-earth-engine.com/Advanced-Topics/Scaling-up-in-Earth-Engine/
 
