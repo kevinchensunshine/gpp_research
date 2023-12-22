@@ -1,7 +1,8 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
-var predicted_gpp_collection = ee.ImageCollection("users/kevinlc3/california_gpp_map");
+var predicted_gpp_collection = ee.ImageCollection("users/kevinlc3/california_gpp_map"),
+    predicted_gpp_full = ee.ImageCollection("users/kevinlc3/california_gpp_map_full");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
-var composite = predicted_gpp_collection.mosaic();
+var composite = predicted_gpp_full.mosaic();
 Map.setCenter(-121.789167, 36.846645, 6);
 
 var vizParams={
