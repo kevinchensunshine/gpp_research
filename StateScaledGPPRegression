@@ -149,8 +149,8 @@ for (var i = 0; i < n; i += stride) {
                                   
   var par_field = par_collection.filterBounds(crop_field);
   
-  //Interpolate to 10-day intervals
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 15, crop_field);
+  //Interpolate to weekly intervals
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, crop_field);
   
   //Apply an SG-filter
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
