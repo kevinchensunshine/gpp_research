@@ -71,8 +71,10 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
+var a = 0.7478;
+var b = 105.2422;
 function run_hyperbola(image) {
-  return gpp_utils.applyHyperbola(image, bands, 0.7478, 105.2422);
+  return gpp_utils.applyHyperbola(image, bands, a, b);
 }
 
 function combine_bands(nirv_image) {
@@ -118,7 +120,9 @@ var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
 var n = strawberry_fields_california.size().getInfo();
 var field_list = strawberry_fields_california.toList(n);
 
-var stride = 256;
+
+//google earth engine allows 40 concurrent tasks at a time. This ensures best performance by splitting up 40 evenly
+var stride = Math.ceil(n / 40);
 
 for (var i = 0; i < n; i += stride) {
   
