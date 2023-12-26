@@ -6,7 +6,7 @@ var strawberry_fields_high_conf = ee.FeatureCollection("users/kevinlc3/strawberr
 
 //init globals
 
-var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection/gpp_lib:GPP_Processing_Lib');
 
 var bands = ['NIRVP0000',
             'NIRVP0300',
