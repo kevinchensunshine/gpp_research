@@ -1,7 +1,13 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var cropland = ee.ImageCollection("USDA/NASS/CDL"),
-    geometry = /* color: #d63000 */ee.Geometry.Point([-121.79103381747437, 36.84689684630422]),
-    polygon = /* color: #98ff00 */ee.Geometry.Polygon(
+    geometry = 
+    /* color: #d63000 */
+    /* shown: false */
+    ee.Geometry.Point([-121.79103381747437, 36.84689684630422]),
+    polygon = 
+    /* color: #98ff00 */
+    /* shown: false */
+    ee.Geometry.Polygon(
         [[[-121.789167, 36.846645],
           [-121.78960688227845, 36.84705218222514],
           [-121.79216111506652, 36.84691621535593],
