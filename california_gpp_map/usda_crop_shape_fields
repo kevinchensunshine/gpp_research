@@ -1,40 +1,46 @@
-//Import the shapefile into an asset
-//Map the shapefile out
-//For each field, clip it to strawberry field
-
-//Open source california import from 
-//https://code.earthengine.google.com/?scriptPath=users%2Fsat-io%2Fawesome-gee-catalog-examples%3Aagriculture-vegetation-forestry%2FUSDA-CSB-APP
+// Your initial setup
 var csbca22 = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
+var california_bound = ee.FeatureCollection('TIGER/2016/States')
+            .filter(ee.Filter.eq('NAME', 'California'));
+var cdl = ee.ImageCollection('USDA/NASS/CDL')
+                  .filter(ee.Filter.date('2016-01-01', '2016-10-02'))
+                  .filterBounds(california_bound)
+                  .first();
 
-var istate= {
-  California: [csbca22,'R22','R21','R20','R19','R18','R17','R16','R15',2022, "06", 'ACRES','CROP22','CROP21','CROP20','CROP19','CROP18','CROP17','CROP16','CROP15']
-};
+// Filter for strawberry fields
+var strawberry_layer_csbca22 = csbca22.filter(ee.Filter.eq('CROP16', 'Strawberries'));
 
-print(csbca22.first())
-
-var strawberry_layer = csbca22.filter(ee.Filter.eq('CROP16', 'Strawberries'))
-
-print(strawberry_layer.size())
-
+// Visualization Parameters
 var visParams = {
-  color: 'black', // Set the outline color of the features to black
-  fillColor: 'ff0000' // Transparent fill, represented as 8-digit hex code (last two digits are alpha value)
+  color: 'black',
+  fillColor: 'ff0000' // Red fill color
 };
 
-var state_outline = Map.addLayer(strawberry_layer.style(visParams), visParams) 
+// Adding layers to the map
+Map.addLayer(strawberry_layer_csbca22, visParams, "Strawberry Fields");
+
+// Mask the CDL image to keep only strawberry classified areas
+var cropLandcover = cdl.select('cropland')
+// Create a mask where the cropland is equal to 211 (strawberries)
+var strawberriesMask = cropLandcover.eq(221);
+// Apply the mask to the dataset
+var strawberries = cropLandcover.updateMask(strawberriesMask);
 
 
-var addBandProperty = function(feature) {
-  // Reduce the region for the feature
-  var meanValue = myImage.reduceRegion({
-    reducer: ee.Reducer.mean(),
-    geometry: feature.geometry(),
-    scale: 30 // Replace with an appropriate scale for your data
-  });
+// Add masked CDL to the map
+Map.addLayer(strawberries, {}, 'CDL Strawberry Areas');
 
-  // Get the mean value of the specified band
-  var bandValue = meanValue.get(bandName);
+var vectorStrawberryFields = strawberries.reduceToVectors({
+  geometry: california_bound.geometry(),
+  scale: 30, // Adjust the scale based on your data's resolution
+  maxPixels: 1e9
+});
+// Process each strawberry field
 
-  // Return the feature with the new property
-  return feature.set(bandName + '_mean', bandValue);
-};
+var strawberry_geom = vectorStrawberryFields.geometry();
+
+var majority_vote_strawberies = strawberry_layer_csbca22.map(function(feature) {
+  return feature.intersection(strawberry_geom, 1);
+});
+
+var state_outline = Map.addLayer(majority_vote_strawberies, visParams, "majority vote") 
