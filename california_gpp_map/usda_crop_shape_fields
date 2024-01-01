@@ -1,0 +1,40 @@
+//Import the shapefile into an asset
+//Map the shapefile out
+//For each field, clip it to strawberry field
+
+//Open source california import from 
+//https://code.earthengine.google.com/?scriptPath=users%2Fsat-io%2Fawesome-gee-catalog-examples%3Aagriculture-vegetation-forestry%2FUSDA-CSB-APP
+var csbca22 = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
+
+var istate= {
+  California: [csbca22,'R22','R21','R20','R19','R18','R17','R16','R15',2022, "06", 'ACRES','CROP22','CROP21','CROP20','CROP19','CROP18','CROP17','CROP16','CROP15']
+};
+
+print(csbca22.first())
+
+var strawberry_layer = csbca22.filter(ee.Filter.eq('CROP16', 'Strawberries'))
+
+print(strawberry_layer.size())
+
+var visParams = {
+  color: 'black', // Set the outline color of the features to black
+  fillColor: 'ff0000' // Transparent fill, represented as 8-digit hex code (last two digits are alpha value)
+};
+
+var state_outline = Map.addLayer(strawberry_layer.style(visParams), visParams) 
+
+
+var addBandProperty = function(feature) {
+  // Reduce the region for the feature
+  var meanValue = myImage.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: feature.geometry(),
+    scale: 30 // Replace with an appropriate scale for your data
+  });
+
+  // Get the mean value of the specified band
+  var bandValue = meanValue.get(bandName);
+
+  // Return the feature with the new property
+  return feature.set(bandName + '_mean', bandValue);
+};
