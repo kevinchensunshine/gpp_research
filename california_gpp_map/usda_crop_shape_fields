@@ -48,9 +48,32 @@ var state_outline = Map.addLayer(majority_vote_strawberies, visParams, "majority
 
 print(majority_vote_strawberies.first())
 
-Export.table.toAsset({
-  collection: majority_vote_strawberies,
-  description: 'strawberry_fields_cdl_csba_intersect',
-  assetId: 'users/kevinlc3/strawberry_fields_cdl_csba_intersect'
-});
+var n = majority_vote_strawberies.size().getInfo();
+
+//export to asset is really slow right now. Let's try parallelizing it
+//google earth engine allows 40 concurrent tasks at a time. This ensures best performance by splitting up 40 evenly
+var stride = Math.ceil(n / 40);
+
+for (var i = 0; i < n; i += stride) {
+  var end = i + stride;
+  if (end > n) {
+    end = n;
+  }
+
+  var batch = majority_vote_strawberies.toList(stride, i); // Get a batch of features
+  var batchFeatureCollection = ee.FeatureCollection(batch);
+
+  // Define the asset ID for each batch
+  var assetId = 'users/kevinlc3/csbca_strawberries_field_level/batch_' + i;
+
+  // Export each batch to an asset
+  var asset = Export.table.toAsset({
+    collection: batchFeatureCollection,
+    description: 'Batch_' + i,
+    assetId: assetId
+  });
+  
+}
+
+print("Export tasks initialized");
 
