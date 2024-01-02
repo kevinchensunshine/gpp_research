@@ -1,0 +1,4 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var roi = ee.FeatureCollection("users/kevinlc3/strawberry_fields_cdl_csba_intersect");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+Map.addLayer(roi, {}, "csbca and cdl majority vote");
