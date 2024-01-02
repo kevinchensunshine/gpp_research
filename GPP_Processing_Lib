@@ -413,6 +413,55 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
 }
 
 /**
+ * Generic function for batch processing and exporting a FeatureCollection in Google Earth Engine.
+ *
+ * @param {ee.FeatureCollection} collection - The collection to be processed.
+ * @param {function} processFunction - Function that takes a batch (FeatureCollection) and returns a processed FeatureCollection.
+ * @param {String} baseAssetId - Base asset path for exporting.
+ * @param {Number} numberOfBatches - Number of batches to divide the collection into.
+ */
+ 
+exports.batchProcessFeatureCollection = function genericBatchExport(collection, processFunction, baseAssetId, numberOfBatches) {
+  var n = collection.size().getInfo();
+  var stride = Math.ceil(n / numberOfBatches);
+
+  for (var i = 0; i < n; i += stride) {
+    var end = Math.min(i + stride, n);
+    var batch = collection.toList(stride, i);
+    var batchFeatureCollection = ee.FeatureCollection(batch);
+
+    // Apply the user-defined processing function
+    var processedBatch = processFunction(batchFeatureCollection);
+
+    var assetId = baseAssetId + '/batch_' + i;
+
+    Export.table.toAsset({
+      collection: processedBatch,
+      description: 'Batch_' + i,
+      assetId: assetId
+    });
+  }
+}
+
+/* Example usage:
+-Define a processing function
+function myProcessingFunction(batchFeatureCollection) {
+  -User-defined processing logic here
+  -For example, this could be a function that intersects each feature in the batch
+  -with another dataset, performs calculations, etc.
+  -Return a processed FeatureCollection
+  return batchFeatureCollection; // Placeholder for actual processing
+}
+
+var collection = majority_vote_strawberies; // Your FeatureCollection
+var baseAssetId = 'users/kevinlc3/csbca_strawberries_field_level';
+var numberOfBatches = 40; // Number of desired batches
+
+-Call the generic function with your collection, processing function, and other parameters
+genericBatchExport(collection, myProcessingFunction, baseAssetId, numberOfBatches);
+*/
+
+/**
  * Utility function for batch processing. Merges all the featurecollection in a folder
  * @param folderPath earth engine path to a folder
  * @param collectionNames names of the respective collections
