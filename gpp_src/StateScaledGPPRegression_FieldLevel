@@ -76,13 +76,6 @@ function run_hyperbola(image) {
   return gpp_utils.applyHyperbola(image, bands, a, b);
 }
 
-function combine_bands(nirv_image) {
-  var date = nirv_image.get('system:time_start');
-  var par_image = par_field
-                  .filter(ee.Filter.equals('system:time_start', date)).first();
-  return nirv_image.addBands(par_image);
-}
-
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
   var par0000Band = image.select('GMT_0000_PAR');
@@ -123,24 +116,32 @@ var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
 var n = strawberry_fields_california.size().getInfo();
 var field_list = strawberry_fields_california.toList(n);
 
-
-function gpp_predictor(crop_field) {
+function gpp_predictor(field) {
+  
+  var roi = field.geometry();
   //Reduce geometry to batched area
-  var nirv_field = nirv_collection.filterBounds(crop_field);
+  var nirv_field = nirv_collection.filterBounds(roi);
                                   
-  var par_field = par_collection.filterBounds(crop_field);
+  var par_field = par_collection.filterBounds(roi);
   
   //Interpolate to weekly intervals
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, crop_field);
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi);
   
   //Apply an SG-filter
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
   
   //Interpolate matching values for PAR
-  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), crop_field);
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), roi);
+  
+  var nirvp = function(nirv_image) {
+    var date = nirv_image.get('system:time_start');
+    var par_image = par_field
+                    .filter(ee.Filter.equals('system:time_start', date)).first();
+    return nirv_image.addBands(par_image);
+  };
   
   //Combine nirv and par bands into one image collection
-  var nirvp_collection = nirv_field.map(combine_bands);
+  var nirvp_collection = nirv_field.map(nirvp);
   
   //temporary: calculate nirvp and take the first image - calculate at a target day
   var nirvp_field = nirvp_collection.map(multiplyBands).first();
@@ -148,7 +149,7 @@ function gpp_predictor(crop_field) {
   //Run the rectangular hyperbola
   var predicted_gpp_field = run_hyperbola(nirvp_field);
   
-  return predicted_gpp_field;
+  return ee.Image(predicted_gpp_field);
 }
 
 function calculate_field_level(image) {
@@ -203,11 +204,11 @@ for (var i = 0; i < n; i += stride) {
   //In order to preserve crop borders now, we need to map this batch to process each feature individually
   
   //First retrieve the pixel-wise computation
-  var pixel_wise_prediction_collection = crop_field.map(gpp_predictor);
+  var pixel_wise_prediction_collection = ee.ImageCollection(crop_field.map(gpp_predictor));
   
   //now map each feature to add a reduced field-level band. 
   //This returns a featurecollection where each feature has the corresponsing geometry and mean values of each field as a property
-  var field_level_prediction_collection = pixel_wise_prediction_collection.map(calculate_field_level);
+  var field_level_prediction_collection = ee.FeatureCollection(pixel_wise_prediction_collection.map(calculate_field_level));
   
   // Define the asset ID for each batch
   var assetId = 'users/kevinlc3/california_field_level_gpp/batch_' + i;
