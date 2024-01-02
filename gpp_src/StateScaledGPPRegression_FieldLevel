@@ -113,9 +113,6 @@ var loc_start = '2016-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
-var n = strawberry_fields_california.size().getInfo();
-var field_list = strawberry_fields_california.toList(n);
-
 function gpp_predictor(field) {
   
   var roi = field.geometry();
@@ -149,7 +146,7 @@ function gpp_predictor(field) {
   //Run the rectangular hyperbola
   var predicted_gpp_field = run_hyperbola(nirvp_field);
   
-  return ee.Image(predicted_gpp_field);
+  return predicted_gpp_field.select(export_bands).clip(roi);
 }
 
 function calculate_field_level(image) {
@@ -183,7 +180,9 @@ function calculate_field_level(image) {
 }
 
 //google earth engine allows 40 concurrent tasks at a time. This ensures best performance by splitting up 40 evenly
-var stride = Math.ceil(n / 40);
+var n = strawberry_fields_california.size().getInfo();
+var field_list = strawberry_fields_california.toList(n);
+var stride = Math.ceil(n / 100);
 
 for (var i = 0; i < n; i += stride) {
   
@@ -197,14 +196,13 @@ for (var i = 0; i < n; i += stride) {
   var batch = field_list.slice(i, end);
   
   batch = ee.FeatureCollection(batch);
-  
-  var crop_field = batch;
-  
+  print(batch.size());
   
   //In order to preserve crop borders now, we need to map this batch to process each feature individually
   
   //First retrieve the pixel-wise computation
-  var pixel_wise_prediction_collection = ee.ImageCollection(crop_field.map(gpp_predictor));
+  var pixel_wise_prediction_collection = ee.ImageCollection(batch.map(gpp_predictor));
+  print(pixel_wise_prediction_collection.size())
   
   //now map each feature to add a reduced field-level band. 
   //This returns a featurecollection where each feature has the corresponsing geometry and mean values of each field as a property
