@@ -1,4 +1,9 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var roi = ee.FeatureCollection("users/kevinlc3/strawberry_fields_cdl_csba_intersect");
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
+var csbca_ref = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
+var strawberry_layer_csbca22 = csbca_ref.filter(ee.Filter.eq('CROP16', 'Strawberries'));
+Map.addLayer(strawberry_layer_csbca22, {}, "Strawberry Fields");
+
+Map.setCenter(-121.789167, 36.846645, 6)
 Map.addLayer(roi, {}, "csbca and cdl majority vote");
