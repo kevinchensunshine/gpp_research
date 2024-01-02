@@ -421,7 +421,7 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
  * @param {Number} numberOfBatches - Number of batches to divide the collection into.
  */
  
-exports.batchProcessFeatureCollection = function genericBatchExport(collection, processFunction, baseAssetId, numberOfBatches) {
+exports.batchProcessFeatureCollection = function(collection, processFunction, baseAssetId, numberOfBatches) {
   var n = collection.size().getInfo();
   var stride = Math.ceil(n / numberOfBatches);
 
@@ -466,7 +466,7 @@ genericBatchExport(collection, myProcessingFunction, baseAssetId, numberOfBatche
  * @param folderPath earth engine path to a folder
  * @param collectionNames names of the respective collections
  */
-exports.mergeCollection = function mergeFeatureCollectionsInFolder(folderPath, collectionNames) {
+exports.mergeCollection = function(folderPath, collectionNames) {
   // Initialize an empty FeatureCollection
   var mergedCollection = ee.FeatureCollection([]);
 
@@ -480,4 +480,39 @@ exports.mergeCollection = function mergeFeatureCollectionsInFolder(folderPath, c
   collectionNames.forEach(mergeCollections);
 
   return mergedCollection;
+}
+
+/**
+ * Reduce an image band by its mean, and add as a property of the image - used for field-level analysis.
+ *
+ * @param {ee.Image} Input image
+ * @param {string} band name in question
+ * @param {dict} parameters for reduceRegion
+ * @return {ee.Image} image with the reduced band as a property
+ */
+ 
+exports.calcFieldLevel = function(image, bandName, params) {
+  // Check if bandName exists in the image
+  if (!image.bandNames().contains(bandName)) {
+    throw 'Band name ' + bandName + ' does not exist in the image';
+  }
+
+  // Set default parameters if not provided
+  if (!params) {
+    params = {
+      reducer: ee.Reducer.mean(),
+      geometry: image.geometry(),
+      scale: 30,  // Default scale
+      maxPixels: 1e9
+    };
+  }
+
+  // Calculate the mean of the specified band
+  var meanDict = image.reduceRegion(params);
+
+  // Extract the mean value from the dictionary
+  var meanValue = meanDict.get(bandName);
+
+  // Add the mean value as a property to the image
+  return image.set(bandName + '_mean', meanValue);
 }
