@@ -8,12 +8,17 @@ var representation = {
   max: 6
 }
 
+var min_gpp = 0;
+var max_gpp = 0;
 exports.create_representation = function(minimum_val, maximum_val) {
   var n_representation = {
     palette: LAIG_palette,
     min: minimum_val,
     max: maximum_val
   }
+  
+  min_gpp = minimum_val;
+  max_gpp = maximum_val;
   
   representation = n_representation;
   return n_representation;
@@ -41,21 +46,28 @@ var colorBar = ui.Thumbnail({
 });
 
 // Create a panel with three numbers for the legend.
+
+var label_numbers = []
+
+for (var i = 0; i <= 6; i++) {
+  label_numbers.push(min_gpp + (max_gpp - min_gpp) / 7);  
+}
+
 var legendLabels = ui.Panel({
   widgets: [
-    ui.Label(representation.min, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-     ui.Label(1, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(2, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(3, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(4, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(5, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(representation.max, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
+    ui.Label(label_numbers[0], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+     ui.Label(label_numbers[1], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[2], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[3], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[4], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[5], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[6], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
   ],
   layout: ui.Panel.Layout.flow('horizontal')
 });
 
 var legendTitle = ui.Label({
-  value: 'LAI (m2/m2) mean prediction',
+  value: 'GPP Field Level Prediction',
   style: {fontWeight: 'bold', fontSize: '26px'}
 });
 
