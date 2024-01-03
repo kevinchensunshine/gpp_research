@@ -49,8 +49,10 @@ var colorBar = ui.Thumbnail({
 
 var label_numbers = []
 
+var running_total = min_gpp;
 for (var i = 0; i <= 6; i++) {
-  label_numbers.push(min_gpp + (max_gpp - min_gpp) / 7);  
+  label_numbers.push(running_total);
+  running_total += (max_gpp - min_gpp) / 7
 }
 
 var legendLabels = ui.Panel({
