@@ -50,7 +50,7 @@ exports.create_legend = function(minimum_value, maximum_value) {
   var label_numbers = []
 
   var running_total = minimum_value;
-  for (var i = 0; i <= 6; i++) {
+  for (var i = 0; i <= 7; i++) {
     label_numbers.push(running_total.toFixed(4).toString());
     running_total += (maximum_value - minimum_value) / 7
   }
@@ -63,7 +63,8 @@ exports.create_legend = function(minimum_value, maximum_value) {
     ui.Label(label_numbers[3], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
     ui.Label(label_numbers[4], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
     ui.Label(label_numbers[5], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[6], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
+    ui.Label(label_numbers[6], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[7], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
   ],
   layout: ui.Panel.Layout.flow('horizontal')
   });
