@@ -37,7 +37,6 @@ function makeColorBarParams(palette) {
     palette: LAIG_palette,
   };
 }
-
 // Create the color bar for the legend.
 var colorBar = ui.Thumbnail({
   image: ee.Image.pixelLonLat().select(0),
@@ -47,14 +46,38 @@ var colorBar = ui.Thumbnail({
 
 // Create a panel with three numbers for the legend.
 
-var label_numbers = []
+exports.create_legend = function(minimum_value, maximum_value) {
+  var label_numbers = []
 
-var running_total = min_gpp;
-for (var i = 0; i <= 6; i++) {
-  label_numbers.push(running_total.toString());
-  running_total += (max_gpp - min_gpp) / 7
+  var running_total = minimum_value < 0 ? 0 : minimum_value;
+  for (var i = 0; i <= 6; i++) {
+    label_numbers.push(running_total.toString());
+    running_total += (maximum_value - minimum_value) / 7
+  }
+  
+  var legendLabels = ui.Panel({
+  widgets: [
+    ui.Label(label_numbers[0], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+     ui.Label(label_numbers[1], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[2], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[3], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[4], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[5], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(label_numbers[6], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
+  ],
+  layout: ui.Panel.Layout.flow('horizontal')
+  });
+  
+  var legendTitle = ui.Label({
+    value: 'GPP Field Level Prediction',
+    style: {fontWeight: 'bold', fontSize: '26px'}
+  });
+  
+  // Add the legendPanel to the map.
+  var legendPanel = ui.Panel([legendTitle, colorBar, legendLabels]);
+  
+  return legendPanel;
 }
-
 var legendLabels = ui.Panel({
   widgets: [
     ui.Label(label_numbers[0], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
