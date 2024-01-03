@@ -9,9 +9,14 @@ var representation = {
 }
 
 exports.create_representation = function(minimum_val, maximum_val) {
-  representation[min] = minimum_val;
-  representation[max] = maximum_val;
-  return representation;
+  var n_representation = {
+    palette: LAIG_palette,
+    min: minimum_val,
+    max: maximum_val
+  }
+  
+  representation = n_representation;
+  return n_representation;
 }
 
 // Creates a color bar thumbnail image for use in legend from the given color
