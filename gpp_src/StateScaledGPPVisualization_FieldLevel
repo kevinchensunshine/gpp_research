@@ -1,6 +1,16 @@
-var asset_path_collection = "users/kevinlc3/california_field_level_gpp/batch_0"
+var asset_path_collection = "users/kevinlc3/california_field_level_gpp/"
+var batch_list = []
 
-var gpp_coll = ee.FeatureCollection(asset_path_collection);
+for (var i = 0; i < 2977; i += 31) {
+  batch_list.push("batch_" + i);
+}
+
+print(batch_list)
+
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+
+var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
+
 
 Map.setCenter(-119.12944008337774, 34.238211739422134, 15)
 
