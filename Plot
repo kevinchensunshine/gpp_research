@@ -1,39 +1,58 @@
-var asset_path_collection = "users/kevinlc3/california_field_level_gpp/batch_0"
+//Visualization palette
 
-var gpp_coll = ee.FeatureCollection(asset_path_collection);
+var LAIG_palette =['#FDFEFB','#FBFDF8','#FAFCF4','#F8FBF1','#F6FAED','#F5F9EA','#F3F8E6','#F2F7E3','#F0F6DF','#EEF5DC','#EDF4D9','#EBF3D5','#EAF2D2','#E8F1CE','#E6F0CB','#E5EFC7','#E3EEC4','#E1EDC0','#E0ECBD','#DEEBBA','#DDEAB6','#DBE9B3','#D9E8AF','#D8E7AC','#D5E5A5','#D3E4A1','#D1E39E','#D0E29B','#CEE197','#CCE094','#CBDF90','#C9DE8D','#C8DD89','#C6DC86','#C4DB82','#C3DA7F','#C1D97C','#C0D878','#BED775','#BCD671','#BBD56E','#B9D46A','#B7D367','#B6D263','#B4D160','#B3D05D','#B1CF59','#AFCE56','#AECD52','#ABCB4B','#A9CA48','#A7C944','#A6C841','#A4C73E','#A3C63A','#A1C537','#9FC433','#9EC330','#9CC22C','#9AC129','#99C025','#97BF22','#96BE1F','#94BD1B','#92BC18','#91BB14','#8FBA11','#8EB90D','#8CB80A','#8AB706','#89B603','#87B500','#85B400','#82B200','#81B100','#7FB000','#7DAF00','#7CAE00','#7AAD00','#79AC00','#77AB00','#75AA00','#74A900','#72A800','#70A700','#6FA600','#6DA500','#6CA400','#6AA300','#68A200','#67A100','#65A000','#649F00','#629E00','#609D00','#5F9C00','#5D9B00','#5B9A00','#589800','#579700','#559600','#539500','#529400','#509300','#4F9200','#4D9100','#4B9000','#4A8F00','#488E00','#478D00','#458C00','#438B00','#428A00','#408900','#3E8800','#3D8700','#3B8600','#3A8500','#388400','#368300','#358200','#338100','#328000','#2E7E00','#2D7D00','#2B7C00','#297B00','#287A00','#267900','#257800','#237700','#217600','#207500','#1E7400','#1D7300','#1B7200','#197100','#187000','#166F00','#146E00','#136D00','#116C00','#106B00','#0E6A00','#0C6900','#0B6800','#096700','#066500','#046400','#036300','#016200','#006100','#006000','#005F00','#005E00','#005D00','#005C00','#005B00','#005A00','#005900','#005800','#005700','#005600','#005500','#005400','#005300','#005200','#005100','#005000','#004F00','#004E00','#004D00','#004B00','#004A00','#004900','#004800','#004700','#004600','#004500','#004400','#004300','#004200','#004100','#004000','#003F00','#003E00','#003D00','#003C00','#003B00','#003A00','#003900','#003800','#003700','#003600','#003500','#003400','#003200','#003100','#003000','#002F00','#002E00','#002D00','#002C00','#002B00','#002A00','#002900','#002800','#002700','#002600','#002500','#002400','#002300','#002200','#002100','#002000','#001F00','#001E00','#001D00','#001C00','#001B00','#001A00','#001800','#001700','#001600','#001500','#001400','#001300','#001200','#001100','#001000','#000F00','#000E00','#000D00','#000C00','#000B00','#000A00','#000900','#000800','#000700','#000600','#000500','#000400','#000300','#000200','#000100'];
 
-Map.setCenter(-119.12944008337774, 34.238211739422134, 15)
-
-var minGppValue = gpp_coll.aggregate_min('NIRVP1800_Hyperbola_GPP').getInfo();
-var maxGppValue = gpp_coll.aggregate_max('NIRVP1800_Hyperbola_GPP').getInfo();
-var range = maxGppValue - minGppValue;
-
-function createNormalizedImage(feature) {
-  feature = ee.Feature(feature);
-  var value = feature.getNumber('NIRVP1800_Hyperbola_GPP');
-
-  // Normalize the value
-  var normalizedValue = value.subtract(minGppValue).divide(range);
-
-  var geometry = feature.geometry();
-  var image = ee.Image.constant(normalizedValue).toFloat().clip(geometry);
-
-  return image;
+var representation = {
+  palette: LAIG_palette,
+  min: 0,
+  max: 6
 }
 
-// Create an ImageCollection with normalized images
-var normalizedImageCollection = ee.ImageCollection(gpp_coll.map(createNormalizedImage));
+exports.representation = representation;
 
-// Visualization parameters for the normalized GPP values
-var visParams = {
-  bands: ['constant'],
-  min: 0,
-  max: 1,
-  palette: ['FFCC33', 'FF3333']  // From black to white
-};
+// Creates a color bar thumbnail image for use in legend from the given color
+// palette.
+function makeColorBarParams(palette) {
+  return {
+    //bbox: [0, 0, 1, 0.1],
+    bbox: [0, 0, 1, 0.1],
+    dimensions: '100x10',
+    format: 'png',
+    min: 0,
+    max: 1,
+    palette: LAIG_palette,
+  };
+}
 
-Map.addLayer(normalizedImageCollection, visParams, "Normalized GPP Visualization");
+// Create the color bar for the legend.
+var colorBar = ui.Thumbnail({
+  image: ee.Image.pixelLonLat().select(0),
+  params: makeColorBarParams(representation.LAIG_palette),
+  style: {stretch: 'horizontal', margin: '0px 4px', maxHeight: '20px'},
+});
 
-Map.addLayer(normalizedImageCollection, plot.representation)
+// Create a panel with three numbers for the legend.
+var legendLabels = ui.Panel({
+  widgets: [
+    ui.Label(representation.min, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+     ui.Label(1, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(2, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(3, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(4, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(5, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(representation.max, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
+  ],
+  layout: ui.Panel.Layout.flow('horizontal')
+});
 
-Map.add(plot.legendPanel)
+var legendTitle = ui.Label({
+  value: 'LAI (m2/m2) mean prediction',
+  style: {fontWeight: 'bold', fontSize: '26px'}
+});
+
+// Add the legendPanel to the map.
+var legendPanel = ui.Panel([legendTitle, colorBar, legendLabels]);
+
+exports.legendPanel = legendPanel
+
+print(LAIG_palette.length)
