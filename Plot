@@ -49,6 +49,7 @@ var colorBar = ui.Thumbnail({
 exports.create_legend = function(minimum_value, maximum_value) {
   var label_numbers = []
 
+  minimum_value = minimum_value < 0 ? 0 : minimum_value;
   var running_total = minimum_value;
   for (var i = 0; i <= 7; i++) {
     label_numbers.push(running_total.toFixed(4).toString());
