@@ -1,3 +1,5 @@
+var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
+
 var asset_path_collection = "users/kevinlc3/california_field_level_gpp/"
 var batch_list = []
 
