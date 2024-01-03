@@ -8,7 +8,17 @@ var representation = {
   max: 6
 }
 
-exports.representation = representation;
+var create_representation = function(minimum_val, maximum_val) {
+  var representation = {
+    palette: LAIG_palette,
+    min: minimum_val,
+    max: maximum_val
+  }
+  
+  return representation
+}
+
+exports.representation = create_representation;
 
 // Creates a color bar thumbnail image for use in legend from the given color
 // palette.
