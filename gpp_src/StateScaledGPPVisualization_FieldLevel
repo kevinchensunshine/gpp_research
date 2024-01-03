@@ -44,4 +44,5 @@ var visParams = {
   palette: ['FFCC33', 'FF3333']  // From black to white
 };
 
-Map.addLayer(normalizedImageCollection, visParams, "Normalized GPP Visualization");
+Map.addLayer(normalizedImageCollection, plot.representation, "Normalized GPP Visualization");
+Map.add(plot.legendPanel);
