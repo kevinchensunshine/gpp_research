@@ -18,6 +18,9 @@ Map.setCenter(-119.12944008337774, 34.238211739422134, 15)
 
 var minGppValue = gpp_coll.aggregate_min('NIRVP1800_Hyperbola_GPP').getInfo();
 var maxGppValue = gpp_coll.aggregate_max('NIRVP1800_Hyperbola_GPP').getInfo();
+
+print(maxGppValue)
+print(minGppValue)
 var range = maxGppValue - minGppValue;
 
 function createNormalizedImage(feature) {
@@ -44,5 +47,5 @@ var visParams = {
   palette: ['FFCC33', 'FF3333']  // From black to white
 };
 
-Map.addLayer(normalizedImageCollection, plot.representation, "Normalized GPP Visualization");
-Map.add(plot.legendPanel);
+Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
+Map.add(plot.create_legend(minGppValue, maxGppValue));
