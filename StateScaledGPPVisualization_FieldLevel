@@ -16,21 +16,20 @@ function createNormalizedImage(feature) {
   var normalizedValue = value.subtract(minGppValue).divide(range);
 
   var geometry = feature.geometry();
-  var image = ee.Image.constant(normalizedValue).clip(geometry);
+  var image = ee.Image.constant(normalizedValue).toFloat().clip(geometry);
 
-  return image.copyProperties(feature, ['system:time_start'])
-              .set('system:footprint', geometry);
+  return image;
 }
 
 // Create an ImageCollection with normalized images
-var normalizedImageCollection = gpp_coll.map(createNormalizedImage);
-print(normalizedImageCollection);
+var normalizedImageCollection = ee.ImageCollection(gpp_coll.map(createNormalizedImage));
 
 // Visualization parameters for the normalized GPP values
 var visParams = {
+  bands: ['constant'],
   min: 0,
   max: 1,
-  palette: ['000000', 'FFFFFF']  // From black to white
+  palette: ['FFCC33', 'FF3333']  // From black to white
 };
 
 Map.addLayer(normalizedImageCollection, visParams, "Normalized GPP Visualization");
