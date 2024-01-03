@@ -1,0 +1,39 @@
+var asset_path_collection = "users/kevinlc3/california_field_level_gpp/batch_0"
+
+var gpp_coll = ee.FeatureCollection(asset_path_collection);
+
+Map.setCenter(-119.12944008337774, 34.238211739422134, 15)
+
+var minGppValue = gpp_coll.aggregate_min('NIRVP1800_Hyperbola_GPP').getInfo();
+var maxGppValue = gpp_coll.aggregate_max('NIRVP1800_Hyperbola_GPP').getInfo();
+var range = maxGppValue - minGppValue;
+
+function createNormalizedImage(feature) {
+  feature = ee.Feature(feature);
+  var value = feature.getNumber('NIRVP1800_Hyperbola_GPP');
+
+  // Normalize the value
+  var normalizedValue = value.subtract(minGppValue).divide(range);
+
+  var geometry = feature.geometry();
+  var image = ee.Image.constant(normalizedValue).toFloat().clip(geometry);
+
+  return image;
+}
+
+// Create an ImageCollection with normalized images
+var normalizedImageCollection = ee.ImageCollection(gpp_coll.map(createNormalizedImage));
+
+// Visualization parameters for the normalized GPP values
+var visParams = {
+  bands: ['constant'],
+  min: 0,
+  max: 1,
+  palette: ['FFCC33', 'FF3333']  // From black to white
+};
+
+Map.addLayer(normalizedImageCollection, visParams, "Normalized GPP Visualization");
+
+Map.addLayer(normalizedImageCollection, plot.representation)
+
+Map.add(plot.legendPanel)
