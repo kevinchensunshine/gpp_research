@@ -51,7 +51,7 @@ var label_numbers = []
 
 var running_total = min_gpp;
 for (var i = 0; i <= 6; i++) {
-  label_numbers.push(running_total);
+  label_numbers.push(running_total.toString());
   running_total += (max_gpp - min_gpp) / 7
 }
 
