@@ -78,15 +78,17 @@ exports.create_legend = function(minimum_value, maximum_value) {
   
   return legendPanel;
 }
+
+
 var legendLabels = ui.Panel({
   widgets: [
-    ui.Label(label_numbers[0], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-     ui.Label(label_numbers[1], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[2], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[3], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[4], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[5], {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
-    ui.Label(label_numbers[6], {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
+    ui.Label(0, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+     ui.Label(1, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(2, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(3, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(4, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(5, {margin: '4px 10px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'}),
+    ui.Label(6, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '20px'})
   ],
   layout: ui.Panel.Layout.flow('horizontal')
 });
