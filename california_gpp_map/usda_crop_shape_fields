@@ -1,5 +1,5 @@
 // Your initial setup
-var year = '2023'
+var year = '2022'
 var csbca22 = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
 var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
