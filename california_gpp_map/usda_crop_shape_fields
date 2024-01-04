@@ -76,9 +76,3 @@ for (var i = 0; i < n; i += stride) {
   
 }
 
-print("Export tasks initialized");
-
-var batch = require('users/kevinlc3/ndvi_nir_collection:Batch');
-batch.runAllTasks();
-batch.confirmAll();
-
