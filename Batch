@@ -22,4 +22,3 @@ exports.confirmAll = function() {
     for (var i = 0; i < ok.length; i++)
         ok[i].click();
 }
-
