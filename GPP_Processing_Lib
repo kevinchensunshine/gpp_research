@@ -516,3 +516,32 @@ exports.calcFieldLevel = function(image, bandName, params) {
   // Add the mean value as a property to the image
   return image.set(bandName + '_mean', meanValue);
 }
+
+exports.calculate_field_level = function(image) {
+  var params = {
+    reducer: ee.Reducer.mean(),
+    geometry: image.geometry(),
+    scale: 30,  // Default scale
+    maxPixels: 1e9
+  };
+
+  // Calculate the mean of all bands
+  var meanDict = image.reduceRegion(params);
+
+  // Initial feature with the image's geometry
+  var feature = ee.Feature(image.geometry());
+
+  // Function to add each property from the dictionary to the feature
+  var addProperties = function(key, feature) {
+    return ee.Feature(feature).set(key, meanDict.get(key));
+  };
+
+  // Iterate over the keys in the dictionary to add each to the feature
+  var resultFeature = ee.Feature(meanDict.keys().iterate(addProperties, feature));
+
+  // Extract timestamp and add it to the feature
+  var timestamp = image.get('timestamp');
+  resultFeature = resultFeature.set('timestamp', timestamp);
+
+  return resultFeature;
+}
