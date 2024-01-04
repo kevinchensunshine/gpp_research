@@ -4,24 +4,10 @@
 
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
 
-var bands = ['NIRVP0000',
-            'NIRVP0300',
-            'NIRVP0600',
-            'NIRVP0900',
-            'NIRVP1200',
-            'NIRVP1500',
-            'NIRVP1800',
-            'NIRVP2100'];
+var bands = ['Mean_NIRVP'];
             
 var export_bands = 
-            ['NIRVP0000_Hyperbola_GPP',
-            'NIRVP0300_Hyperbola_GPP',
-            'NIRVP0600_Hyperbola_GPP',
-            'NIRVP0900_Hyperbola_GPP',
-            'NIRVP1200_Hyperbola_GPP',
-            'NIRVP1500_Hyperbola_GPP',
-            'NIRVP1800_Hyperbola_GPP',
-            'NIRVP2100_Hyperbola_GPP',
+            ['Mean_GPP',
             'timestamp'];
 
 
@@ -75,22 +61,9 @@ function run_hyperbola(image) {
 
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
-  var par0000Band = image.select('GMT_0000_PAR');
-  var par0300Band = image.select('GMT_0300_PAR');
-  var par0600Band = image.select('GMT_0600_PAR');
-  var par0900Band = image.select('GMT_0900_PAR');
-  var par1200Band = image.select('GMT_1200_PAR');
-  var par1500Band = image.select('GMT_1500_PAR');
-  var par1800Band = image.select('GMT_1800_PAR');
-  var par2100Band = image.select('GMT_2100_PAR');
-  return image.addBands([nirvBand.multiply(par0000Band).rename('NIRVP0000'), 
-                        nirvBand.multiply(par0300Band).rename('NIRVP0300'),
-                        nirvBand.multiply(par0600Band).rename('NIRVP0600'),
-                        nirvBand.multiply(par0900Band).rename('NIRVP0900'),
-                        nirvBand.multiply(par1200Band).rename('NIRVP1200'),
-                        nirvBand.multiply(par1500Band).rename('NIRVP1500'),
-                        nirvBand.multiply(par1800Band).rename('NIRVP1800'),
-                        nirvBand.multiply(par2100Band).rename('NIRVP2100')]);
+  var meanParBand = image.select('Mean_PAR');
+
+  return image.addBands([nirvBand.multiply(meanParBand).rename('Mean_NIRVP')]);
 }
 
 function extract_geometry(feature) {
@@ -110,6 +83,24 @@ var loc_start = '2016-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
+function aggregate_par(image) {
+    // Define the band names to be averaged
+    var bandNames = [
+        'GMT_0000_PAR', 'GMT_0300_PAR', 'GMT_0600_PAR', 'GMT_0900_PAR',
+        'GMT_1200_PAR', 'GMT_1500_PAR', 'GMT_1800_PAR', 'GMT_2100_PAR'
+    ];
+
+    // Select the bands from the image
+    var selectedBands = image.select(bandNames);
+
+    // Calculate the mean of the selected bands
+    var meanPar = selectedBands.reduce(ee.Reducer.mean());
+
+    // Add the mean band to the original image and rename it to 'Mean_PAR'
+    return image.addBands(meanPar.rename('Mean_PAR')).select('Mean_PAR');
+}
+
+
 function gpp_predictor(field) {
   
   var roi = field.geometry();
@@ -117,6 +108,8 @@ function gpp_predictor(field) {
   var nirv_field = nirv_collection.filterBounds(roi);
                                   
   var par_field = par_collection.filterBounds(roi);
+  
+  par_field = par_field.map(aggregate_par);
   
   //Interpolate to weekly intervals
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi);
