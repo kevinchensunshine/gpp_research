@@ -26,14 +26,7 @@ var range = maxGppValue - minGppValue;
 function createNormalizedImage(feature) {
   feature = ee.Feature(feature);
   var value = feature.getNumber('NIRVP1800_Hyperbola_GPP');
-
-  // Normalize the value
-  var normalizedValue = value.subtract(minGppValue).divide(range);
-
-  var geometry = feature.geometry();
-  var image = ee.Image.constant(normalizedValue).toFloat().clip(geometry);
-
-  return image;
+  return ee.Image.constant(value).toFloat().clip(feature.geometry());
 }
 
 // Create an ImageCollection with normalized images
