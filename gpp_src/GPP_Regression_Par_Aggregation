@@ -10,7 +10,7 @@ var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib')
 var bands = ['Mean_NIRVP'];
             
 var export_bands = 
-            ['Mean_GPP',
+            ['Mean_NIRVP_Hyperbola_GPP',
             'timestamp'];
 
 
