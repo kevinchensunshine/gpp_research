@@ -2,6 +2,21 @@
 Define the path of the folder you created for the batches of geometries
 */
 
+var asset_path_collection = "users/kevinlc3/csbca_strawberries_field_level_2022/";
+var filename = "strawberry_fields_cdl_csba_intersect_2022";
+var batch_list = []
 
+for (var i = 0; i < 609; i += 16) {
+  batch_list.push("batch_" + i);
+}
 
-var california_geom = 
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+
+var california_geom = gpp_utils.mergeCollection(asset_path_collection, batch_list);
+
+Map.addLayer(california_geom);
+Export.table.toAsset({
+  collection: california_geom,
+  description: "Crop Sequence and CDL defined boundaries for California Strawberry Fields in 2022",
+  assetId: filename
+});
