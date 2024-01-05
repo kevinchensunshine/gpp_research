@@ -42,3 +42,5 @@ var visParams = {
 
 Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
 Map.add(plot.create_legend(minGppValue, maxGppValue));
+var label = ui.Label("2016-09-1");
+Map.add(label);
