@@ -1,3 +1,6 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var strawberry_fields_california = ee.FeatureCollection("users/kevinlc3/strawberry_fields_cdl_csba_intersect_2022");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
 //https://google-earth-engine.com/Advanced-Topics/Scaling-up-in-Earth-Engine/
 
 //init globals
@@ -142,7 +145,7 @@ function gpp_predictor(field) {
 //google earth engine allows 40 concurrent tasks at a time. This ensures best performance by splitting up 40 evenly
 var n = strawberry_fields_california.size().getInfo();
 var field_list = strawberry_fields_california.toList(n);
-var stride = Math.ceil(n / 100);
+var stride = Math.ceil(n / 40);
 
 for (var i = 0; i < n; i += stride) {
   
@@ -166,7 +169,7 @@ for (var i = 0; i < n; i += stride) {
   var field_level_prediction_collection = ee.FeatureCollection(pixel_wise_prediction_collection.map(gpp_utils.calculate_field_level));
 
   // Define the asset ID for each batch
-  var assetId = 'users/kevinlc3/california_field_level_gpp/batch_' + i;
+  var assetId = 'users/kevinlc3/california_field_level_gpp_2022/batch_' + i;
 
   // Export each batch to an asset
   var asset = Export.table.toAsset({
@@ -178,8 +181,3 @@ for (var i = 0; i < n; i += stride) {
 }
 
 print("finished");
-
-var batch = require('users/kevinlc3/ndvi_nir_collection:Batch')
-//Use if you want the tasks to be run automatically
-batch.runTaskList();
-batch.confirmAll();
