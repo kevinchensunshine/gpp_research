@@ -167,6 +167,8 @@ for (var i = 0; i < n; i += stride) {
   //now map each feature to add a reduced field-level band. 
   //This returns a featurecollection where each feature has the corresponsing geometry and mean values of each field as a property
   var field_level_prediction_collection = ee.FeatureCollection(pixel_wise_prediction_collection.map(gpp_utils.calculate_field_level));
+  
+  field_level_prediction_collection = field_level_prediction_collection.set('new_property_name', 'new_property_value');
 
   // Define the asset ID for each batch
   var assetId = 'users/kevinlc3/california_field_level_gpp_2022/batch_' + i;
