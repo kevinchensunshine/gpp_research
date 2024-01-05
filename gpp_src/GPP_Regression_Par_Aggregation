@@ -145,7 +145,7 @@ function gpp_predictor(field) {
 //google earth engine allows 40 concurrent tasks at a time. This ensures best performance by splitting up 40 evenly
 var n = strawberry_fields_california.size().getInfo();
 var field_list = strawberry_fields_california.toList(n);
-var stride = Math.ceil(n / 40);
+var stride = Math.ceil(n / 100);
 
 for (var i = 0; i < n; i += stride) {
   
