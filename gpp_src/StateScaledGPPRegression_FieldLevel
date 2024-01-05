@@ -188,8 +188,3 @@ for (var i = 0; i < n; i += stride) {
 }
 
 print("finished");
-
-var batch = require('users/kevinlc3/ndvi_nir_collection:Batch')
-//Use if you want the tasks to be run automatically
-batch.runTaskList();
-batch.confirmAll();
