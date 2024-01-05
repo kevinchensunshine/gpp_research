@@ -70,8 +70,8 @@ function extract_geometry(feature) {
   return ee.Feature(feature).geometry();
 }
 
-var startDate = '2016-01-1';
-var endDate = '2016-12-30';
+var startDate = '2022-1-1';
+var endDate = '2022-12-30';
 var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(startDate, endDate)
   .map(maskClouds)
@@ -79,7 +79,7 @@ var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .map(dataset_nirv)
   .select(['NIRV']);
   
-var loc_start = '2016-09-01';
+var loc_start = '2022-09-01';
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(loc_start, ee.Date(loc_start).advance(1, 'day'));
 
