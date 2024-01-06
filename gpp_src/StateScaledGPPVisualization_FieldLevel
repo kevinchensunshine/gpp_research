@@ -1,9 +1,9 @@
 var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
 
-var asset_path_collection = "users/kevinlc3/california_field_level_gpp/"
+var asset_path_collection = "users/kevinlc3/california_field_level_gpp_2022/"
 var batch_list = []
 
-for (var i = 0; i < 2977; i += 31) {
+for (var i = 0; i < 141; i += 7) {
   batch_list.push("batch_" + i);
 }
 
@@ -16,8 +16,8 @@ var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
 
 Map.setCenter(-119.12944008337774, 34.238211739422134, 15)
 
-var minGppValue = gpp_coll.aggregate_min('NIRVP1800_Hyperbola_GPP').getInfo();
-var maxGppValue = gpp_coll.aggregate_max('NIRVP1800_Hyperbola_GPP').getInfo();
+var minGppValue = gpp_coll.aggregate_min('Mean_NIRVP_Hyperbola_GPP').getInfo();
+var maxGppValue = gpp_coll.aggregate_max('Mean_NIRVP_Hyperbola_GPP').getInfo();
 
 print(maxGppValue)
 print(minGppValue)
@@ -25,7 +25,7 @@ var range = maxGppValue - minGppValue;
 
 function createNormalizedImage(feature) {
   feature = ee.Feature(feature);
-  var value = feature.getNumber('NIRVP1800_Hyperbola_GPP');
+  var value = feature.getNumber('Mean_NIRVP_Hyperbola_GPP');
   return ee.Image.constant(value).toFloat().clip(feature.geometry());
 }
 
@@ -42,5 +42,5 @@ var visParams = {
 
 Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
 Map.add(plot.create_legend(minGppValue, maxGppValue));
-var label = ui.Label("2016-09-1");
+var label = ui.Label("2022-09-1");
 Map.add(label);
