@@ -3,7 +3,7 @@ var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
 var asset_path_collection = "users/kevinlc3/california_field_level_gpp_2022/"
 var batch_list = []
 
-for (var i = 0; i < 288; i += 7) {
+for (var i = 0; i < 379; i += 7) {
   batch_list.push("batch_" + i);
 }
 
