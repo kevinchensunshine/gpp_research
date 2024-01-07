@@ -12,7 +12,6 @@ for (var i = 0; i < 363; i += 7) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
-
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
 var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
