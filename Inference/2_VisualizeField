@@ -1,11 +1,20 @@
-var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
-
+/**
+ * Using the GPP Map predeicted in the previous script, this will aggregate it and visualize it, as well as provide a full asset to export
+ * Usage: Define the collection path from the last script, as well as the file names of each batch. These run by a pattern which should be easy to see, so use that to adjust the loop
+ */
+ 
+//User defined values:
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
 var asset_path_collection = "users/kevinlc3/california_field_level_gpp_2022/"
 var batch_list = []
 
 for (var i = 0; i < 363; i += 7) {
   batch_list.push("batch_" + i);
 }
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
+
+var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
 
 print(batch_list)
 
