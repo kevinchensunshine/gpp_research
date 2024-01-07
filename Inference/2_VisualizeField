@@ -1,0 +1,45 @@
+var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
+
+var asset_path_collection = "users/kevinlc3/california_field_level_gpp_2022/"
+var batch_list = []
+
+for (var i = 0; i < 363; i += 7) {
+  batch_list.push("batch_" + i);
+}
+
+print(batch_list)
+
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+
+var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
+
+
+var minGppValue = gpp_coll.aggregate_min('Mean_NIRVP_Hyperbola_GPP').getInfo();
+var maxGppValue = gpp_coll.aggregate_max('Mean_NIRVP_Hyperbola_GPP').getInfo();
+
+print(maxGppValue)
+print(minGppValue)
+var range = maxGppValue - minGppValue;
+
+function createNormalizedImage(feature) {
+  feature = ee.Feature(feature);
+  var value = feature.getNumber('Mean_NIRVP_Hyperbola_GPP');
+  return ee.Image.constant(value).toFloat().clip(feature.geometry());
+}
+
+// Create an ImageCollection with normalized images
+var normalizedImageCollection = ee.ImageCollection(gpp_coll.map(createNormalizedImage));
+
+// Visualization parameters for the normalized GPP values
+var visParams = {
+  bands: ['constant'],
+  min: 0,
+  max: 1,
+  palette: ['FFCC33', 'FF3333']  // From black to white
+};
+
+Map.centerObject(normalizedImageCollection, 10);
+Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
+Map.add(plot.create_legend(minGppValue, maxGppValue));
+var label = ui.Label("2022-09-1");
+Map.add(label);
