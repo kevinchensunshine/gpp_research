@@ -5,9 +5,9 @@
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = "users/kevinlc3/california_field_level_gpp_2022/"
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022/'
 var batch_list = []
-
+var export_name = 'export_name'
 for (var i = 0; i < 363; i += 7) {
   batch_list.push("batch_" + i);
 }
@@ -15,7 +15,6 @@ print(batch_list);
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
 var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
-
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
 
 var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
@@ -50,3 +49,4 @@ Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, 
 Map.add(plot.create_legend(minGppValue, maxGppValue));
 var label = ui.Label("2022-09-1");
 Map.add(label);
+
