@@ -51,7 +51,7 @@ var label = ui.Label("2022-09-1");
 Map.add(label);
 
 Export.table.toAsset({
-  collection: gpp_cooll,
+  collection: gpp_coll,
   description: 'Full Predicted GPP Map for ' + export_name,
   assetId: export_name
 });
