@@ -8,7 +8,7 @@
 var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022/'
 var batch_list = []
 var export_name = 'export_name'
-for (var i = 0; i < 363; i += 7) {
+for (var i = 0; i < 617; i += 7) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
