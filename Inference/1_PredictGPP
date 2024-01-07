@@ -1,0 +1,191 @@
+
+
+/**
+ * Given a Date and Year, this script maps the GPP of that day over the state of California. The GPP is predicted used a rectangular hyperbola model
+ * Usage: Create an asset folder, and have the path defined as path. Define a Date and an Year, and then run
+ */
+ 
+//User defined values:
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
+var date = '2022-09-01';
+var year = '2022';
+var path = 'users/kevinlc3/california_field_level_gpp_' + date;
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
+
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+
+var bands = ['Mean_NIRVP'];
+            
+var export_bands = 
+            ['Mean_NIRVP_Hyperbola_GPP',
+            'timestamp'];
+
+
+function applyScaleFactors(image) {
+  var opticalBands = image.select('B.').multiply(0.0001);
+  return image.addBands(opticalBands, null, true);
+}
+
+var bitwiseExtract = function(input, fromBit, toBit) {
+  if (toBit === undefined) toBit = fromBit;
+  var maskSize = ee.Number(1).add(toBit).subtract(fromBit);
+  var mask = ee.Number(1).leftShift(maskSize).subtract(1);
+  return input.rightShift(fromBit).bitwiseAnd(mask);
+};
+
+function maskAerosols(image) {
+  var qa_aerosol = image.select(['SR_QA_AEROSOL']);
+  var aerosol_bit = bitwiseExtract(qa_aerosol, 6, 7);
+
+  var mask = qa_aerosol.bitwiseAnd(aerosol_bit).eq(0);
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function maskClouds(image) {
+  var qa = image.select('Fmask');
+  var cirrus = image.select('B9');
+
+  // Bit 1 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 1;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function dataset_nirv(image) {
+  var nirv = image.select('NDVI').multiply(image.select('B5')).rename('NIRV');
+  return image.addBands(nirv);
+}
+
+var a = 0.7478;
+var b = 105.2422;
+function run_hyperbola(image) {
+  return gpp_utils.applyHyperbola(image, bands, a, b);
+}
+
+function multiplyBands(image) {
+  var nirvBand = image.select('d_0_NIRV');
+  var meanParBand = image.select('Mean_PAR');
+
+  return image.addBands([nirvBand.multiply(meanParBand).rename('Mean_NIRVP')]);
+}
+
+function extract_geometry(feature) {
+  return ee.Feature(feature).geometry();
+}
+
+var startDate = year + '-1-1';
+var endDate = year + '-12-30';
+var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
+  .filterDate(startDate, endDate)
+  .map(maskClouds)
+  .map(dataset_ndvi)
+  .map(dataset_nirv)
+  .select(['NIRV']);
+  
+var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
+  .filterDate(date, ee.Date(date).advance(1, 'day'));
+
+function aggregate_par(image) {
+    // Define the band names to be averaged
+    var bandNames = [
+        'GMT_0000_PAR', 'GMT_0300_PAR', 'GMT_0600_PAR', 'GMT_0900_PAR',
+        'GMT_1200_PAR', 'GMT_1500_PAR', 'GMT_1800_PAR', 'GMT_2100_PAR'
+    ];
+
+    // Select the bands from the image
+    var selectedBands = image.select(bandNames);
+
+    // Calculate the mean of the selected bands
+    var meanPar = selectedBands.reduce(ee.Reducer.mean());
+
+    // Add the mean band to the original image and rename it to 'Mean_PAR'
+    return image.addBands(meanPar.rename('Mean_PAR')).select('Mean_PAR');
+}
+
+
+function gpp_predictor(field) {
+  
+  var roi = field.geometry();
+  //Reduce geometry to batched area
+  var nirv_field = nirv_collection.filterBounds(roi);
+                                  
+  var par_field = par_collection.filterBounds(roi);
+  
+  par_field = par_field.map(aggregate_par);
+  
+  //Interpolate to weekly intervals
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi);
+  
+  //Apply an SG-filter
+  nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
+  
+  //Interpolate matching values for PAR
+  nirv_field = gpp_utils.alignCollections(par_field, nirv_field.select(['d_0_NIRV']), roi);
+  
+  var nirvp = function(nirv_image) {
+    var date = nirv_image.get('system:time_start');
+    var par_image = par_field
+                    .filter(ee.Filter.equals('system:time_start', date)).first();
+    return nirv_image.addBands(par_image);
+  };
+  
+  //Combine nirv and par bands into one image collection
+  var nirvp_collection = nirv_field.map(nirvp);
+  
+  //temporary: calculate nirvp and take the first image - calculate at a target day
+  var nirvp_field = nirvp_collection.map(multiplyBands).first();
+  
+  //Run the rectangular hyperbola
+  var predicted_gpp_field = run_hyperbola(nirvp_field);
+  
+  return predicted_gpp_field.select(export_bands).clip(roi);
+}
+
+//https://google-earth-engine.com/Advanced-Topics/Scaling-up-in-Earth-Engine/
+var n = strawberry_fields_california.size().getInfo();
+var field_list = strawberry_fields_california.toList(n);
+var stride = Math.ceil(n / 100);
+
+for (var i = 0; i < n; i += stride) {
+  
+  print(i);
+  
+  //Process fields in batches of 16
+  var end = i + stride;
+  if (end > n) {
+      end = n;
+  }
+  var batch = field_list.slice(i, end);
+  
+  batch = ee.FeatureCollection(batch);
+  //In order to preserve crop borders now, we need to map this batch to process each feature individually
+  
+  //First retrieve the pixel-wise computation
+  var pixel_wise_prediction_collection = ee.ImageCollection(batch.map(gpp_predictor));
+
+  //now map each feature to add a reduced field-level band. 
+  //This returns a featurecollection where each feature has the corresponsing geometry and mean values of each field as a property
+  var field_level_prediction_collection = ee.FeatureCollection(pixel_wise_prediction_collection.map(gpp_utils.calculate_field_level));
+  
+  field_level_prediction_collection = field_level_prediction_collection.set('timestamp', date);
+
+  // Define the asset ID for each batch
+  var assetId = path + '/batch_' + i;
+
+  // Export each batch to an asset
+  var asset = Export.table.toAsset({
+    collection: field_level_prediction_collection,
+    description: 'Batch_' + i,
+    assetId: assetId
+  });
+  
+}
+
+print("finished");
