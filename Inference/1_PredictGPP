@@ -112,10 +112,8 @@ for (var i = 0; i < n; i += stride) {
   
   batch = ee.FeatureCollection(batch);
   //In order to preserve crop borders now, we need to map this batch to process each feature individually
-  
   //First retrieve the pixel-wise computation
   var pixel_wise_prediction_collection = ee.ImageCollection(batch.map(gpp_predictor));
-
   //now map each feature to add a reduced field-level band. 
   //This returns a featurecollection where each feature has the corresponsing geometry and mean values of each field as a property
   var field_level_prediction_collection = ee.FeatureCollection(pixel_wise_prediction_collection.map(gpp_utils.calculate_field_level));
@@ -124,7 +122,6 @@ for (var i = 0; i < n; i += stride) {
 
   // Define the asset ID for each batch
   var assetId = path + '/batch_' + i;
-
   // Export each batch to an asset
   var asset = Export.table.toAsset({
     collection: field_level_prediction_collection,
