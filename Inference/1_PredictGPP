@@ -10,7 +10,7 @@ var year = '2022';
 var path = 'users/kevinlc3/california_field_level_gpp_' + date;
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
-var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
 var model = require('users/kevinlc3/ndvi_nir_collection:Model/gpp_model');
 
 var bands = ['Mean_NIRVP'];
