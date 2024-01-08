@@ -139,7 +139,7 @@ function gpp_predictor(field) {
   var nirvp_field = nirvp_collection.map(multiplyBands).first();
   
   //Run the rectangular hyperbola
-  var predicted_gpp_field = model.applyHyperbola(nirvp_field);
+  var predicted_gpp_field = model.applyHyperbola(nirvp_field, bands);
   
   return predicted_gpp_field.select(export_bands).clip(roi);
 }
