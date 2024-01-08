@@ -26,9 +26,11 @@ function maskClouds(image) {
 
   // Bit 1 and 11 are clouds and cirrus, respectively.
   var cloudBitMask = 1 << 1;
+  var cirrusBitMask = 1 << 11;
 
   // Both flags should be set to zero, indicating clear conditions.
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+        .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
@@ -111,14 +113,14 @@ function FeatureAccessor(featureCollection) {
 //Define collection bounds
 
 var startDate_2023 = '2023-01-1';
-var endDate_2023 = '2023-12-15';
+var endDate_2023 = '2023-12-30';
 var geometry_2023 = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213],
                                         [-121.66793609708007, 36.887290332607236],
                                         [-121.66700268465287, 36.887865267169495],
                                         [-121.6685583750657, 36.88928971620196],
                                         [-121.66842962854085, 36.88854317230213]])
                                                                   
-var startDate_2016 = '2016-02-1';
+var startDate_2016 = '2016-01-1';
 var endDate_2016 = '2016-12-30';
 var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581],
                               [-121.79189748877717, 36.84425718950863],
@@ -160,7 +162,7 @@ var originalCollection_2016 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .map(dataset_ndvi)
   .map(dataset_nirv)
   
-var originalCollection = originalCollection_2016.merge(originalCollection_2023)
+var originalCollection = originalCollection_2016.merge(originalCollection_2023).select(['NIRV', 'B4', 'B3', 'B2']);
 
 var startDate = parameter_accessor.getStartDate(cur_field);
 var endDate = parameter_accessor.getEndDate(cur_field);
@@ -184,7 +186,7 @@ var numBands = bandNames.size();
 var initBands = ee.List.repeat(ee.Image(), numBands);
 var initImage = ee.ImageCollection(initBands).toBands().rename(bandNames)
 
-var n = 1;
+var n = 7;
 var firstImage = ee.Image(originalCollection.sort('system:time_start').first())
 var lastImage = ee.Image(originalCollection.sort('system:time_start', false).first())
 var timeStart = ee.Date(firstImage.get('system:time_start'))
@@ -492,7 +494,6 @@ var chart = ui.Chart.image.series({
       interpolateNulls: false,
       vAxis: {title: 'NIRV', viewWindow: {min: 0, max: 0.3}},
       hAxis: {title: '', format: 'YYYY-MM'},
-      lineWidth: 1,
       pointSize: 4,
       series: {
         0: {color: '#66c2a4', lineDashStyle: [1, 1], pointSize: 2}, // Original NDVI
