@@ -18,6 +18,7 @@ var export_bands =
             ['Mean_NIRVP_Hyperbola_GPP',
             'timestamp'];
 
+var strawberry_fields_california = ee.FeatureCollection('strawberry_fields_cdl_csba_intersect_' + year);
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
@@ -45,9 +46,11 @@ function maskClouds(image) {
 
   // Bit 1 and 11 are clouds and cirrus, respectively.
   var cloudBitMask = 1 << 1;
+  var cirrusBitMask = 1 << 11;
 
   // Both flags should be set to zero, indicating clear conditions.
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0);
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+        .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
   return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
 }
 
