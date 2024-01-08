@@ -49,6 +49,12 @@ function aggregate_par(image) {
     return image.addBands(meanPar.rename('Mean_PAR')).select('Mean_PAR');
 }
 
+function multiplyBands(image) {
+  var nirvBand = image.select('d_0_NIRV');
+  var meanParBand = image.select('Mean_PAR');
+
+  return image.addBands([nirvBand.multiply(meanParBand).rename('Mean_NIRVP')]);
+}
 
 function gpp_predictor(field) {
   
