@@ -84,8 +84,6 @@ var nirv_collection = ee.ImageCollection('NASA/HLS/HLSL30/v002')
 nirv_collection = gpp_utils.cleanHLS(nirv_collection);
 nirv_collection = gpp_utils.calcNIRV(nirv_collection);
   
-
-  
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(date, ee.Date(date).advance(1, 'day'));
 
