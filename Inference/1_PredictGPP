@@ -19,7 +19,7 @@ var export_bands =
             ['Mean_NIRVP_Hyperbola_GPP',
             'timestamp'];
 
-var strawberry_fields_california = ee.FeatureCollection('strawberry_fields_cdl_csba_intersect_' + year);
+var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/strawberry_fields_cdl_csba_intersect_' + year);
 
 function applyScaleFactors(image) {
   var opticalBands = image.select('B.').multiply(0.0001);
