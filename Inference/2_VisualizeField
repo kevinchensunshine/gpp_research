@@ -14,8 +14,8 @@ for (var i = 0; i < 617; i += 7) {
 print(batch_list);
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
-var plot = require('users/kevinlc3/ndvi_nir_collection:Plot');
-var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:GPP_Processing_Lib');
+var plot = require('users/kevinlc3/ndvi_nir_collection:Utils/Plot');
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
 
 var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
 
