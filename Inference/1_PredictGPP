@@ -117,7 +117,7 @@ function gpp_predictor(field) {
   par_field = par_field.map(aggregate_par);
   
   //Interpolate to weekly intervals
-  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi);
+  nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi).select(['NIRV']);
   
   //Apply an SG-filter
   nirv_field = gpp_utils.applySGFilter(nirv_field, 3);
