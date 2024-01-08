@@ -431,7 +431,7 @@ exports.batchFeatureCollection = function(collection, processFunction, baseAsset
     var batchFeatureCollection = ee.FeatureCollection(batch);
     var assetId = baseAssetId + '/batch_' + i;
     // Apply the user-defined processing function
-    if (processFunctions !== null) {
+    if (processFunction !== null) {
       var processedBatch = processFunction(batchFeatureCollection);
       Export.table.toAsset({
         collection: processedBatch,
