@@ -51,4 +51,4 @@ print(majority_vote_strawberies.first())
 
 var batch = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib')
 
-batch.batchFeatureCollection(batch, null, 'users/kevinlc3/csbca_strawberries_field_level_' + year, 40);
+batch.batchFeatureCollection(majority_vote_strawberies, null, 'users/kevinlc3/csbca_strawberries_field_level_' + year, 40);
