@@ -1,0 +1,19 @@
+exports.applyHyperbola = function(image, par_bands, a, b) {
+  var applyHyperbolicFormula = function(bandName) {
+    var band = image.select(bandName);
+    return band.expression(
+      '((a * x) / (b + x))', {
+        'x': band,
+        'a': a,
+        'b': b
+      }).rename(bandName + '_Hyperbola_GPP');
+  };
+
+  // Apply the formula to each NIRVP band
+  for (var i = 0; i < par_bands.length; i++) {
+    var parBand = par_bands[i];
+    image = image.addBands(applyHyperbolicFormula(parBand), null, true);
+  }
+
+  return image;
+}
