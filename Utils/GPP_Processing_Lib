@@ -421,7 +421,7 @@ exports.alignCollections = function(base_collection, to_interpolate_collection, 
  * @param {Number} numberOfBatches - Number of batches to divide the collection into.
  */
  
-exports.FeatureCollection.batch = function(collection, processFunction, baseAssetId, numberOfBatches) {
+exports.batchFeatureCollection = function(collection, processFunction, baseAssetId, numberOfBatches) {
   var n = collection.size().getInfo();
   var stride = Math.ceil(n / numberOfBatches);
 
