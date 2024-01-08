@@ -545,3 +545,43 @@ exports.calculate_field_level = function(image) {
 
   return resultFeature;
 }
+
+
+
+function applyScaleFactors(image) {
+  var opticalBands = image.select('B.').multiply(0.0001);
+  return image.addBands(opticalBands, null, true);
+}
+
+function maskClouds(image) {
+  var qa = image.select('Fmask');
+  var cirrus = image.select('B9');
+
+  // Bit 1 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 1;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+        .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+  return image.updateMask(mask).copyProperties(image).set('system:time_start', image.get('system:time_start'));
+}
+
+function dataset_ndvi(image) {
+  var ndvi = image.normalizedDifference(['B5', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function dataset_nirv(image) {
+  var nirv = image.select('NDVI').multiply(image.select('B5')).rename('NIRV');
+  return image.addBands(nirv);
+}
+
+
+exports.cleanHSL = function(originalCollection) {
+  return originalCollection.map(applyScaleFactors).map(maskClouds);
+}
+
+exports.calcNIRV = function(originalCollection) {
+  return originalCollection.map(dataset_ndvi).map(dataset_nirv);
+}
