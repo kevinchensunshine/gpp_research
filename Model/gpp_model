@@ -2,7 +2,7 @@
 var a = 0.7478;
 var b = 105.2422;
 
-exports.applyHyperbola = function(image, par_bands, a, b) {
+exports.applyHyperbola = function(image, par_bands) {
   var applyHyperbolicFormula = function(bandName) {
     var band = image.select(bandName);
     return band.expression(
