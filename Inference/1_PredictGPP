@@ -65,12 +65,6 @@ function dataset_nirv(image) {
   return image.addBands(nirv);
 }
 
-var a = 0.7478;
-var b = 105.2422;
-function run_hyperbola(image) {
-  return gpp_utils.applyHyperbola(image, bands, a, b);
-}
-
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
   var meanParBand = image.select('Mean_PAR');
@@ -145,7 +139,7 @@ function gpp_predictor(field) {
   var nirvp_field = nirvp_collection.map(multiplyBands).first();
   
   //Run the rectangular hyperbola
-  var predicted_gpp_field = run_hyperbola(nirvp_field);
+  var predicted_gpp_field = model.applyHyperbola(nirvp_field);
   
   return predicted_gpp_field.select(export_bands).clip(roi);
 }
