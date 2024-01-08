@@ -578,8 +578,8 @@ function dataset_nirv(image) {
 }
 
 
-exports.cleanHSL = function(originalCollection) {
-  return originalCollection.map(applyScaleFactors).map(maskClouds);
+exports.cleanHLS = function(originalCollection) {
+  return originalCollection.map(maskClouds);
 }
 
 exports.calcNIRV = function(originalCollection) {
