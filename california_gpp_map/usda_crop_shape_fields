@@ -1,5 +1,5 @@
 // Your initial setup
-var year = '2019'
+var year = '2018'
 var csbca22 = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
 var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
@@ -9,7 +9,7 @@ var cdl = ee.ImageCollection('USDA/NASS/CDL')
                   .first();
 
 // Filter for strawberry fields
-var strawberry_layer_csbca22 = csbca22.filter(ee.Filter.eq('R19', 221));
+var strawberry_layer_csbca22 = csbca22.filter(ee.Filter.eq('R18', 221));
 
 // Visualization Parameters
 var visParams = {
