@@ -429,17 +429,22 @@ exports.FeatureCollection.batch = function(collection, processFunction, baseAsse
     var end = Math.min(i + stride, n);
     var batch = collection.toList(stride, i);
     var batchFeatureCollection = ee.FeatureCollection(batch);
-
-    // Apply the user-defined processing function
-    var processedBatch = processFunction(batchFeatureCollection);
-
     var assetId = baseAssetId + '/batch_' + i;
-
-    Export.table.toAsset({
-      collection: processedBatch,
-      description: 'Batch_' + i,
-      assetId: assetId
-    });
+    // Apply the user-defined processing function
+    if (processFunctions !== null) {
+      var processedBatch = processFunction(batchFeatureCollection);
+      Export.table.toAsset({
+        collection: processedBatch,
+        description: 'Batch_' + i,
+        assetId: assetId
+      });
+    } else {
+      Export.table.toAsset({
+        collection: batchFeatureCollection,
+        description: 'Batch_' + i,
+        assetId: assetId
+      });
+    }
   }
 }
 
