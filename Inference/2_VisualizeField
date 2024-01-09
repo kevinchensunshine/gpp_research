@@ -1,16 +1,17 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var ConcentratedAreaSalinas = 
     /* color: #d63000 */
+    /* shown: false */
     /* displayProperties: [
       {
         "type": "rectangle"
       }
     ] */
     ee.Geometry.Polygon(
-        [[[-121.84584920878, 36.91263500635226],
-          [-121.84584920878, 36.532879372669285],
-          [-121.26220052713937, 36.532879372669285],
-          [-121.26220052713937, 36.91263500635226]]], null, false);
+        [[[-121.89666097635812, 36.93678757465375],
+          [-121.89666097635812, 36.649757694168365],
+          [-121.51625936503, 36.649757694168365],
+          [-121.51625936503, 36.93678757465375]]], null, false);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 /**
  * Using the GPP Map predeicted in the previous script, this will aggregate it and visualize it, as well as provide a full asset to export
@@ -58,11 +59,16 @@ var visParams = {
   palette: ['FFCC33', 'FF3333']  // From black to white
 };
 
-Map.centerObject(normalizedImageCollection, 10);
 Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
 Map.add(plot.create_legend(minGppValue, maxGppValue));
 var label = ui.Label("2022-09-1");
 Map.add(label);
+
+var area1 = ui.Button("Strawberry Fields In Salinas",
+                      function() {
+                        Map.centerObject(ConcentratedAreaSalinas, 12);
+                      })
+Map.add(area1);
 
 Export.table.toAsset({
   collection: gpp_coll,
