@@ -102,13 +102,55 @@ Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, 
 Map.add(plot.create_legend(minGppValue, maxGppValue));
 
 var areas = ui.Panel({
-  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
-            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
-            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
-            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'})
+  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 12);}, {
+              margin: '8px 10px',
+              textAlign: 'center',
+              stretch: 'horizontal',
+              fontSize: '18px',
+              backgroundColor: '#f8f8f8',
+              color: '#333',
+              border: '1px solid #ccc',
+              padding: '10px'
+            }),
+            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 12);}, {
+              margin: '8px 10px',
+              textAlign: 'center',
+              stretch: 'horizontal',
+              fontSize: '18px',
+              backgroundColor: '#f8f8f8',
+              color: '#333',
+              border: '1px solid #ccc',
+              padding: '10px'
+            }),
+            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 12);}, {
+              margin: '8px 10px',
+              textAlign: 'center',
+              stretch: 'horizontal',
+              fontSize: '18px',
+              backgroundColor: '#f8f8f8',
+              color: '#333',
+              border: '1px solid #ccc',
+              padding: '10px'
+            }),
+            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 12);}, {
+              margin: '8px 10px',
+              textAlign: 'center',
+              stretch: 'horizontal',
+              fontSize: '18px',
+              backgroundColor: '#f8f8f8',
+              color: '#333',
+              border: '1px solid #ccc',
+              padding: '10px'
+            })
             ],
-  layout: ui.Panel.Layout.flow('vertical')
+  layout: ui.Panel.Layout.flow('vertical'),
+  style: {
+    padding: '16px',
+    backgroundColor: '#fff',
+    border: '1px solid #ddd',
+  }
   });
+
    
 Map.add(areas);
 var label = ui.Label("2022-09-1");
