@@ -97,7 +97,7 @@ var legendLabels = ui.Panel({
 
 var legendTitle = ui.Label({
   value: 'GPP Field Level Prediction',
-  style: {fontWeight: 'bold', fontSize: '26px'}
+  style: {textAlign: 'center', fontWeight: 'bold', fontSize: '26px'}
 });
 
 // Add the legendPanel to the map.
