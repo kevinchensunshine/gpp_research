@@ -2,8 +2,8 @@
 Define the path of the folder you created for the batches of geometries
 */
 
-var asset_path_collection = "users/kevinlc3/csbca_strawberries_field_level_2022/";
-var filename = "strawberry_fields_cdl_csba_intersect_2022";
+var asset_path_collection = "users/kevinlc3/csbca_strawberries_field_level_2021/";
+var filename = "strawberry_fields_cdl_csba_intersect_2021";
 var batch_list = []
 
 for (var i = 0; i < 609; i += 16) {
