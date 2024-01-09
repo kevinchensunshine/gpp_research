@@ -11,7 +11,46 @@ var ConcentratedAreaSalinas =
         [[[-121.89666097635812, 36.93678757465375],
           [-121.89666097635812, 36.649757694168365],
           [-121.51625936503, 36.649757694168365],
-          [-121.51625936503, 36.93678757465375]]], null, false);
+          [-121.51625936503, 36.93678757465375]]], null, false),
+    ConcentratedAreasSantaMaria = 
+    /* color: #98ff00 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[-120.67439617370455, 35.146525061879196],
+          [-120.67439617370455, 34.76835205013335],
+          [-120.16902507995455, 34.76835205013335],
+          [-120.16902507995455, 35.146525061879196]]], null, false),
+    ConcentratedAreaOxnard = 
+    /* color: #0b4a8b */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[-119.37900173221716, 34.34203822577279],
+          [-119.37900173221716, 34.03304963678151],
+          [-118.74179470096716, 34.03304963678151],
+          [-118.74179470096716, 34.34203822577279]]], null, false),
+    ConcentratedAreaOrangeCounty = 
+    /* color: #ffc82d */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[-117.97721492801794, 33.82623931891391],
+          [-117.97721492801794, 33.52910884272487],
+          [-117.5405083850492, 33.52910884272487],
+          [-117.5405083850492, 33.82623931891391]]], null, false);
 /***** End of imports. If edited, may not auto-convert in the playground. *****/
 /**
  * Using the GPP Map predeicted in the previous script, this will aggregate it and visualize it, as well as provide a full asset to export
@@ -20,10 +59,10 @@ var ConcentratedAreaSalinas =
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = 'users/kevinlc3/california_field_level_gpp/'
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022/'
 var batch_list = []
-var export_name = '2016'
-for (var i = 0; i < 2977; i += 31) {
+var export_name = '2022'
+for (var i = 0; i < 617; i += 7) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
@@ -68,7 +107,23 @@ var area1 = ui.Button("Strawberry Fields In Salinas",
                       function() {
                         Map.centerObject(ConcentratedAreaSalinas, 12);
                       })
+var area2 = ui.Button("Strawberry Fields In Santa Maria",
+                      function() {
+                        Map.centerObject(ConcentratedAreasSantaMaria, 12);
+                      })
+var area3 = ui.Button("Strawberry Fields In Oxnard",
+                      function() {
+                        Map.centerObject(ConcentratedAreaOxnard, 12);
+                      })
+var area4 = ui.Button("Strawberry Fields In Orange County",
+                      function() {
+                        Map.centerObject(ConcentratedAreaOrangeCounty, 12);
+                      })
+                
 Map.add(area1);
+Map.add(area2);
+Map.add(area3);
+Map.add(area4);
 
 Export.table.toAsset({
   collection: gpp_coll,
