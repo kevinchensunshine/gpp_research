@@ -101,10 +101,10 @@ var visParams = {
 Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
 
 var areas = ui.Panel({
-  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 15);}),
-            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 15);}),
-            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 15);}),
-            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 15);})
+  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 13);}),
+            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 13);}),
+            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 13);}),
+            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 13);})
             ],
   layout: ui.Panel.Layout.flow('horizontal'),
   style: {
