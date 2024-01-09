@@ -116,11 +116,16 @@ var areas = ui.Panel({
 var full_panel = ui.Panel({widgets: [plot.create_legend(minGppValue, maxGppValue), areas], layout: ui.Panel.Layout.flow('vertical')});
 Map.add(full_panel);
 
+var export_button = ui.Button("Export " + export_name, 
+  function() {
+    Export.table.toAsset({
+      collection: gpp_coll,
+      description: 'Full Predicted GPP Map for ' + export_name,
+      assetId: export_name
+    });
+  }
+);
+
 var label = ui.Label("2022-09-1");
 Map.add(label);
-
-Export.table.toAsset({
-  collection: gpp_coll,
-  description: 'Full Predicted GPP Map for ' + export_name,
-  assetId: export_name
-});
+Map.add(export_button);
