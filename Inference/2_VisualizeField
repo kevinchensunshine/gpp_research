@@ -102,10 +102,10 @@ Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, 
 Map.add(plot.create_legend(minGppValue, maxGppValue));
 
 var areas = ui.Panel({
-  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 12);}),
-            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 12);}),
-            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 12);}),
-            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 12);})
+  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
+            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
+            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'}),
+            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 12);}, {margin: '4px 6px', textAlign: 'center', stretch: 'horizontal', fontSize: '40px'})
             ],
   layout: ui.Panel.Layout.flow('vertical')
   });
