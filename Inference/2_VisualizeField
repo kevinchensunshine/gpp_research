@@ -20,10 +20,10 @@ var ConcentratedAreaSalinas =
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022/'
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp/'
 var batch_list = []
-var export_name = '2022'
-for (var i = 0; i < 617; i += 7) {
+var export_name = '2016'
+for (var i = 0; i < 2977; i += 31) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
