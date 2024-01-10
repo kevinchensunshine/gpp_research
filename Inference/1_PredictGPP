@@ -119,7 +119,7 @@ for (var i = 0; i < n; i += stride) {
   field_level_prediction_collection = field_level_prediction_collection.set({
                                                                               timestamp: date, 
                                                                               stride: stride,
-                                                                              sizeL: n
+                                                                              size: n
                                                                               });
 
   // Define the asset ID for each batch
