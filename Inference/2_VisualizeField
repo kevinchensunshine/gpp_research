@@ -79,7 +79,6 @@ var maxGppValue = gpp_coll.aggregate_max('Mean_NIRVP_Hyperbola_GPP').getInfo();
 
 print(maxGppValue)
 print(minGppValue)
-var range = maxGppValue - minGppValue;
 
 function createNormalizedImage(feature) {
   feature = ee.Feature(feature);
