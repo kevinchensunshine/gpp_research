@@ -59,10 +59,10 @@ var ConcentratedAreaSalinas =
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022/'
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2016-09-01/'
 var batch_list = []
-var export_name = '2022'
-for (var i = 0; i < 617; i += 7) {
+var export_name = '2016-09-01'
+for (var i = 0; i < 2977; i += 31) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
@@ -126,6 +126,6 @@ var export_button = ui.Button("Export " + export_name,
   }
 );
 
-var label = ui.Label("2022-09-1");
+var label = ui.Label(export_name);
 Map.add(label);
 Map.add(export_button);
