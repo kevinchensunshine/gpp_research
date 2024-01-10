@@ -72,6 +72,7 @@ var plot = require('users/kevinlc3/ndvi_nir_collection:Utils/Plot');
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
 
 var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
+gpp_coll = gpp_coll.filter(ee.Filter.notNull(['Mean_NIRVP_Hyperbola_GPP']));
 
 
 var minGppValue = gpp_coll.aggregate_min('Mean_NIRVP_Hyperbola_GPP').getInfo();
@@ -102,8 +103,7 @@ Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, 
 var areas = ui.Panel({
   widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 13);}),
             ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 13);}),
-            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 13);}),
-            ui.Button("Strawberry Fields In Orange County",function() {Map.centerObject(ConcentratedAreaOrangeCounty, 13);})
+            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 13);})
             ],
   layout: ui.Panel.Layout.flow('horizontal'),
   style: {
