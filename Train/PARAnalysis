@@ -176,7 +176,7 @@ var exportable = originalCollection.map(function(image) {
   var date = ee.Date(image.get('system:time_start'));
 
   return ee.Feature(null, {
-    'Date_0000': date.format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_0000': date,
     'PAR_0000': PAR_0000,
     'Date_0300' : date.advance(3, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
     'PAR_0300' : PAR_0300,
