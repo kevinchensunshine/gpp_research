@@ -24,11 +24,6 @@ var diff_to1 = diff_neg0.expression(
       'DIFF': diff_neg0
 });
 
-Map.addLayer(diff_neg0,
- {palette: 'FF0000, 000000, 00FF00', min: -0.3, max: 0.3},"Negative differences");
-Map.addLayer(diff_to1,
- {palette: 'FF0000, 000000, 00FF00', min: -0.3, max: 0.3},"Diff to 1");
-
 var stats = diff_to1.reduceRegion({
   reducer: ee.Reducer.sum(),
   geometry: diff_to1.geometry(),
