@@ -16,8 +16,7 @@ var model = require('users/kevinlc3/ndvi_nir_collection:Model/gpp_model');
 var bands = ['Mean_NIRVP'];
             
 var export_bands = 
-            ['Mean_NIRVP_Hyperbola_GPP',
-            'timestamp'];
+            ['Mean_NIRVP_Hyperbola_GPP'];
 
 var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/strawberry_fields_cdl_csba_intersect_' + year);
 
