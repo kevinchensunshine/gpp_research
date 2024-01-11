@@ -178,19 +178,19 @@ var exportable = originalCollection.map(function(image) {
   return ee.Feature(null, {
     'Date_0000': date,
     'PAR_0000': PAR_0000,
-    'Date_0300' : date.advance(3, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_0300' : date.advance(3, 'hours'),
     'PAR_0300' : PAR_0300,
-    'Date_0600': date.advance(6, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_0600': date.advance(6, 'hours'),
     'PAR_0600': PAR_0600,
-    'Date_0900' : date.advance(9, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_0900' : date.advance(9, 'hours'),
     'PAR_0900' : PAR_0900,
-    'Date_1200': date.advance(12, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_1200': date.advance(12, 'hours'),
     'PAR_1200': PAR_1200,
-    'Date_1500' : date.advance(15, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_1500' : date.advance(15, 'hours'),
     'PAR_1500' : PAR_1500,
-    'Date_1800': date.advance(18, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_1800': date.advance(18, 'hours'),
     'PAR_1800': PAR_1800,
-    'Date_2100' : date.advance(21, 'hours').format('yyyy-MM-dd HH:mm:ss', 'US/Pacific'),
+    'Date_2100' : date.advance(21, 'hours'),
     'PAR_2100' : PAR_2100
   });
 });
