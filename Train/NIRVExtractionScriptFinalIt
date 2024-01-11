@@ -122,8 +122,7 @@ var geometry_2023 = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213
                                         [-121.66700268465287, 36.887865267169495],
                                         [-121.6685583750657, 36.88928971620196],
                                         [-121.66842962854085, 36.88854317230213]])
-Map.addLayer(geometry_2023, {color: 'FF0000'}, 'geodesic polygon');
-                                                                  
+
 var startDate_2016 = '2016-01-1';
 var endDate_2016 = '2016-12-30';
 var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581],
@@ -131,7 +130,6 @@ var geometry_2016 = ee.Geometry.Polygon([[-121.79385013694001, 36.84691020164581
                               [-121.78920455092621, 36.84610314620703],
                               [-121.78927965277863, 36.84947726815222],
                               [-121.79385013694001, 36.84691020164581]])
-Map.addLayer(geometry_2016, {color: 'FF0000'}, 'geodesic polygon');
 
 //Turn these into a a feature collection for scalable indexing
 var start_date_list = [startDate_2023, startDate_2016]
@@ -163,7 +161,6 @@ var originalCollection_2016 = ee.ImageCollection('NASA/HLS/HLSL30/v002')
   .filterDate(parameter_accessor.getStartDate("2016"), 
               parameter_accessor.getEndDate("2016"))
   .filterBounds(parameter_accessor.getGeometry("2016"))
-  .filterBounds(strawberries.geometry().dissolve())
   .map(maskClouds)
   .map(dataset_ndvi)
   .map(dataset_nirv)
