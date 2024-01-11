@@ -1,0 +1,40 @@
+var date = '2016-09-01';
+var year = '2016';
+var path = 'users/kevinlc3/california_field_level_gpp_' + date;
+var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/strawberry_fields_cdl_csba_intersect_' + year);
+
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
+
+var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
+  .filterDate(date, ee.Date(date).advance(1, 'day')).first();
+  
+var par_fields = par_collection.clip(strawberry_fields_california.geometry().dissolve());
+
+var negmask = function(image) {
+  return image.updateMask(image.lt(0));
+};
+
+var diff_neg = negmask(par_fields);
+var diff_neg0 = diff_neg.expression(
+    '0 * DIFF', {
+      'DIFF': diff_neg
+});
+var diff_to1 = diff_neg0.expression(
+    '1 + DIFF', {
+      'DIFF': diff_neg0
+});
+
+Map.addLayer(diff_neg0,
+ {palette: 'FF0000, 000000, 00FF00', min: -0.3, max: 0.3},"Negative differences");
+Map.addLayer(diff_to1,
+ {palette: 'FF0000, 000000, 00FF00', min: -0.3, max: 0.3},"Diff to 1");
+
+var stats = diff_to1.reduceRegion({
+  reducer: ee.Reducer.sum(),
+  geometry: diff_to1.geometry(),
+  scale: 500,
+  maxPixels: 1e9
+});
+
+print (stats);
+
