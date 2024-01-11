@@ -139,7 +139,7 @@ var names = ["2023", "2016"]
 
 var parameters = createFeatureCollection(start_date_list, end_date_list, region_list, names)
 var parameter_accessor = new FeatureAccessor(parameters)
-var cur_field = "2023" //set name here, alternatively set it manually for each instance
+var cur_field = "2016" //set name here, alternatively set it manually for each instance
 
 //Use parameters to get values for a specific feature: e.g
 //var filteredFeature = myFeatureCollection.filter(ee.Filter.eq('name', featureName)).first();
