@@ -1,6 +1,6 @@
 //define model params
-var a = 0.7478;
-var b = 105.2422;
+var a = 12.9614;
+var b = 240.2214;
 
 exports.applyHyperbola = function(image, par_bands) {
   var applyHyperbolicFormula = function(bandName) {
