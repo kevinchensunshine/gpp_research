@@ -42,7 +42,8 @@ function aggregate_par(image) {
     var selectedBands = image.select(bandNames);
 
     // Calculate the mean of the selected bands
-    var meanPar = selectedBands.reduce(ee.Reducer.mean());
+    // Multiply by 4.57 to convert from W/m^2 to umol m-2 s-1
+    var meanPar = selectedBands.reduce(ee.Reducer.mean()).multiply(4.57);
 
     // Add the mean band to the original image and rename it to 'Mean_PAR'
     return image.addBands(meanPar.rename('Mean_PAR')).select('Mean_PAR');
