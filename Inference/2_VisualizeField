@@ -59,10 +59,11 @@ var ConcentratedAreaSalinas =
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2016-09-01/'
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2021-09-01/'
 var batch_list = []
-var export_name = '2016-09-01'
-for (var i = 0; i < 2977; i += 31) {
+var export_name = '2021-09-01'
+
+for (var i = 0; i < 84; i += 4) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
