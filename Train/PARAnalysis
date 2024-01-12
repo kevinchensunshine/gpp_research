@@ -1,9 +1,12 @@
 var startDate = '2016-05-10T16:30:00';
 var endDate = '2016-10-31T16:30:00';
 
-var geometry = ee.Geometry.Polygon([
-  [[-121.789167, 36.846645], [-121.789167, 36.849645], [-121.793867, 36.846645], [-121.793167, 36.843645]]
-]);
+var geometry = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213],
+                                        [-121.66793609708007, 36.887290332607236],
+                                        [-121.66700268465287, 36.887865267169495],
+                                        [-121.6685583750657, 36.88928971620196],
+                                        [-121.66842962854085, 36.88854317230213]])
+Map.addLayer(geometry)
 
 var originalCollection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(startDate, endDate)
