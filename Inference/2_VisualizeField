@@ -1,6 +1,7 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var ConcentratedAreaSalinas = 
     /* color: #d63000 */
+    /* shown: false */
     /* locked: true */
     /* displayProperties: [
       {
