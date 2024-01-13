@@ -28,10 +28,10 @@ function filterStrawberryFields(featureCollection) {
     var minmax = ee.Dictionary(ovals.reduce(ee.Reducer.minMax()))
     var maxval = ee.Number(minmax.get('max'))
     var maxind = ovals.indexOf(maxval)
-    var maxkey = ee.Number.parse(okeys.get(maxind))
+    var maxkey = okeys.get(maxind)
 
     // Check if the most frequent crop type is strawberries (221)
-    return ee.Feature(feature).set('isMajorityStrawberries', ee.Number(maxkey).eq(221));
+    return ee.Feature(feature).set('isMajorityStrawberries', maxkey.eq('221'));
   };
 
   // Map the function over the FeatureCollection
