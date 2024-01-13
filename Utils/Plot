@@ -71,7 +71,7 @@ exports.create_legend = function(minimum_value, maximum_value) {
   });
   
   var legendTitle = ui.Label({
-    value: 'GPP Field Level Prediction mg m-2 s-1',
+    value: 'GPP Field Level Prediction mg m-2 d-1',
     style: {textAlign: 'center', fontWeight: 'bold', fontSize: '26px'}
   });
   
