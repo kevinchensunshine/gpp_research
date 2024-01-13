@@ -24,9 +24,8 @@ function filterStrawberryFields(featureCollection) {
     var cropHistogram = ee.Dictionary(histogram.get('cropland'));
     // Sort the dictionary by value to find the most frequent crop type
     var sorted_keys = cropHistogram.keys().sort(cropHistogram.values())
-
-    var mostFrequentCrop = ee.Number(sorted_keys.get(0));
-
+    var lastIndex = sorted_keys.size().subtract(1);
+    var mostFrequentCrop = ee.Number.parse(sorted_keys.get(lastIndex));
     // Check if the most frequent crop type is strawberries (221)
     return ee.Feature(feature).set('isMajorityStrawberries', mostFrequentCrop.eq(221));
   };
