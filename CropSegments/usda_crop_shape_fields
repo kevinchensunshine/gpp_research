@@ -39,6 +39,8 @@ function filterStrawberryFields(featureCollection) {
 
 var csbca22_cali = csbca22.filter(ee.Filter.eq('R21', 221)).filterBounds(california_bound);
 var strawberryFields = filterStrawberryFields(csbca22_cali);
+print(csbca22_cali.size())
+print(strawberryFields.size())
 Map.addLayer(strawberryFields);
 /*
 // Filter for strawberry fields
