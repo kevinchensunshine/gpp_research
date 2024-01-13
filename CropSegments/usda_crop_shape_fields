@@ -7,7 +7,44 @@ var cdl = ee.ImageCollection('USDA/NASS/CDL')
                   .filter(ee.Filter.date(year + '-01-01', year + '-12-01'))
                   .filterBounds(california_bound)
                   .first();
+                  
+function filterStrawberryFields(featureCollection) {
 
+  // Function to check if strawberries are the majority crop
+  var isMajorityStrawberries = function(feature) {
+    // Reduce the CDL image to a frequency histogram within the feature's bounds
+    var histogram = cdl.select('cropland').reduceRegion({
+      reducer: ee.Reducer.frequencyHistogram(),
+      geometry: feature.geometry(),
+      scale: 30,  // Adjust as needed
+      maxPixels: 1e9
+    });
+
+    // Get the histogram of the 'cropland' band and find the most frequent crop type
+    var o = ee.Dictionary(histogram.get('cropland'));
+    var okeys = ee.List(o.keys())
+    var ovals = ee.List(o.values())
+    
+    var minmax = ee.Dictionary(ovals.reduce(ee.Reducer.minMax()))
+    var maxval = ee.Number(minmax.get('max'))
+    var maxind = ovals.indexOf(maxval)
+    var maxkey = ee.Number.parse(okeys.get(maxind))
+
+    // Check if the most frequent crop type is strawberries (221)
+    return ee.Feature(feature).set('isMajorityStrawberries', ee.Number(maxkey).eq(221));
+  };
+
+  // Map the function over the FeatureCollection
+  var updatedCollection = featureCollection.map(isMajorityStrawberries);
+
+  // Filter to keep only features where strawberries are the majority
+  return updatedCollection.filter(ee.Filter.eq('isMajorityStrawberries', true));
+}
+
+var csbca22_cali = csbca22.filter(ee.Filter.eq('R17', 221)).filterBounds(california_bound);
+var strawberryFields = filterStrawberryFields(csbca22_cali);
+Map.addLayer(strawberryFields);
+/*
 // Filter for strawberry fields
 var strawberry_layer_csbca22 = csbca22.filter(ee.Filter.eq('R17', 221));
 
@@ -52,3 +89,4 @@ print(majority_vote_strawberies.first())
 var batch = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib')
 
 batch.batchFeatureCollection(majority_vote_strawberies, null, 'users/kevinlc3/csbca_strawberries_field_level_' + year, 40);
+*/
