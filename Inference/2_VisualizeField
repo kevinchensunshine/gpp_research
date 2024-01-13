@@ -1,17 +1,63 @@
 /**** Start of imports. If edited, may not auto-convert in the playground. ****/
 var ConcentratedAreaSalinas = 
     /* color: #d63000 */
-    /* shown: false */
+    /* locked: true */
     /* displayProperties: [
       {
         "type": "rectangle"
+      },
+      {
+        "type": "marker"
+      },
+      {
+        "type": "marker"
       }
     ] */
-    ee.Geometry.Polygon(
-        [[[-121.89666097635812, 36.93678757465375],
-          [-121.89666097635812, 36.649757694168365],
-          [-121.51625936503, 36.649757694168365],
-          [-121.51625936503, 36.93678757465375]]], null, false),
+    ee.Geometry({
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -121.89666097635812,
+                36.93678757465375
+              ],
+              [
+                -121.89666097635812,
+                36.649757694168365
+              ],
+              [
+                -121.51625936503,
+                36.649757694168365
+              ],
+              [
+                -121.51625936503,
+                36.93678757465375
+              ]
+            ]
+          ],
+          "geodesic": false,
+          "evenOdd": true
+        },
+        {
+          "type": "Point",
+          "coordinates": [
+            -121.79765527720102,
+            36.84705030235158
+          ]
+        },
+        {
+          "type": "Point",
+          "coordinates": [
+            -121.79778402323373,
+            36.847668465580725
+          ]
+        }
+      ],
+      "coordinates": []
+    }),
     ConcentratedAreasSantaMaria = 
     /* color: #98ff00 */
     /* shown: false */
