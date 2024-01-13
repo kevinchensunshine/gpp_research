@@ -1,5 +1,5 @@
 // Your initial setup
-var year = '2017'
+var year = '2021'
 var csbca22 = ee.FeatureCollection("projects/nass-csb/assets/csb1522/CSBCA1522");
 var california_bound = ee.FeatureCollection('TIGER/2016/States')
             .filter(ee.Filter.eq('NAME', 'California'));
@@ -25,9 +25,9 @@ function filterStrawberryFields(featureCollection) {
     // Sort the dictionary by value to find the most frequent crop type
     var sorted_keys = cropHistogram.keys().sort(cropHistogram.values())
     var lastIndex = sorted_keys.size().subtract(1);
-    var mostFrequentCrop = sorted_keys.get(lastIndex);
+    var mostFrequentCrop = ee.String(sorted_keys.get(lastIndex));
     // Check if the most frequent crop type is strawberries (221)
-    return ee.Feature(feature).set('isMajorityStrawberries', mostFrequentCrop.eq('221'));
+    return ee.Feature(feature).set('isMajorityStrawberries', mostFrequentCrop.equals('221'));
   };
 
   // Map the function over the FeatureCollection
@@ -37,7 +37,7 @@ function filterStrawberryFields(featureCollection) {
   return updatedCollection.filter(ee.Filter.eq('isMajorityStrawberries', true));
 }
 
-var csbca22_cali = csbca22.filter(ee.Filter.eq('R17', 221)).filterBounds(california_bound);
+var csbca22_cali = csbca22.filter(ee.Filter.eq('R21', 221)).filterBounds(california_bound);
 var strawberryFields = filterStrawberryFields(csbca22_cali);
 Map.addLayer(strawberryFields);
 /*
