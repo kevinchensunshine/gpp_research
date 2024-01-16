@@ -41,13 +41,13 @@ var csbca22_cali = csbca22.filter(ee.Filter.eq('R22', 221)).filterBounds(califor
 var strawberryFields = filterStrawberryFields(csbca22_cali);
 print(csbca22_cali.size())
 print(strawberryFields.size())
+
 var assetId = 'majority_vote_filtered_strawberries' + year;
 Export.table.toAsset({
   collection: strawberryFields,
   description: 'majority_vote_filtered_strawberries' + year,
   assetId: assetId
 });
-Export.table.toAsset(strawberryFields)
 Map.addLayer(strawberryFields);
 /*
 // Filter for strawberry fields
