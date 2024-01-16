@@ -48,6 +48,7 @@ Export.table.toAsset({
   description: 'majority_vote_filtered_strawberries' + year,
   assetId: assetId
 });
+
 Map.addLayer(strawberryFields);
 /*
 // Filter for strawberry fields
