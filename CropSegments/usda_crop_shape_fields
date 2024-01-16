@@ -37,7 +37,7 @@ function filterStrawberryFields(featureCollection) {
   return updatedCollection.filter(ee.Filter.eq('isMajorityStrawberries', true));
 }
 
-var csbca22_cali = csbca22.filter(ee.Filter.eq('R21', 221)).filterBounds(california_bound);
+var csbca22_cali = csbca22.filter(ee.Filter.eq('R22', 221)).filterBounds(california_bound);
 var strawberryFields = filterStrawberryFields(csbca22_cali);
 print(csbca22_cali.size())
 print(strawberryFields.size())
