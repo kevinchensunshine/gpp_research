@@ -27,7 +27,7 @@ function filterStrawberryFields(featureCollection) {
     var lastIndex = sorted_keys.size().subtract(1);
     var mostFrequentCrop = ee.String(sorted_keys.get(lastIndex));
     // Check if the most frequent crop type is strawberries (221)
-    return ee.Feature(feature).set('isMajorityStrawberries', mostFrequentCrop.equals('221'));
+    return feature.set('isMajorityStrawberries', mostFrequentCrop.equals('221'));
   };
 
   // Map the function over the FeatureCollection
@@ -38,7 +38,7 @@ function filterStrawberryFields(featureCollection) {
 }
 
 var csbca22_cali = csbca22.filter(ee.Filter.eq('R22', 221)).filterBounds(california_bound);
-var strawberryFields = filterStrawberryFields(csbca22_cali);
+var strawberryFields = filterStrawberryFields(csbca22_cali).select('R22');
 print(csbca22_cali.size())
 print(strawberryFields.size())
 
