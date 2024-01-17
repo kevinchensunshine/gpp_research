@@ -1,0 +1,21 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var table = ee.FeatureCollection("users/kevinlc3/majority_vote_filtered_strawberries2022");
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
+var getCentroid = function(feature) {
+  var centroid = feature.geometry().centroid();
+  // Return a new Feature, copying properties from the old Feature.
+  return ee.Feature(centroid).copyProperties(feature, keepProperties);
+};
+
+var centroids = table.map(getCentroid);
+
+Map.addLayer(centroids, {color: 'FF0000'}, 'centroids');
+
+// Print centroids
+print('centroids', centroids);
+
+Export.table.toDrive({
+  collection: centroids, 
+  description: 'centroids',
+  fileFormat: 'csv'
+})
