@@ -4,7 +4,7 @@ var table = ee.FeatureCollection("users/kevinlc3/majority_vote_filtered_strawber
 var getCentroid = function(feature) {
   var centroid = feature.geometry().centroid();
   // Return a new Feature, copying properties from the old Feature.
-  return ee.Feature(centroid).copyProperties(feature, keepProperties);
+  return ee.Feature(centroid);
 };
 
 var centroids = table.map(getCentroid);
