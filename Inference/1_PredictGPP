@@ -5,8 +5,8 @@
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var date = '2021-09-01';
-var year = '2021';
+var date = '2022-09-01';
+var year = '2022';
 var path = 'users/kevinlc3/california_field_level_gpp_' + date;
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -18,7 +18,7 @@ var bands = ['Mean_NIRVP'];
 var export_bands = 
             ['Mean_NIRVP_Hyperbola_GPP'];
 
-var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/strawberry_fields_cdl_csba_intersect_' + year);
+var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/majority_vote_filtered_strawberries' + year);
 
 var startDate = year + '-1-1';
 var endDate = year + '-12-30';
