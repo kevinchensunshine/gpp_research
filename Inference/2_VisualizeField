@@ -106,11 +106,11 @@ var ConcentratedAreaSalinas =
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2021-09-01/'
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022-09-02/'
 var batch_list = []
 var export_name = '2021-09-01'
 
-for (var i = 0; i < 397; i += 4) {
+for (var i = 0; i < 610; i += 14) {
   batch_list.push("batch_" + i);
 }
 print(batch_list);
@@ -145,7 +145,7 @@ var visParams = {
   max: 1,
   palette: ['FFCC33', 'FF3333']  // From black to white
 };
-
+Map.addLayer(gpp_coll);
 Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
 
 var areas = ui.Panel({
