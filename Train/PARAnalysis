@@ -6,6 +6,14 @@ var geometry = ee.Geometry.Polygon([[-121.66842962854085, 36.88854317230213],
                                         [-121.66700268465287, 36.887865267169495],
                                         [-121.6685583750657, 36.88928971620196],
                                         [-121.66842962854085, 36.88854317230213]])
+var california_bound = ee.FeatureCollection('TIGER/2016/States')
+            .filter(ee.Filter.eq('NAME', 'California'));
+var cdl = ee.ImageCollection('USDA/NASS/CDL')
+                  .filter(ee.Filter.date('2022-01-01', '2022-12-01'))
+                  .filterBounds(california_bound)
+                  .first();
+var cropLandcover = cdl.select('cropland');
+Map.addLayer(cropLandcover, {}, 'Crop Landcover');
 Map.addLayer(geometry)
 
 var originalCollection = ee.ImageCollection('MODIS/061/MCD18C2')
