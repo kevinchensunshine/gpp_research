@@ -64,8 +64,6 @@ function gpp_predictor(field) {
                                   
   var par_field = par_collection.filterBounds(roi);
   
-  par_field = par_field.map(aggregate_par);
-  
   //Interpolate to weekly intervals
   nirv_field = gpp_utils.interpolateCollection(nirv_field, 7, roi).select(['NIRV']);
   
