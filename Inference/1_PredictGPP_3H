@@ -13,10 +13,10 @@ var path = 'users/kevinlc3/california_field_level_gpp_' + date;
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
 var model = require('users/kevinlc3/ndvi_nir_collection:Model/gpp_model');
 
-var bands = ['Mean_NIRVP'];
+var bands = ['NIRVP_0000', 'NIRVP_0300', 'NIRVP_0600', 'NIRVP_0900', 'NIRVP_1200', 'NIRVP_1500', 'NIRVP_1800', 'NIRVP_2100'];
             
 var export_bands = 
-            ['Mean_NIRVP_Hyperbola_GPP'];
+            ['GPP_0000', 'GPP_0300', 'GPP_0600', 'GPP_0900', 'GPP_1200', 'GPP_1500', 'GPP_1800', 'GPP_2100'];
 
 var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/majority_vote_filtered_strawberries' + year);
 
@@ -33,9 +33,24 @@ var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
 
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
-  var meanParBand = image.select('Mean_PAR');
+  var par_0000 = image.select('GMT_0000_PAR');
+  var par_0300 = image.select('GMT_0300_PAR');
+  var par_0600 = image.select('GMT_0600_PAR');
+  var par_0900 = image.select('GMT_0900_PAR');
+  var par_1200 = image.select('GMT_1200_PAR');
+  var par_1500 = image.select('GMT_1500_PAR');
+  var par_1800 = image.select('GMT_1800_PAR');
+  var par_2100 = image.select('GMT_2100_PAR');
 
-  return image.addBands([nirvBand.multiply(meanParBand).rename('Mean_NIRVP')]);
+  return image.addBands([nirvBand.multiply(par_0000).rename('NIRVP_0000'),
+                        nirvBand.multiply(par_0300).rename('NIRVP_0300'),
+                        nirvBand.multiply(par_0600).rename('NIRVP_0600'),
+                        nirvBand.multiply(par_0900).rename('NIRVP_0900'),
+                        nirvBand.multiply(par_1200).rename('NIRVP_1200'),
+                        nirvBand.multiply(par_1500).rename('NIRVP_1500'),
+                        nirvBand.multiply(par_1800).rename('NIRVP_1800'),
+                        nirvBand.multiply(par_2100).rename('NIRVP_2100')
+                        ]);
 }
 
 function gpp_predictor(field) {
