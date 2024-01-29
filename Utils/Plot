@@ -52,7 +52,7 @@ exports.create_legend = function(minimum_value, maximum_value) {
   minimum_value = minimum_value < 0 ? 0 : minimum_value;
   var running_total = minimum_value;
   for (var i = 0; i <= 7; i++) {
-    label_numbers.push(running_total.toFixed(1).toString());
+    label_numbers.push(running_total.toFixed(0).toString());
     running_total += (maximum_value - minimum_value) / 7
   }
   
