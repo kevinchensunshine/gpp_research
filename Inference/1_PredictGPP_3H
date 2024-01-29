@@ -31,24 +31,6 @@ nirv_collection = gpp_utils.calcNIRV(nirv_collection);
 var par_collection = ee.ImageCollection('MODIS/061/MCD18C2')
   .filterDate(date, ee.Date(date).advance(1, 'day'));
 
-function aggregate_par(image) {
-    // Define the band names to be averaged
-    var bandNames = [
-        'GMT_0000_PAR', 'GMT_0300_PAR', 'GMT_0600_PAR', 'GMT_0900_PAR',
-        'GMT_1200_PAR', 'GMT_1500_PAR', 'GMT_1800_PAR', 'GMT_2100_PAR'
-    ];
-
-    // Select the bands from the image
-    var selectedBands = image.select(bandNames);
-
-    // Calculate the mean of the selected bands
-    // Multiply by 4.57 to convert from W/m^2 to umol m-2 s-1
-    var meanPar = selectedBands.reduce(ee.Reducer.mean()).multiply(4.57);
-
-    // Add the mean band to the original image and rename it to 'Mean_PAR'
-    return image.addBands(meanPar.rename('Mean_PAR')).select('Mean_PAR');
-}
-
 function multiplyBands(image) {
   var nirvBand = image.select('d_0_NIRV');
   var meanParBand = image.select('Mean_PAR');
