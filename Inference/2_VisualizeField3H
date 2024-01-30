@@ -1,0 +1,79 @@
+/**
+ * Using the GPP Map predeicted in the previous script, this will aggregate it and visualize it, as well as provide a full asset to export
+ * Usage: Define the collection path from the last script, as well as the file names of each batch. These run by a pattern which should be easy to see, so use that to adjust the loop
+ */
+ 
+//User defined values:
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
+var asset_path_collection = 'users/kevinlc3/california_field_level_gpp_2022-09-02/'
+var batch_list = []
+var export_name = '2021-09-01'
+
+for (var i = 0; i < 610; i += 14) {
+  batch_list.push("batch_" + i);
+}
+print(batch_list);
+//--------------------------------------------------------------------------------------------------------------------------------------------------//
+
+var plot = require('users/kevinlc3/ndvi_nir_collection:Utils/Plot');
+var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
+
+var gpp_coll = gpp_utils.mergeCollection(asset_path_collection, batch_list);
+gpp_coll = gpp_coll.filter(ee.Filter.notNull(['Mean_NIRVP_Hyperbola_GPP']));
+
+
+var minGppValue = gpp_coll.aggregate_min('Mean_NIRVP_Hyperbola_GPP').getInfo();
+var maxGppValue = gpp_coll.aggregate_max('Mean_NIRVP_Hyperbola_GPP').getInfo();
+
+print(maxGppValue)
+print(minGppValue)
+
+function createNormalizedImage(feature) {
+  feature = ee.Feature(feature);
+  var value = feature.getNumber('Mean_NIRVP_Hyperbola_GPP');
+  return ee.Image.constant(value).toFloat().clip(feature.geometry());
+}
+
+// Create an ImageCollection with normalized images
+var normalizedImageCollection = ee.ImageCollection(gpp_coll.map(createNormalizedImage));
+
+// Visualization parameters for the normalized GPP values
+var visParams = {
+  bands: ['constant'],
+  min: 0,
+  max: 1,
+  palette: ['FFCC33', 'FF3333']  // From black to white
+};
+Map.addLayer(gpp_coll);
+Map.addLayer(normalizedImageCollection, plot.create_representation(minGppValue, maxGppValue), "Normalized GPP Visualization");
+
+/*
+var areas = ui.Panel({
+  widgets: [ui.Button("Strawberry Fields In Salinas", function() {Map.centerObject(ConcentratedAreaSalinas, 13);}),
+            ui.Button("Strawberry Fields In Santa Maria",function() {Map.centerObject(ConcentratedAreasSantaMaria, 13);}),
+            ui.Button("Strawberry Fields In Oxnard",function() {Map.centerObject(ConcentratedAreaOxnard, 13);})
+            ],
+  layout: ui.Panel.Layout.flow('horizontal'),
+  style: {
+    backgroundColor: '#fff',
+    border: '1px solid #ddd',
+  }
+  });
+
+var full_panel = ui.Panel({widgets: [plot.create_legend(minGppValue, maxGppValue), areas], layout: ui.Panel.Layout.flow('vertical')});
+Map.add(full_panel);
+
+var export_button = ui.Button("Export " + export_name, 
+  function() {
+    Export.table.toAsset({
+      collection: gpp_coll,
+      description: 'Full Predicted GPP Map for ' + export_name,
+      assetId: export_name
+    });
+  }
+);
+
+var label = ui.Label(export_name);
+Map.add(label);
+Map.add(export_button);
+*/
