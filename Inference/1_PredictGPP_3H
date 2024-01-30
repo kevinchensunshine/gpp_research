@@ -118,11 +118,11 @@ for (var i = 0; i < n; i += stride) {
                                                                               });
 
   // Define the asset ID for each batch
-  var assetId = path + '/batch_' + i;
+  var assetId = path + '/batch_3h_' + i;
   // Export each batch to an asset
   var asset = Export.table.toAsset({
     collection: field_level_prediction_collection,
-    description: 'Batch_' + i,
+    description: 'Batch_3h' + i,
     assetId: assetId
   });
   
