@@ -16,7 +16,7 @@ var model = require('users/kevinlc3/ndvi_nir_collection:Model/gpp_model');
 var bands = ['NIRVP_0000', 'NIRVP_0300', 'NIRVP_0600', 'NIRVP_0900', 'NIRVP_1200', 'NIRVP_1500', 'NIRVP_1800', 'NIRVP_2100'];
             
 var export_bands = 
-            ['GPP_0000', 'GPP_0300', 'GPP_0600', 'GPP_0900', 'GPP_1200', 'GPP_1500', 'GPP_1800', 'GPP_2100'];
+            ['NIRVP_0000_GPP', 'NIRVP_0300_GPP', 'NIRVP_0600_GPP', 'NIRVP_0900_GPP', 'NIRVP_1200_GPP', 'NIRVP_1500_GPP', 'NIRVP_1800_GPP', 'NIRVP_2100_GPP'];
 
 var strawberry_fields_california = ee.FeatureCollection('users/kevinlc3/majority_vote_filtered_strawberries' + year);
 
