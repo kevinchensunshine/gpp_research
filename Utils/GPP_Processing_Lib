@@ -11,7 +11,7 @@ exports.applyHyperbola = function(image, par_bands, a, b) {
         'x': band,
         'a': a,
         'b': b
-      }).rename(bandName + '_Hyperbola_GPP');
+      }).rename(bandName + '_GPP');
   };
 
   // Apply the formula to each NIRVP band
