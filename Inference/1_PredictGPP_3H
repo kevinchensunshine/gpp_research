@@ -5,9 +5,9 @@
  
 //User defined values:
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
-var date = '2022-09-02';
+var date = '2022-09-03';
 var year = '2022';
-var path = 'users/kevinlc3/california_field_level_gpp_' + date;
+var path = 'users/kevinlc3/california_field_level_gpp_' + date + '-3H';
 //--------------------------------------------------------------------------------------------------------------------------------------------------//
 
 var gpp_utils = require('users/kevinlc3/ndvi_nir_collection:Utils/GPP_Processing_Lib');
