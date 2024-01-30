@@ -21,3 +21,23 @@ exports.applyHyperbola = function(image, par_bands) {
 
   return image;
 }
+
+var alpha = 0.0178
+exports.applyLinear = function(image, par_bands) {
+  var applyLinearFormula = function(bandName) {
+    var band = image.select(bandName);
+    return band.expression(
+      '(a * x)', {
+        'x': band,
+        'a': alpha
+      }).rename(bandName + '_GPP');
+  };
+
+  // Apply the formula to each NIRVP band
+  for (var i = 0; i < par_bands.length; i++) {
+    var parBand = par_bands[i];
+    image = image.addBands(applyLinearFormula(parBand), null, true);
+  }
+
+  return image;
+}
